@@ -98,6 +98,7 @@ body {
     display: flex;
     gap: 8px;
     margin-bottom: 16px;
+    flex-wrap: wrap;
 }
 
 .filter-chip {
@@ -114,7 +115,132 @@ body {
     background: #7627C5;
 }
 
-/* Pokemon Card */
+/* ========== EVENT HEADER (Like Android App) ========== */
+.event-header {
+    background: linear-gradient(135deg, #FFC107, #1a1a2e);
+    border-radius: 30px;
+    padding: 10px 16px;
+    margin: 16px 8px 12px 8px;
+    text-align: center;
+}
+
+.event-header h3 {
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+/* ========== EVENT CARD WITH IMAGE (Like Android App) ========== */
+.event-card-with-img {
+    background: #2a2a3e;
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.event-card-with-img img {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: white;
+    padding: 4px;
+    object-fit: contain;
+}
+
+.event-info {
+    flex: 1;
+}
+
+.event-name {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: white;
+}
+
+.event-heading {
+    font-size: 11px;
+    color: #FFA500;
+    margin-bottom: 4px;
+}
+
+.event-time {
+    font-size: 10px;
+    color: #aaa;
+    line-height: 1.4;
+}
+
+.event-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.event-view-btn {
+    padding: 6px 12px;
+    background: #2196F3;
+    border: none;
+    border-radius: 20px;
+    color: white;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.event-rsvp-btn {
+    padding: 6px 12px;
+    background: #4CAF50;
+    border: none;
+    border-radius: 20px;
+    color: white;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+/* Fallback simple event card */
+.event-card {
+    background: #2a2a3e;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.event-title {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.event-date {
+    font-size: 11px;
+    color: #FFA500;
+    margin-bottom: 4px;
+}
+
+.event-link {
+    font-size: 11px;
+    color: #2196F3;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 8px;
+}
+
+.rsvp-btn {
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: #4CAF50;
+    border: none;
+    border-radius: 20px;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* ========== POKEMON CARD ========== */
 .pokemon-card {
     background: #2a2a3e;
     border-radius: 12px;
@@ -129,6 +255,7 @@ body {
 .pokemon-card img {
     width: 50px;
     height: 50px;
+    object-fit: contain;
 }
 
 .pokemon-info {
@@ -174,9 +301,23 @@ body {
     font-size: 12px;
 }
 
-/* Raid Card */
+/* ========== RAID SECTION (Like Android App) ========== */
 .raid-category {
     margin-bottom: 20px;
+}
+
+.raid-header {
+    background: #0d0d1a;
+    padding: 10px 12px;
+    margin: 16px 0 8px 0;
+    border-left: 4px solid #FFC107;
+}
+
+.raid-header h4 {
+    color: #FFC107;
+    font-size: 13px;
+    font-weight: bold;
+    margin: 0;
 }
 
 .raid-category h4 {
@@ -198,11 +339,17 @@ body {
     text-align: center;
     width: 85px;
     cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.raid-card:active {
+    transform: scale(0.98);
 }
 
 .raid-card img {
     width: 55px;
     height: 55px;
+    object-fit: contain;
 }
 
 .raid-card span {
@@ -216,46 +363,7 @@ body {
     font-size: 12px;
 }
 
-/* Event Card */
-.event-card {
-    background: #2a2a3e;
-    border-radius: 12px;
-    padding: 12px;
-    margin-bottom: 10px;
-}
-
-.event-title {
-    font-weight: bold;
-    font-size: 14px;
-    margin-bottom: 8px;
-}
-
-.event-date {
-    font-size: 11px;
-    color: #FFA500;
-    margin-bottom: 4px;
-}
-
-.event-link {
-    font-size: 11px;
-    color: #2196F3;
-    text-decoration: none;
-    display: inline-block;
-    margin-top: 8px;
-}
-
-.rsvp-btn {
-    margin-top: 10px;
-    padding: 6px 12px;
-    background: #4CAF50;
-    border: none;
-    border-radius: 20px;
-    color: white;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-/* Cart Section (Orders Tab) */
+/* ========== CART SECTION (Orders Tab) ========== */
 .cart-section {
     background: #0d0d1a;
     border-radius: 16px;
@@ -348,7 +456,7 @@ body {
     cursor: pointer;
 }
 
-/* Contact Section */
+/* ========== CONTACT SECTION ========== */
 .contact-section {
     background: #0d0d1a;
     border-radius: 16px;
@@ -391,7 +499,7 @@ body {
     margin-top: 12px;
 }
 
-/* Modal */
+/* ========== MODAL ========== */
 .modal {
     display: none;
     position: fixed;
@@ -463,7 +571,7 @@ body {
     cursor: pointer;
 }
 
-/* Order Dialog Styles */
+/* ========== ORDER DIALOG STYLES ========== */
 .order-stats {
     background: #0d0d1a;
     padding: 12px;
@@ -508,6 +616,7 @@ body {
     display: flex;
     gap: 10px;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 .pack-btn {
@@ -582,4 +691,14 @@ body {
     text-align: center;
     padding: 40px;
     color: #888;
+}
+
+/* Disclaimer text at bottom of spawns */
+.disclaimer-bottom {
+    font-size: 10px;
+    color: #FFA500;
+    text-align: center;
+    padding: 12px;
+    margin-top: 16px;
+    border-top: 1px solid #333;
 }
