@@ -434,43 +434,72 @@ function displayRaids(regularRaids, dynamaxRaids) {
     const container = document.getElementById('raidsList');
     if (!container) return;
     
+    // Define order of categories exactly like Android app
+    const categoryOrder = [
+        { key: 'mega', title: '🔴 MEGA RAIDS', color: '#FF5722' },
+        { key: 'tier5', title: '⭐⭐⭐⭐⭐ 5-STAR RAIDS', color: '#FF9800' },
+        { key: 'tier4', title: '⭐⭐⭐⭐ 4-STAR RAIDS', color: '#FFC107' },
+        { key: 'tier3', title: '⭐⭐⭐ 3-STAR RAIDS', color: '#4CAF50' },
+        { key: 'tier2', title: '⭐⭐ 2-STAR RAIDS', color: '#2196F3' },
+        { key: 'tier1', title: '⭐ 1-STAR RAIDS', color: '#9C27B0' },
+        { key: 'shadow5', title: '🌑 SHADOW LEGENDARY (5-STAR)', color: '#673AB7' },
+        { key: 'shadow3', title: '🌑 SHADOW 3-STAR RAIDS', color: '#673AB7' },
+        { key: 'shadow1', title: '🌑 SHADOW 1-STAR RAIDS', color: '#673AB7' }
+    ];
+    
     let html = '';
     
-    if (regularRaids.mega.length > 0) {
-        html += `<div class="raid-category"><h4>🔴 MEGA RAIDS</h4><div class="raids-grid">`;
-        html += regularRaids.mega.map(r => `<div class="raid-card" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
-        html += `</div></div>`;
-    }
-    
-    if (regularRaids.tier5.length > 0) {
-        html += `<div class="raid-category"><h4>⭐⭐⭐⭐⭐ 5-STAR RAIDS</h4><div class="raids-grid">`;
-        html += regularRaids.tier5.map(r => `<div class="raid-card" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span>${r.isShiny ? '<span class="shiny-star"> ✨</span>' : ''}</div>`).join('');
-        html += `</div></div>`;
-    }
-    
-    if (regularRaids.tier3.length > 0) {
-        html += `<div class="raid-category"><h4>⭐⭐⭐ 3-STAR RAIDS</h4><div class="raids-grid">`;
-        html += regularRaids.tier3.map(r => `<div class="raid-card" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
-        html += `</div></div>`;
-    }
-    
-    if (regularRaids.shadow5.length > 0) {
-        html += `<div class="raid-category"><h4>🌑 SHADOW LEGENDARY</h4><div class="raids-grid">`;
-        html += regularRaids.shadow5.map(r => `<div class="raid-card" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
-        html += `</div></div>`;
-    }
-    
-    if (dynamaxRaids.length > 0) {
-        const dynaByTier = {};
-        for (const raid of dynamaxRaids) {
-            if (!dynaByTier[raid.tier]) dynaByTier[raid.tier] = [];
-            dynaByTier[raid.tier].push(raid);
+    // Add regular raids in correct order
+    for (const cat of categoryOrder) {
+        if (regularRaids[cat.key] && regularRaids[cat.key].length > 0) {
+            html += `
+                <div class="raid-header">
+                    <h4>${cat.title}</h4>
+                </div>
+                <div class="raids-grid">
+                    ${regularRaids[cat.key].map(r => `
+                        <div class="raid-card" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'>
+                            <img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'">
+                            <span>${r.name}${r.isShiny ? ' ✨' : ''}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         }
-        
-        for (const [tier, raids] of Object.entries(dynaByTier)) {
-            html += `<div class="raid-category"><h4>${tier}</h4><div class="raids-grid">`;
-            html += raids.map(r => `<div class="raid-card" onclick='showDynamaxOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
-            html += `</div></div>`;
+    }
+    
+    // Add Dynamax/Gigantamax in order
+    const dynaOrder = [
+        { key: 'gigantamax', title: '💥 GIGANTAMAX' },
+        { key: 'dynamax_tier5', title: '⚡⚡⚡⚡⚡ DYNAMAX TIER 5' },
+        { key: 'dynamax_tier4', title: '⚡⚡⚡⚡ DYNAMAX TIER 4' },
+        { key: 'dynamax_tier3', title: '⚡⚡⚡ DYNAMAX TIER 3' },
+        { key: 'dynamax_tier2', title: '⚡⚡ DYNAMAX TIER 2' },
+        { key: 'dynamax_tier1', title: '⚡ DYNAMAX TIER 1' }
+    ];
+    
+    // Group dynamax raids by tier
+    const dynaByTier = {};
+    for (const raid of dynamaxRaids) {
+        if (!dynaByTier[raid.tier]) dynaByTier[raid.tier] = [];
+        dynaByTier[raid.tier].push(raid);
+    }
+    
+    for (const dyna of dynaOrder) {
+        if (dynaByTier[dyna.title] && dynaByTier[dyna.title].length > 0) {
+            html += `
+                <div class="raid-header">
+                    <h4>${dyna.title}</h4>
+                </div>
+                <div class="raids-grid">
+                    ${dynaByTier[dyna.title].map(r => `
+                        <div class="raid-card" onclick='showDynamaxOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'>
+                            <img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'">
+                            <span>${r.name}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         }
     }
     
