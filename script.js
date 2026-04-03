@@ -394,8 +394,10 @@ async function loadRaids() {
     
     const { scrapedRaids, dynaRaids } = raidData;
     
+    // Initialize all categories
     const regularRaids = {
-        mega: [], shadow5: [], tier5: [], tier3: [], tier1: []
+        tier6: [], tier5: [], tier4: [], tier3: [], tier2: [], tier1: [],
+        mega: [], shadow5: [], shadow3: [], shadow1: []
     };
     
     for (const raid of scrapedRaids) {
@@ -403,26 +405,68 @@ async function loadRaids() {
         const name = raid.name;
         const id = await getPokemonIdFromName(name);
         
-        const raidObj = { name, tier, id, isShiny: raid.canBeShiny, image: raid.image || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png` };
+        const raidObj = { 
+            name: name, 
+            tier: tier, 
+            id: id, 
+            isShiny: raid.canBeShiny, 
+            image: raid.image || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png`
+        };
         
-        if (tier.includes('Mega')) regularRaids.mega.push(raidObj);
-        else if (tier.includes('Shadow') && tier.includes('5-Star')) regularRaids.shadow5.push(raidObj);
-        else if (tier.includes('5-Star')) regularRaids.tier5.push(raidObj);
-        else if (tier.includes('3-Star')) regularRaids.tier3.push(raidObj);
-        else if (tier.includes('1-Star')) regularRaids.tier1.push(raidObj);
+        // Correct categorization
+        if (tier.includes('6-Star')) {
+            regularRaids.tier6.push(raidObj);
+        } else if (tier.includes('5-Star') && !tier.includes('Shadow')) {
+            regularRaids.tier5.push(raidObj);
+        } else if (tier.includes('4-Star') && !tier.includes('Shadow')) {
+            regularRaids.tier4.push(raidObj);
+        } else if (tier.includes('3-Star') && !tier.includes('Shadow')) {
+            regularRaids.tier3.push(raidObj);
+        } else if (tier.includes('2-Star') && !tier.includes('Shadow')) {
+            regularRaids.tier2.push(raidObj);
+        } else if (tier.includes('1-Star') && !tier.includes('Shadow')) {
+            regularRaids.tier1.push(raidObj);
+        } else if (tier.includes('Mega')) {
+            regularRaids.mega.push(raidObj);
+        } else if (tier.includes('Shadow') && tier.includes('5-Star')) {
+            regularRaids.shadow5.push(raidObj);
+        } else if (tier.includes('Shadow') && tier.includes('3-Star')) {
+            regularRaids.shadow3.push(raidObj);
+        } else if (tier.includes('Shadow') && tier.includes('1-Star')) {
+            regularRaids.shadow1.push(raidObj);
+        }
     }
     
+    // Process Dynamax raids from your GitHub JSON
     const dynamaxRaids = [];
-    const tiers = ['dynamax_tier1', 'dynamax_tier2', 'dynamax_tier3', 'dynamax_tier4', 'dynamax_tier5', 'gigantamax'];
-    const tierNames = ['⚡ DYNAMAX TIER 1', '⚡⚡ DYNAMAX TIER 2', '⚡⚡⚡ DYNAMAX TIER 3', '⚡⚡⚡⚡ DYNAMAX TIER 4', '⚡⚡⚡⚡⚡ DYNAMAX TIER 5', '💥 GIGANTAMAX'];
+    const tierMapping = {
+        'dynamax_tier1': '⚡ DYNAMAX TIER 1',
+        'dynamax_tier2': '⚡⚡ DYNAMAX TIER 2',
+        'dynamax_tier3': '⚡⚡⚡ DYNAMAX TIER 3',
+        'dynamax_tier4': '⚡⚡⚡⚡ DYNAMAX TIER 4',
+        'dynamax_tier5': '⚡⚡⚡⚡⚡ DYNAMAX TIER 5',
+        'gigantamax': '💥 GIGANTAMAX'
+    };
     
-    for (let i = 0; i < tiers.length; i++) {
-        if (dynaRaids[tiers[i]] && dynaRaids[tiers[i]].length > 0) {
-            for (const name of dynaRaids[tiers[i]]) {
-                if (name && name.length > 2 && !['bug','dark','dragon','electric','fairy','fighting','fire','flying','ghost','grass','ground','ice','normal','poison','psychic','rock','steel','water'].includes(name.toLowerCase())) {
-                    const id = await getPokemonIdFromName(name);
-                    dynamaxRaids.push({ name, tier: tierNames[i], id, isShiny: true, image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png` });
-                }
+    // Filter out invalid names
+    const invalidNames = ['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'flying', 'ghost', 'grass', 'ground', 'ice', 'normal', 'poison', 'psychic', 'rock', 'steel', 'water', 'Search...', 'Telegram', 'Facebook', 'Instagram', 'Discord'];
+    
+    for (const [key, title] of Object.entries(tierMapping)) {
+        if (dynaRaids[key] && dynaRaids[key].length > 0) {
+            for (const name of dynaRaids[key]) {
+                // Skip invalid names
+                if (!name || name.length < 2) continue;
+                if (invalidNames.includes(name)) continue;
+                if (invalidNames.includes(name.toLowerCase())) continue;
+                
+                const id = await getPokemonIdFromName(name);
+                dynamaxRaids.push({
+                    name: name,
+                    tier: title,
+                    id: id,
+                    isShiny: true,
+                    image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png`
+                });
             }
         }
     }
