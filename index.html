@@ -22,40 +22,28 @@
             </div>
         </div>
 
-        <!-- Tab Buttons -->
+        <!-- Tab Buttons - 2 rows -->
         <div class="tabs">
-            <button class="tab-btn active" data-tab="spawns">🔥 SPAWNS</button>
-            <button class="tab-btn" data-tab="raids">🏆 RAIDS</button>
-            <button class="tab-btn" data-tab="current">📅 CURRENT</button>
-            <button class="tab-btn" data-tab="upcoming">🔮 UPCOMING</button>
-            <button class="tab-btn" data-tab="orders">📦 ORDERS</button>
+            <div class="tab-row">
+                <button class="tab-btn active" data-tab="spawns">🔥 SPAWNS</button>
+                <button class="tab-btn" data-tab="raids">🏆 RAIDS</button>
+                <button class="tab-btn" data-tab="current">📅 CURRENT</button>
+            </div>
+            <div class="tab-row">
+                <button class="tab-btn" data-tab="upcoming">🔮 UPCOMING</button>
+                <button class="tab-btn" data-tab="orders">📦 ORDERS</button>
+            </div>
         </div>
 
         <!-- Content Area -->
         <div class="content">
             <!-- Spawns Tab -->
             <div id="spawns" class="tab-content active">
-                <!-- Cart Panel -->
-                <div class="cart-panel">
-                    <div class="cart-header">
-                        <span>🛒 Your Cart</span>
-                        <span id="cartCount">0</span>
-                    </div>
-                    <div id="cartItems"></div>
-                    <div id="emptyCartMsg" class="empty-cart">Your Pokecart is empty</div>
-                    <div class="cart-total">
-                        Total: $<span id="cartTotal">0.00</span>
-                    </div>
-                    <button class="confirm-btn" style="width:100%; margin-top:12px;" onclick="showCustomerDialog()">Checkout</button>
-                </div>
-
                 <div class="search-bar">
                     <input type="text" id="spawnSearch" placeholder="🔍 Search Pokemon..." onkeyup="filterSpawns()">
                 </div>
                 <div class="filter-bar">
-                    <button class="filter-chip" onclick="toggleFilter('regional')">🌍 Regional</button>
                     <button class="filter-chip" onclick="toggleFilter('shundo')">✨ Shundo</button>
-                    <button class="filter-chip" onclick="toggleFilter('pvp')">🏆 PvP</button>
                     <button class="filter-chip" onclick="toggleFilter('shiny164')">⭐ 1/64 Shiny</button>
                 </div>
                 <div id="spawnsList" class="list-container">
@@ -66,19 +54,6 @@
 
             <!-- Raids Tab -->
             <div id="raids" class="tab-content">
-                <!-- Cart Panel -->
-                <div class="cart-panel">
-                    <div class="cart-header">
-                        <span>🛒 Your Cart</span>
-                        <span id="cartCount2">0</span>
-                    </div>
-                    <div id="cartItems2"></div>
-                    <div id="emptyCartMsg2" class="empty-cart">Your Pokecart is empty</div>
-                    <div class="cart-total">
-                        Total: $<span id="cartTotal2">0.00</span>
-                    </div>
-                    <button class="confirm-btn" style="width:100%; margin-top:12px;" onclick="showCustomerDialog()">Checkout</button>
-                </div>
                 <div id="raidsList" class="raids-container">
                     <div class="loading">Loading raids...</div>
                 </div>
@@ -100,40 +75,43 @@
 
             <!-- Orders Tab -->
             <div id="orders" class="tab-content">
-                <div class="orders-container">
-                    <div class="admin-section">
-                        <h3>👑 Choose Your Admin</h3>
-                        <div class="admin-buttons">
-                            <button class="admin-btn dan" onclick="selectAdmin('Dan')">Dan (Skatecrete)</button>
-                            <button class="admin-btn kingi" onclick="selectAdmin('Kingi')">Kingi (zEViLvSTON4z)</button>
-                            <button class="admin-btn thomas" onclick="selectAdmin('Thomas')">Thomas (RampageGamer)</button>
-                        </div>
+                <!-- Cart Section -->
+                <div class="cart-section">
+                    <div class="cart-header">
+                        <span>🛒 YOUR CART</span>
+                        <span id="cartCount">0 items</span>
                     </div>
+                    <div id="cartItems"></div>
+                    <div id="emptyCartMsg" class="empty-cart">Your Pokecart is empty</div>
+                    <div class="cart-total">
+                        Total: $<span id="cartTotal">0.00</span>
+                    </div>
+                    <button class="checkout-btn" onclick="showCustomerDialog()">PROCEED TO CHECKOUT</button>
+                </div>
 
-                    <div id="paymentSection" style="display:none;">
-                        <h3>💰 Complete Your Order</h3>
-                        <div id="paymentOptions"></div>
+                <!-- Contact Section -->
+                <div class="contact-section">
+                    <h3>📱 Need Help?</h3>
+                    <div class="contact-buttons">
+                        <a href="https://www.facebook.com/share/g/18A1Q6CLfg/" target="_blank" class="contact-btn facebook">📘 Facebook Group</a>
+                        <a href="mailto:pokespawn@gmail.com" class="contact-btn email">📧 Email</a>
                     </div>
-
-                    <div class="contact-section">
-                        <h3>📱 Need Help?</h3>
-                        <p>Contact us directly:</p>
-                        <div class="contact-buttons">
-                            <a href="https://www.facebook.com/share/g/18A1Q6CLfg/" target="_blank" class="contact-btn facebook">📘 Facebook Group</a>
-                            <a href="mailto:pokespawn@gmail.com" class="contact-btn email">📧 Email</a>
-                        </div>
-                        <div class="facebook-info">
-                            <p style="font-size: 12px; color: #aaa; margin-top: 12px;">💡 You can reach out to your admin through the <strong>Members</strong> tab in the Facebook group!</p>
-                        </div>
-                    </div>
+                    <p class="facebook-info">💡 Reach out to your admin through the <strong>Members</strong> tab in the Facebook group!</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Order Modal -->
-    <div id="orderModal" class="modal" style="display:none;">
-        <div class="modal-content" id="modalContent"></div>
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Order</h2>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer" id="modalFooter"></div>
+        </div>
     </div>
 
     <script src="script.js"></script>
