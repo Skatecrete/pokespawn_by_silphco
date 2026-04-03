@@ -1,23 +1,280 @@
-/* Cart Styles */
-.cart-panel {
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: #1a1a2e;
+    color: #fff;
+}
+
+.app-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #1a1a2e;
+    min-height: 100vh;
+    padding-bottom: 20px;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(135deg, #7627C5, #1a1a2e);
+    padding: 20px;
+    text-align: center;
+}
+
+.logo-text {
+    font-size: 24px;
+    font-weight: bold;
+    display: block;
+}
+
+.silph {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* Tabs - 2 rows */
+.tabs {
+    background: #0d0d1a;
+    padding: 12px;
+}
+
+.tab-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.tab-row:last-child {
+    margin-bottom: 0;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px 4px;
+    background: #7627C5;
+    border: none;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: #2196F3;
+}
+
+/* Content */
+.content {
+    padding: 12px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Search & Filters */
+.search-bar input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 25px;
+    border: none;
+    background: #2a2a3e;
+    color: white;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.filter-chip {
+    padding: 8px 16px;
+    background: #2a2a3e;
+    border: none;
+    color: white;
+    border-radius: 25px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.filter-chip.active {
+    background: #7627C5;
+}
+
+/* Pokemon Card */
+.pokemon-card {
+    background: #2a2a3e;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.pokemon-card img {
+    width: 50px;
+    height: 50px;
+}
+
+.pokemon-info {
+    flex: 1;
+}
+
+.pokemon-name {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.pokemon-details {
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 4px;
+}
+
+.spawn-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+    display: inline-block;
+}
+
+.badge-heavy { background: #F44336; }
+.badge-medium { background: #FF9800; }
+.badge-low { background: #4CAF50; }
+.badge-minimal { background: #2196F3; }
+
+.shiny-rate {
+    color: #FFD700;
+}
+
+.order-btn {
+    background: #4CAF50;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 20px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* Raid Card */
+.raid-category {
+    margin-bottom: 20px;
+}
+
+.raid-category h4 {
+    color: #FFA500;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.raids-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.raid-card {
+    background: #2a2a3e;
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+    width: 85px;
+    cursor: pointer;
+}
+
+.raid-card img {
+    width: 55px;
+    height: 55px;
+}
+
+.raid-card span {
+    font-size: 11px;
+    display: block;
+    margin-top: 5px;
+}
+
+.shiny-star {
+    color: #FFD700;
+    font-size: 12px;
+}
+
+/* Event Card */
+.event-card {
+    background: #2a2a3e;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.event-title {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.event-date {
+    font-size: 11px;
+    color: #FFA500;
+    margin-bottom: 4px;
+}
+
+.event-link {
+    font-size: 11px;
+    color: #2196F3;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 8px;
+}
+
+.rsvp-btn {
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: #4CAF50;
+    border: none;
+    border-radius: 20px;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* Cart Section (Orders Tab) */
+.cart-section {
     background: #0d0d1a;
     border-radius: 16px;
-    padding: 12px;
-    margin-bottom: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
 }
 
 .cart-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
+    padding-bottom: 12px;
     border-bottom: 1px solid #333;
+    margin-bottom: 12px;
+    font-weight: bold;
 }
 
 .cart-item {
     background: #1a1a2e;
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 10px;
     margin-bottom: 8px;
 }
@@ -35,40 +292,40 @@
 
 .cart-item-price {
     color: #4CAF50;
-    font-weight: bold;
 }
 
 .cart-item-controls {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .qty-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 16px;
+    width: 28px;
+    height: 28px;
+    border-radius: 14px;
     border: none;
     background: #7627C5;
     color: white;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
 }
 
 .delete-btn {
     background: #F44336;
     border: none;
-    padding: 6px 12px;
-    border-radius: 16px;
+    padding: 4px 10px;
+    border-radius: 14px;
     color: white;
     cursor: pointer;
+    font-size: 11px;
 }
 
 .cart-total {
     text-align: right;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
-    margin-top: 12px;
+    margin: 12px 0;
     padding-top: 12px;
     border-top: 1px solid #333;
 }
@@ -79,57 +336,59 @@
     color: #888;
 }
 
-/* Order Button */
-.order-btn {
+.checkout-btn {
+    width: 100%;
+    padding: 14px;
     background: #4CAF50;
     border: none;
-    padding: 6px 12px;
-    border-radius: 20px;
+    border-radius: 25px;
     color: white;
     font-weight: bold;
+    font-size: 14px;
     cursor: pointer;
 }
 
-/* Pokemon Card */
-.pokemon-card {
-    background: #2a2a3e;
-    border-radius: 12px;
-    padding: 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    transition: transform 0.1s;
-}
-
-.pokemon-card:active {
-    transform: scale(0.99);
-}
-
-/* Raid Card Small */
-.raid-card-small {
-    background: #2a2a3e;
-    border-radius: 12px;
-    padding: 8px;
+/* Contact Section */
+.contact-section {
+    background: #0d0d1a;
+    border-radius: 16px;
+    padding: 16px;
     text-align: center;
-    width: 80px;
-    cursor: pointer;
 }
 
-.raid-card-small img {
-    width: 60px;
-    height: 60px;
+.contact-section h3 {
+    margin-bottom: 12px;
+    font-size: 16px;
 }
 
-.raid-card-small span {
+.contact-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.contact-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+
+.contact-btn.facebook {
+    background: #1877F2;
+}
+
+.contact-btn.email {
+    background: #EA4335;
+}
+
+.facebook-info {
     font-size: 11px;
-    display: block;
-    margin-top: 4px;
-}
-
-.shiny-star {
-    color: #FFD700;
-    font-size: 12px;
+    color: #aaa;
+    margin-top: 12px;
 }
 
 /* Modal */
@@ -140,7 +399,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.9);
+    background: rgba(0,0,0,0.95);
     z-index: 1000;
     justify-content: center;
     align-items: center;
@@ -204,7 +463,15 @@
     cursor: pointer;
 }
 
-/* Order Sections */
+/* Order Dialog Styles */
+.order-stats {
+    background: #0d0d1a;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+}
+
 .order-section {
     background: #0d0d1a;
     border-radius: 12px;
@@ -215,7 +482,7 @@
 .section-title {
     font-weight: bold;
     margin-bottom: 12px;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .quantity-selector {
@@ -225,7 +492,7 @@
 }
 
 .qty-num {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
     min-width: 40px;
     text-align: center;
@@ -239,23 +506,24 @@
 
 .raid-packs {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     justify-content: center;
 }
 
 .pack-btn {
-    padding: 10px 16px;
+    padding: 8px 12px;
     background: #7627C5;
     border: none;
-    border-radius: 25px;
+    border-radius: 20px;
     color: white;
     font-weight: bold;
     cursor: pointer;
+    font-size: 12px;
 }
 
 .admin-option {
     width: 100%;
-    padding: 14px;
+    padding: 12px;
     margin-bottom: 10px;
     border: none;
     border-radius: 12px;
@@ -278,36 +546,40 @@
     color: white;
 }
 
-.rsvp-btn {
-    margin-top: 8px;
-    padding: 6px 12px;
-    background: #4CAF50;
-    border: none;
-    border-radius: 20px;
-    color: white;
-    cursor: pointer;
-}
-
-.order-summary {
+.payment-option {
     background: #0d0d1a;
     border-radius: 12px;
     padding: 12px;
-    margin-bottom: 16px;
-    line-height: 1.6;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.payment-option a {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 10px 20px;
+    background: #0070BA;
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: bold;
+}
+
+.disclaimer {
+    font-size: 10px;
+    color: #FFA500;
+    text-align: center;
+    margin-top: 12px;
 }
 
 .disclaimer-small {
     font-size: 10px;
     color: #FFA500;
-    margin-top: 4px;
+    margin-top: 8px;
 }
 
-.contact-btn.facebook {
-    background: #1877F2;
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #888;
 }
-
-/* Badges */
-.badge-heavy { background: #F44336; }
-.badge-medium { background: #FF9800; }
-.badge-low { background: #4CAF50; }
-.badge-minimal { background: #2196F3; }
