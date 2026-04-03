@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#7627C5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PokeSpawn">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>PokeSpawn - Pokemon GO Hunting Service</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-area">
+                <span class="logo-text">⚡ PokeSpawn</span>
+                <span class="silph">Silph Co. Services</span>
+            </div>
+        </div>
+
+        <!-- Tab Buttons -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="spawns">🔥 SPAWNS</button>
+            <button class="tab-btn" data-tab="raids">🏆 RAIDS</button>
+            <button class="tab-btn" data-tab="current">📅 CURRENT</button>
+            <button class="tab-btn" data-tab="upcoming">🔮 UPCOMING</button>
+            <button class="tab-btn" data-tab="orders">📦 ORDERS</button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Spawns Tab -->
+            <div id="spawns" class="tab-content active">
+                <div class="search-bar">
+                    <input type="text" id="spawnSearch" placeholder="🔍 Search Pokemon..." onkeyup="filterSpawns()">
+                </div>
+                <div class="filter-bar">
+                    <button class="filter-chip" onclick="toggleFilter('regional')">🌍 Regional</button>
+                    <button class="filter-chip" onclick="toggleFilter('shundo')">✨ Shundo</button>
+                    <button class="filter-chip" onclick="toggleFilter('pvp')">🏆 PvP</button>
+                    <button class="filter-chip" onclick="toggleFilter('shiny164')">⭐ 1/64 Shiny</button>
+                </div>
+                <div id="spawnsList" class="list-container">
+                    <div class="loading">Loading spawns...</div>
+                </div>
+                <div class="disclaimer">*Only spawn rates 0.65%+ with shiny can be Shundo hunted</div>
+            </div>
+
+            <!-- Raids Tab -->
+            <div id="raids" class="tab-content">
+                <div id="raidsList" class="raids-container">
+                    <div class="loading">Loading raids...</div>
+                </div>
+            </div>
+
+            <!-- Current Events Tab -->
+            <div id="current" class="tab-content">
+                <div id="currentEventsList" class="list-container">
+                    <div class="loading">Loading events...</div>
+                </div>
+            </div>
+
+            <!-- Upcoming Events Tab -->
+            <div id="upcoming" class="tab-content">
+                <div id="upcomingEventsList" class="list-container">
+                    <div class="loading">Loading events...</div>
+                </div>
+            </div>
+
+            <!-- Orders Tab -->
+            <div id="orders" class="tab-content">
+                <div class="orders-container">
+                    <div class="admin-section">
+                        <h3>👑 Choose Your Admin</h3>
+                        <div class="admin-buttons">
+                            <button class="admin-btn dan" onclick="selectAdmin('Dan')">Dan (Skatecrete)</button>
+                            <button class="admin-btn kingi" onclick="selectAdmin('Kingi')">Kingi (zEViLvSTON4z)</button>
+                            <button class="admin-btn thomas" onclick="selectAdmin('Thomas')">Thomas (RampageGamer)</button>
+                        </div>
+                    </div>
+
+                    <div id="paymentSection" style="display:none;">
+                        <h3>💰 Complete Your Order</h3>
+                        <div id="paymentOptions"></div>
+                    </div>
+
+                    <div class="contact-section">
+                        <h3>📱 Need Help?</h3>
+                        <p>Contact us directly:</p>
+                        <div class="contact-buttons">
+                            <a href="https://discord.gg/invite" class="contact-btn discord">💬 Discord</a>
+                            <a href="mailto:pokespawn@gmail.com" class="contact-btn email">📧 Email</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
