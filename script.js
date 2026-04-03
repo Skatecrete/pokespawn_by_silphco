@@ -434,17 +434,28 @@ function displayRaids(regularRaids, dynamaxRaids) {
     const container = document.getElementById('raidsList');
     if (!container) return;
     
-    // Define order of categories exactly like Android app
+    // Define correct order exactly like Android app
     const categoryOrder = [
-        { key: 'mega', title: '🔴 MEGA RAIDS', color: '#FF5722' },
-        { key: 'tier5', title: '⭐⭐⭐⭐⭐ 5-STAR RAIDS', color: '#FF9800' },
-        { key: 'tier4', title: '⭐⭐⭐⭐ 4-STAR RAIDS', color: '#FFC107' },
-        { key: 'tier3', title: '⭐⭐⭐ 3-STAR RAIDS', color: '#4CAF50' },
-        { key: 'tier2', title: '⭐⭐ 2-STAR RAIDS', color: '#2196F3' },
-        { key: 'tier1', title: '⭐ 1-STAR RAIDS', color: '#9C27B0' },
-        { key: 'shadow5', title: '🌑 SHADOW LEGENDARY (5-STAR)', color: '#673AB7' },
-        { key: 'shadow3', title: '🌑 SHADOW 3-STAR RAIDS', color: '#673AB7' },
-        { key: 'shadow1', title: '🌑 SHADOW 1-STAR RAIDS', color: '#673AB7' }
+        { key: 'tier6', title: '⭐⭐⭐⭐⭐⭐ 6-STAR RAIDS' },
+        { key: 'tier5', title: '⭐⭐⭐⭐⭐ 5-STAR RAIDS' },
+        { key: 'tier4', title: '⭐⭐⭐⭐ 4-STAR RAIDS' },
+        { key: 'tier3', title: '⭐⭐⭐ 3-STAR RAIDS' },
+        { key: 'tier2', title: '⭐⭐ 2-STAR RAIDS' },
+        { key: 'tier1', title: '⭐ 1-STAR RAIDS' },
+        { key: 'mega', title: '🔴 MEGA RAIDS' },
+        { key: 'shadow5', title: '🌑 SHADOW LEGENDARY (5-STAR)' },
+        { key: 'shadow3', title: '🌑 SHADOW 3-STAR RAIDS' },
+        { key: 'shadow1', title: '🌑 SHADOW 1-STAR RAIDS' }
+    ];
+    
+    // Dynamax order
+    const dynaOrder = [
+        { key: 'dynamax_tier5', title: '⚡⚡⚡⚡⚡ DYNAMAX TIER 5' },
+        { key: 'dynamax_tier4', title: '⚡⚡⚡⚡ DYNAMAX TIER 4' },
+        { key: 'dynamax_tier3', title: '⚡⚡⚡ DYNAMAX TIER 3' },
+        { key: 'dynamax_tier2', title: '⚡⚡ DYNAMAX TIER 2' },
+        { key: 'dynamax_tier1', title: '⚡ DYNAMAX TIER 1' },
+        { key: 'gigantamax', title: '💥 GIGANTAMAX' }
     ];
     
     let html = '';
@@ -468,23 +479,16 @@ function displayRaids(regularRaids, dynamaxRaids) {
         }
     }
     
-    // Add Dynamax/Gigantamax in order
-    const dynaOrder = [
-        { key: 'gigantamax', title: '💥 GIGANTAMAX' },
-        { key: 'dynamax_tier5', title: '⚡⚡⚡⚡⚡ DYNAMAX TIER 5' },
-        { key: 'dynamax_tier4', title: '⚡⚡⚡⚡ DYNAMAX TIER 4' },
-        { key: 'dynamax_tier3', title: '⚡⚡⚡ DYNAMAX TIER 3' },
-        { key: 'dynamax_tier2', title: '⚡⚡ DYNAMAX TIER 2' },
-        { key: 'dynamax_tier1', title: '⚡ DYNAMAX TIER 1' }
-    ];
-    
     // Group dynamax raids by tier
     const dynaByTier = {};
     for (const raid of dynamaxRaids) {
+        // Skip "Search..." from Gigantamax
+        if (raid.name === 'Search...') continue;
         if (!dynaByTier[raid.tier]) dynaByTier[raid.tier] = [];
         dynaByTier[raid.tier].push(raid);
     }
     
+    // Add Dynamax/Gigantamax in correct order
     for (const dyna of dynaOrder) {
         if (dynaByTier[dyna.title] && dynaByTier[dyna.title].length > 0) {
             html += `
