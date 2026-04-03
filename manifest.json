@@ -1,0 +1,21 @@
+{
+    "name": "PokeSpawn - Pokemon GO Hunting",
+    "short_name": "PokeSpawn",
+    "description": "Pokemon GO spawn hunting and raid service",
+    "start_url": "/",
+    "display": "standalone",
+    "theme_color": "#7627C5",
+    "background_color": "#1a1a2e",
+    "icons": [
+        {
+            "src": "icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
