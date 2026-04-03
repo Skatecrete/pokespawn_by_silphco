@@ -1,126 +1,93 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background: #1a1a2e;
-    color: #fff;
-}
-
-.app-container {
-    max-width: 600px;
-    margin: 0 auto;
-    background: #1a1a2e;
-    min-height: 100vh;
-    padding-bottom: 20px;
-}
-
-/* Header */
-.header {
-    background: linear-gradient(135deg, #7627C5, #1a1a2e);
-    padding: 20px;
-    text-align: center;
-}
-
-.logo-text {
-    font-size: 24px;
-    font-weight: bold;
-    display: block;
-}
-
-.silph {
-    font-size: 12px;
-    opacity: 0.8;
-}
-
-/* Tabs */
-.tabs {
-    display: flex;
-    flex-wrap: wrap;
+/* Cart Styles */
+.cart-panel {
     background: #0d0d1a;
-    padding: 8px;
-    gap: 4px;
-}
-
-.tab-btn {
-    flex: 1;
-    min-width: 70px;
-    padding: 10px 4px;
-    background: #7627C5;
-    border: none;
-    color: white;
-    font-size: 11px;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.tab-btn.active {
-    background: #2196F3;
-    transform: scale(0.98);
-}
-
-/* Content */
-.content {
+    border-radius: 16px;
     padding: 12px;
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-/* Search & Filters */
-.search-bar input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 25px;
-    border: none;
-    background: #2a2a3e;
-    color: white;
-    font-size: 14px;
-    margin-bottom: 12px;
-}
-
-.filter-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
     margin-bottom: 16px;
 }
 
-.filter-chip {
-    padding: 6px 12px;
-    background: #2a2a3e;
+.cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #333;
+}
+
+.cart-item {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 10px;
+    margin-bottom: 8px;
+}
+
+.cart-item-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.cart-item-name {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.cart-item-price {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.cart-item-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.qty-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
     border: none;
+    background: #7627C5;
     color: white;
-    border-radius: 20px;
-    font-size: 12px;
+    font-size: 18px;
     cursor: pointer;
 }
 
-.filter-chip.active {
-    background: #7627C5;
+.delete-btn {
+    background: #F44336;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 16px;
+    color: white;
+    cursor: pointer;
 }
 
-/* Lists */
-.list-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.cart-total {
+    text-align: right;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #333;
 }
 
-.loading {
+.empty-cart {
     text-align: center;
-    padding: 40px;
+    padding: 20px;
     color: #888;
+}
+
+/* Order Button */
+.order-btn {
+    background: #4CAF50;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 20px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 /* Pokemon Card */
@@ -131,188 +98,212 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
+    cursor: pointer;
+    transition: transform 0.1s;
 }
 
-.pokemon-card img {
-    width: 50px;
-    height: 50px;
+.pokemon-card:active {
+    transform: scale(0.99);
 }
 
-.pokemon-info {
-    flex: 1;
+/* Raid Card Small */
+.raid-card-small {
+    background: #2a2a3e;
+    border-radius: 12px;
+    padding: 8px;
+    text-align: center;
+    width: 80px;
+    cursor: pointer;
 }
 
-.pokemon-name {
-    font-weight: bold;
-    font-size: 16px;
+.raid-card-small img {
+    width: 60px;
+    height: 60px;
 }
 
-.pokemon-details {
-    font-size: 12px;
-    color: #aaa;
+.raid-card-small span {
+    font-size: 11px;
+    display: block;
     margin-top: 4px;
 }
 
-.spawn-badge {
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 12px;
-    background: #4CAF50;
-    display: inline-block;
-    margin-left: 8px;
-}
-
-.shiny-rate {
+.shiny-star {
     color: #FFD700;
     font-size: 12px;
 }
 
-/* Raid Card */
-.raid-card {
-    background: #2a2a3e;
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #1a1a2e;
+    border-radius: 20px;
+    max-width: 400px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #333;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 16px;
+}
+
+.modal-footer {
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    border-top: 1px solid #333;
+}
+
+.cancel-btn {
+    flex: 1;
+    padding: 12px;
+    background: #F44336;
+    border: none;
+    border-radius: 25px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.confirm-btn {
+    flex: 1;
+    padding: 12px;
+    background: #4CAF50;
+    border: none;
+    border-radius: 25px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Order Sections */
+.order-section {
+    background: #0d0d1a;
     border-radius: 12px;
     padding: 12px;
+    margin-bottom: 12px;
+}
+
+.section-title {
+    font-weight: bold;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.quantity-selector {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 8px;
 }
 
-.raid-card img {
-    width: 50px;
-    height: 50px;
-}
-
-.raid-tier {
-    font-size: 12px;
-    color: #FFA500;
-}
-
-/* Event Card */
-.event-card {
-    background: #2a2a3e;
-    border-radius: 12px;
-    padding: 12px;
-    margin-bottom: 8px;
-}
-
-.event-title {
+.qty-num {
+    font-size: 20px;
     font-weight: bold;
-    font-size: 14px;
+    min-width: 40px;
+    text-align: center;
 }
 
-.event-date {
-    font-size: 11px;
-    color: #FFA500;
-    margin-top: 4px;
+.item-price {
+    margin-left: auto;
+    color: #4CAF50;
+    font-weight: bold;
 }
 
-.event-link {
-    font-size: 11px;
-    color: #2196F3;
-    text-decoration: none;
-    margin-top: 8px;
-    display: inline-block;
-}
-
-/* Orders Tab */
-.orders-container {
+.raid-packs {
     display: flex;
-    flex-direction: column;
-    gap: 20px;
+    gap: 12px;
+    justify-content: center;
 }
 
-.admin-section h3, .contact-section h3 {
-    margin-bottom: 12px;
-    font-size: 16px;
+.pack-btn {
+    padding: 10px 16px;
+    background: #7627C5;
+    border: none;
+    border-radius: 25px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
 }
 
-.admin-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.admin-btn {
+.admin-option {
+    width: 100%;
     padding: 14px;
+    margin-bottom: 10px;
     border: none;
     border-radius: 12px;
-    font-size: 14px;
+    color: white;
     font-weight: bold;
+    cursor: pointer;
+}
+
+.admin-option.dan { background: #4CAF50; }
+.admin-option.kingi { background: #2196F3; }
+.admin-option.thomas { background: #FF9800; }
+
+.rsvp-input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    border: none;
+    background: #2a2a3e;
+    color: white;
+}
+
+.rsvp-btn {
+    margin-top: 8px;
+    padding: 6px 12px;
+    background: #4CAF50;
+    border: none;
+    border-radius: 20px;
     color: white;
     cursor: pointer;
 }
 
-.admin-btn.dan { background: #4CAF50; }
-.admin-btn.kingi { background: #2196F3; }
-.admin-btn.thomas { background: #FF9800; }
-
-.payment-option {
-    background: #2a2a3e;
+.order-summary {
+    background: #0d0d1a;
     border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 12px;
-    text-align: center;
-}
-
-.payment-option a {
-    display: inline-block;
-    margin-top: 8px;
-    padding: 10px 20px;
-    background: #0070BA;
-    color: white;
-    text-decoration: none;
-    border-radius: 25px;
-    font-weight: bold;
-}
-
-.disclaimer {
-    font-size: 11px;
-    color: #FFA500;
-    text-align: center;
     padding: 12px;
-    margin-top: 16px;
+    margin-bottom: 16px;
+    line-height: 1.6;
 }
 
-.contact-buttons {
-    display: flex;
-    gap: 12px;
-    margin-top: 8px;
-}
-
-.contact-btn {
-    flex: 1;
-    padding: 12px;
-    text-align: center;
-    border-radius: 12px;
-    text-decoration: none;
-    color: white;
-    font-weight: bold;
-}
-
-.contact-btn.discord { background: #5865F2; }
-.contact-btn.email { background: #EA4335; }
-
-/* Raid categories */
-.raid-category {
-    margin-bottom: 20px;
-}
-
-.raid-category h4 {
+.disclaimer-small {
+    font-size: 10px;
     color: #FFA500;
-    margin-bottom: 8px;
-    font-size: 14px;
+    margin-top: 4px;
 }
 
-.raids-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.raid-badge {
-    background: #3a3a4e;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-}
+/* Badges */
+.badge-heavy { background: #F44336; }
+.badge-medium { background: #FF9800; }
+.badge-low { background: #4CAF50; }
+.badge-minimal { background: #2196F3; }
