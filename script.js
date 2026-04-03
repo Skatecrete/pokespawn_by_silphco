@@ -1,9 +1,34 @@
+// ============================================
+// POKESPAWN WEB APP - FULL FUNCTIONALITY
+// ============================================
+
 // Global variables
 let allPokemon = [];
+let allRaids = [];
+let cartItems = [];
+let customerName = '';
+let customerIgn = '';
+let selectedAdmin = '';
 let filters = { regional: false, shundo: false, pvp: false, shiny164: false };
 let currentSearch = '';
 
-// Fetch spawns from Shungo API
+// Pricing
+const PRICES = {
+    shundo: 5.0,
+    hundo: 3.0,
+    pvp: 5.0,
+    shiny: 2.0,
+    raid10: 7.0,
+    raid20: 12.0,
+    raid50: 20.0,
+    dynamax4: 10.0,
+    dynamaxSingle: 2.5
+};
+
+// ============================================
+// FETCH DATA
+// ============================================
+
 async function fetchSpawns() {
     try {
         const response = await fetch('https://shungo.app/api/shungo/data/spawns');
@@ -15,18 +40,23 @@ async function fetchSpawns() {
     }
 }
 
-// Fetch raids from GitHub
-async function fetchRaids() {
+async function fetchAllRaids() {
     try {
-        const response = await fetch('https://raw.githubusercontent.com/Skatecrete/pogo-raid-data/main/current_raids.json');
-        return await response.json();
+        // Fetch from ScrapedDuck for regular raids
+        const scrapedResponse = await fetch('https://raw.githubusercontent.com/bigfoott/ScrapedDuck/data/raids.min.json');
+        const scrapedRaids = await scrapedResponse.json();
+        
+        // Fetch from your GitHub for Dynamax/Gigantamax
+        const dynaResponse = await fetch('https://raw.githubusercontent.com/Skatecrete/pogo-raid-data/main/current_raids.json');
+        const dynaRaids = await dynaResponse.json();
+        
+        return { scrapedRaids, dynaRaids };
     } catch (error) {
         console.error('Error fetching raids:', error);
         return null;
     }
 }
 
-// Fetch events from LeekDuck
 async function fetchEvents() {
     try {
         const response = await fetch('https://leekduck.com/feeds/events.json');
@@ -37,16 +67,141 @@ async function fetchEvents() {
     }
 }
 
-// Get Pokemon name by ID
 async function getPokemonName(id) {
-    const response = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}/`);
-    const data = await response.json();
-    return data.names.find(n => n.language.name === 'en').name;
+    try {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}/`);
+        const data = await response.json();
+        return data.names.find(n => n.language.name === 'en').name;
+    } catch {
+        return `Pokemon #${id}`;
+    }
 }
 
-// Load and display spawns
+// ============================================
+// CART FUNCTIONS
+// ============================================
+
+function addToCart(item) {
+    const existingIndex = cartItems.findIndex(i => 
+        i.type === item.type && 
+        i.pokemonName === item.pokemonName &&
+        i.raidTier === item.raidTier
+    );
+    
+    if (existingIndex >= 0) {
+        cartItems[existingIndex].quantity += item.quantity;
+        cartItems[existingIndex].price = calculateItemPrice(cartItems[existingIndex]);
+    } else {
+        cartItems.push(item);
+    }
+    
+    updateCartDisplay();
+    showToast(`Added ${item.quantity}x ${item.pokemonName} to cart`);
+}
+
+function removeFromCart(index) {
+    cartItems.splice(index, 1);
+    updateCartDisplay();
+}
+
+function updateQuantity(index, newQuantity) {
+    if (newQuantity <= 0) {
+        cartItems.splice(index, 1);
+    } else {
+        cartItems[index].quantity = newQuantity;
+        cartItems[index].price = calculateItemPrice(cartItems[index]);
+    }
+    updateCartDisplay();
+}
+
+function calculateItemPrice(item) {
+    if (item.type === 'shundo') return item.quantity * PRICES.shundo;
+    if (item.type === 'hundo') return item.quantity * PRICES.hundo;
+    if (item.type === 'pvp') return item.quantity * PRICES.pvp;
+    if (item.type === 'shiny') return item.quantity * PRICES.shiny;
+    if (item.type === 'raid') {
+        const qty = item.quantity;
+        let price = 0;
+        let remaining = qty;
+        while (remaining >= 50) { price += 20; remaining -= 50; }
+        while (remaining >= 20) { price += 12; remaining -= 20; }
+        while (remaining >= 10) { price += 7; remaining -= 10; }
+        price += remaining * 0.70;
+        return price;
+    }
+    if (item.type === 'dynamax') {
+        return Math.floor(item.quantity / 4) * 10 + (item.quantity % 4) * 2.5;
+    }
+    return 0;
+}
+
+function getCartTotal() {
+    return cartItems.reduce((sum, item) => sum + item.price, 0);
+}
+
+function updateCartDisplay() {
+    const cartContainer = document.getElementById('cartItems');
+    const cartTotal = document.getElementById('cartTotal');
+    const cartCount = document.getElementById('cartCount');
+    const emptyCartMsg = document.getElementById('emptyCartMsg');
+    
+    const total = getCartTotal();
+    const itemCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
+    
+    if (cartCount) cartCount.textContent = itemCount;
+    if (cartTotal) cartTotal.textContent = `$${total.toFixed(2)}`;
+    
+    if (cartItems.length === 0) {
+        if (cartContainer) cartContainer.innerHTML = '';
+        if (emptyCartMsg) emptyCartMsg.style.display = 'block';
+        return;
+    }
+    
+    if (emptyCartMsg) emptyCartMsg.style.display = 'none';
+    
+    if (cartContainer) {
+        cartContainer.innerHTML = cartItems.map((item, idx) => `
+            <div class="cart-item">
+                <div class="cart-item-info">
+                    <div class="cart-item-name">${item.pokemonName} ${item.raidTier ? `(${item.raidTier})` : ''}</div>
+                    <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                </div>
+                <div class="cart-item-controls">
+                    <button class="qty-btn" onclick="updateQuantity(${idx}, ${item.quantity - 1})">-</button>
+                    <span class="cart-qty">${item.quantity}</span>
+                    <button class="qty-btn" onclick="updateQuantity(${idx}, ${item.quantity + 1})">+</button>
+                    <button class="delete-btn" onclick="removeFromCart(${idx})">🗑️</button>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function clearCart() {
+    cartItems = [];
+    updateCartDisplay();
+}
+
+function showToast(message) {
+    let toast = document.getElementById('toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#4CAF50;color:white;padding:12px 24px;border-radius:25px;z-index:1000;opacity:0;transition:opacity 0.3s';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.opacity = '1';
+    setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+}
+
+// ============================================
+// SPAWN FUNCTIONS
+// ============================================
+
 async function loadSpawns() {
     const container = document.getElementById('spawnsList');
+    if (!container) return;
     container.innerHTML = '<div class="loading">Loading spawns...</div>';
     
     const spawnData = await fetchSpawns();
@@ -55,9 +210,8 @@ async function loadSpawns() {
         return;
     }
     
-    // Process spawn data
     const pokemonList = [];
-    for (let i = 0; i < Math.min(spawnData.length, 100); i++) {
+    for (let i = 0; i < Math.min(spawnData.length, 200); i++) {
         const item = spawnData[i];
         const pokedexId = item[0];
         const spawnRate = item[2];
@@ -76,30 +230,21 @@ async function loadSpawns() {
     
     pokemonList.sort((a, b) => b.spawnRate - a.spawnRate);
     allPokemon = pokemonList;
-    displaySpawns(allPokemon);
+    displaySpawns();
 }
 
-function displaySpawns(pokemonList) {
+function displaySpawns() {
     const container = document.getElementById('spawnsList');
+    if (!container) return;
     
-    let filtered = [...pokemonList];
+    let filtered = [...allPokemon];
     
-    // Apply search
     if (currentSearch) {
         filtered = filtered.filter(p => p.name.toLowerCase().includes(currentSearch));
     }
     
-    // Apply filters
-    if (filters.regional) {
-        // Regional filter would need a list - simplified for now
-        filtered = filtered;
-    }
     if (filters.shundo) {
         filtered = filtered.filter(p => p.spawnRate >= 0.65 && p.isShiny);
-    }
-    if (filters.pvp) {
-        // PvP filter simplified
-        filtered = filtered;
     }
     if (filters.shiny164) {
         filtered = filtered.filter(p => p.isShiny && p.spawnRate >= 0.65);
@@ -110,68 +255,233 @@ function displaySpawns(pokemonList) {
         return;
     }
     
-    container.innerHTML = filtered.map(p => `
-        <div class="pokemon-card">
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${p.id}.png" 
-                 onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png'">
-            <div class="pokemon-info">
-                <div class="pokemon-name">
-                    ${p.name}
-                    ${p.spawnRate >= 0.85 ? '<span class="spawn-badge" style="background:#F44336">HEAVY</span>' : ''}
-                    ${p.spawnRate >= 0.65 && p.spawnRate < 0.85 ? '<span class="spawn-badge" style="background:#FF9800">MEDIUM</span>' : ''}
-                    ${p.spawnRate >= 0.30 && p.spawnRate < 0.65 ? '<span class="spawn-badge" style="background:#4CAF50">LOW</span>' : ''}
-                    ${p.spawnRate < 0.30 ? '<span class="spawn-badge" style="background:#2196F3">MINIMAL</span>' : ''}
+    container.innerHTML = filtered.map(p => {
+        let badgeClass = '';
+        let badgeText = '';
+        if (p.spawnRate >= 0.85) { badgeClass = 'badge-heavy'; badgeText = 'HEAVY'; }
+        else if (p.spawnRate >= 0.65) { badgeClass = 'badge-medium'; badgeText = 'MEDIUM'; }
+        else if (p.spawnRate >= 0.30) { badgeClass = 'badge-low'; badgeText = 'LOW'; }
+        else { badgeClass = 'badge-minimal'; badgeText = 'MINIMAL'; }
+        
+        return `
+            <div class="pokemon-card" onclick='showSpawnOrderDialog(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${p.id}.png" 
+                     onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png'">
+                <div class="pokemon-info">
+                    <div class="pokemon-name">
+                        ${p.name}
+                        <span class="spawn-badge ${badgeClass}">${badgeText}</span>
+                    </div>
+                    <div class="pokemon-details">
+                        Rate: ${p.spawnRate.toFixed(2)}% | 
+                        <span class="shiny-rate">${p.shinyRate}</span>
+                    </div>
                 </div>
-                <div class="pokemon-details">
-                    Rate: ${p.spawnRate.toFixed(2)}% | 
-                    <span class="shiny-rate">${p.shinyRate}</span>
+                <button class="order-btn" onclick="event.stopPropagation(); showSpawnOrderDialog(${JSON.stringify(p).replace(/'/g, "&#39;")})">➕ Order</button>
+            </div>
+        `;
+    }).join('');
+}
+
+function showSpawnOrderDialog(pokemon) {
+    const modal = document.getElementById('orderModal');
+    const modalContent = document.getElementById('modalContent');
+    
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h2>Order ${pokemon.name}</h2>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="order-stats">
+                <div>Spawn Rate: ${pokemon.spawnRate.toFixed(2)}%</div>
+                <div>Shiny: ${pokemon.shinyRate}</div>
+            </div>
+            
+            ${pokemon.spawnRate >= 0.65 && pokemon.isShiny ? `
+            <div class="order-section">
+                <div class="section-title">✨ SHUNDO (100% IV + SHINY) - $5 EACH</div>
+                <div class="quantity-selector">
+                    <button class="qty-btn" onclick="updateSpawnQty('shundo', -1)">-</button>
+                    <span id="shundoQty" class="qty-num">0</span>
+                    <button class="qty-btn" onclick="updateSpawnQty('shundo', 1)">+</button>
+                    <span id="shundoPrice" class="item-price">$0.00</span>
+                </div>
+            </div>
+            ` : ''}
+            
+            <div class="order-section">
+                <div class="section-title">💯 HUNDO (100% IV) - $3 EACH</div>
+                <div class="quantity-selector">
+                    <button class="qty-btn" onclick="updateSpawnQty('hundo', -1)">-</button>
+                    <span id="hundoQty" class="qty-num">0</span>
+                    <button class="qty-btn" onclick="updateSpawnQty('hundo', 1)">+</button>
+                    <span id="hundoPrice" class="item-price">$0.00</span>
+                </div>
+            </div>
+            
+            <div class="order-section">
+                <div class="section-title">✨ SHINY (Random IVs) - $2 EACH</div>
+                <div class="quantity-selector">
+                    <button class="qty-btn" onclick="updateSpawnQty('shiny', -1)">-</button>
+                    <span id="shinyQty" class="qty-num">0</span>
+                    <button class="qty-btn" onclick="updateSpawnQty('shiny', 1)">+</button>
+                    <span id="shinyPrice" class="item-price">$0.00</span>
                 </div>
             </div>
         </div>
-    `).join('');
+        <div class="modal-footer">
+            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+            <button class="confirm-btn" onclick="addSpawnOrderToCart('${pokemon.name}', ${pokemon.id})">Add to Cart</button>
+        </div>
+    `;
+    
+    window.currentSpawnPokemon = pokemon;
+    window.spawnQuantities = { shundo: 0, hundo: 0, shiny: 0 };
+    modal.style.display = 'flex';
 }
 
-function filterSpawns() {
-    currentSearch = document.getElementById('spawnSearch').value.toLowerCase();
-    displaySpawns(allPokemon);
+function updateSpawnQty(type, delta) {
+    const newQty = Math.max(0, window.spawnQuantities[type] + delta);
+    window.spawnQuantities[type] = newQty;
+    
+    document.getElementById(`${type}Qty`).textContent = newQty;
+    const price = newQty * (type === 'shundo' ? 5 : type === 'hundo' ? 3 : 2);
+    document.getElementById(`${type}Price`).textContent = `$${price.toFixed(2)}`;
 }
 
-function toggleFilter(filter) {
-    filters[filter] = !filters[filter];
-    displaySpawns(allPokemon);
+function addSpawnOrderToCart(pokemonName, pokemonId) {
+    const { shundo, hundo, shiny } = window.spawnQuantities;
+    
+    if (shundo > 0) {
+        addToCart({ type: 'shundo', pokemonName, pokemonId, quantity: shundo, price: shundo * 5 });
+    }
+    if (hundo > 0) {
+        addToCart({ type: 'hundo', pokemonName, pokemonId, quantity: hundo, price: hundo * 3 });
+    }
+    if (shiny > 0) {
+        addToCart({ type: 'shiny', pokemonName, pokemonId, quantity: shiny, price: shiny * 2 });
+    }
+    
+    closeModal();
 }
 
-// Load and display raids
+// ============================================
+// RAID FUNCTIONS
+// ============================================
+
 async function loadRaids() {
     const container = document.getElementById('raidsList');
+    if (!container) return;
     container.innerHTML = '<div class="loading">Loading raids...</div>';
     
-    const raidData = await fetchRaids();
+    const raidData = await fetchAllRaids();
     if (!raidData) {
         container.innerHTML = '<div class="loading">Failed to load raids</div>';
         return;
     }
     
-    const categories = [
-        { key: 'dynamax_tier5', name: '⚡⚡⚡⚡⚡ DYNAMAX TIER 5', color: '#FF5722' },
-        { key: 'dynamax_tier4', name: '⚡⚡⚡⚡ DYNAMAX TIER 4', color: '#FF9800' },
-        { key: 'dynamax_tier3', name: '⚡⚡⚡ DYNAMAX TIER 3', color: '#FFC107' },
-        { key: 'dynamax_tier2', name: '⚡⚡ DYNAMAX TIER 2', color: '#4CAF50' },
-        { key: 'dynamax_tier1', name: '⚡ DYNAMAX TIER 1', color: '#2196F3' },
-        { key: 'gigantamax', name: '💥 GIGANTAMAX', color: '#9C27B0' }
-    ];
+    const { scrapedRaids, dynaRaids } = raidData;
+    
+    // Process regular raids from ScrapedDuck
+    const regularRaids = {
+        mega: [], shadow5: [], shadow3: [], shadow1: [],
+        tier5: [], tier4: [], tier3: [], tier2: [], tier1: []
+    };
+    
+    for (const raid of scrapedRaids) {
+        const tier = raid.tier;
+        const name = raid.name;
+        const id = await getPokemonIdFromName(name);
+        
+        const raidObj = { name, tier, id, isShiny: raid.canBeShiny, image: raid.image || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png` };
+        
+        if (tier.includes('Mega')) regularRaids.mega.push(raidObj);
+        else if (tier.includes('Shadow') && tier.includes('5-Star')) regularRaids.shadow5.push(raidObj);
+        else if (tier.includes('Shadow') && tier.includes('3-Star')) regularRaids.shadow3.push(raidObj);
+        else if (tier.includes('Shadow') && tier.includes('1-Star')) regularRaids.shadow1.push(raidObj);
+        else if (tier.includes('5-Star')) regularRaids.tier5.push(raidObj);
+        else if (tier.includes('4-Star')) regularRaids.tier4.push(raidObj);
+        else if (tier.includes('3-Star')) regularRaids.tier3.push(raidObj);
+        else if (tier.includes('2-Star')) regularRaids.tier2.push(raidObj);
+        else if (tier.includes('1-Star')) regularRaids.tier1.push(raidObj);
+    }
+    
+    // Process Dynamax raids
+    const dynamaxRaids = [];
+    const tiers = ['dynamax_tier1', 'dynamax_tier2', 'dynamax_tier3', 'dynamax_tier4', 'dynamax_tier5', 'gigantamax'];
+    const tierNames = ['⚡ DYNAMAX TIER 1', '⚡⚡ DYNAMAX TIER 2', '⚡⚡⚡ DYNAMAX TIER 3', '⚡⚡⚡⚡ DYNAMAX TIER 4', '⚡⚡⚡⚡⚡ DYNAMAX TIER 5', '💥 GIGANTAMAX'];
+    
+    for (let i = 0; i < tiers.length; i++) {
+        if (dynaRaids[tiers[i]] && dynaRaids[tiers[i]].length > 0) {
+            for (const name of dynaRaids[tiers[i]]) {
+                if (name && name.length > 2 && !['bug','dark','dragon','electric','fairy','fighting','fire','flying','ghost','grass','ground','ice','normal','poison','psychic','rock','steel','water'].includes(name.toLowerCase())) {
+                    const id = await getPokemonIdFromName(name);
+                    dynamaxRaids.push({ name, tier: tierNames[i], id, isShiny: true, image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png` });
+                }
+            }
+        }
+    }
+    
+    displayRaids(regularRaids, dynamaxRaids);
+}
+
+async function getPokemonIdFromName(name) {
+    const cleanName = name.replace('Shadow ', '').replace('Mega ', '').replace('D-Max ', '').trim().toLowerCase();
+    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${cleanName}`);
+    if (response.ok) {
+        const data = await response.json();
+        return data.id;
+    }
+    return 25; // Default to Pikachu
+}
+
+function displayRaids(regularRaids, dynamaxRaids) {
+    const container = document.getElementById('raidsList');
+    if (!container) return;
     
     let html = '';
-    for (const cat of categories) {
-        if (raidData[cat.key] && raidData[cat.key].length > 0) {
-            html += `
-                <div class="raid-category">
-                    <h4>${cat.name}</h4>
-                    <div class="raids-grid">
-                        ${raidData[cat.key].map(raid => `<span class="raid-badge">${raid}</span>`).join('')}
-                    </div>
-                </div>
-            `;
+    
+    // Mega Raids
+    if (regularRaids.mega.length > 0) {
+        html += `<div class="raid-category"><h4>🔴 MEGA RAIDS</h4><div class="raids-grid">`;
+        html += regularRaids.mega.map(r => `<div class="raid-card-small" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
+        html += `</div></div>`;
+    }
+    
+    // 5-Star Raids
+    if (regularRaids.tier5.length > 0) {
+        html += `<div class="raid-category"><h4>⭐⭐⭐⭐⭐ 5-STAR RAIDS</h4><div class="raids-grid">`;
+        html += regularRaids.tier5.map(r => `<div class="raid-card-small" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span>${r.isShiny ? '<span class="shiny-star">✨</span>' : ''}</div>`).join('');
+        html += `</div></div>`;
+    }
+    
+    // 3-Star Raids
+    if (regularRaids.tier3.length > 0) {
+        html += `<div class="raid-category"><h4>⭐⭐⭐ 3-STAR RAIDS</h4><div class="raids-grid">`;
+        html += regularRaids.tier3.map(r => `<div class="raid-card-small" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
+        html += `</div></div>`;
+    }
+    
+    // Shadow Legendary
+    if (regularRaids.shadow5.length > 0) {
+        html += `<div class="raid-category"><h4>🌑 SHADOW LEGENDARY (5-STAR)</h4><div class="raids-grid">`;
+        html += regularRaids.shadow5.map(r => `<div class="raid-card-small" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
+        html += `</div></div>`;
+    }
+    
+    // Dynamax/Gigantamax
+    if (dynamaxRaids.length > 0) {
+        const dynaByTier = {};
+        for (const raid of dynamaxRaids) {
+            if (!dynaByTier[raid.tier]) dynaByTier[raid.tier] = [];
+            dynaByTier[raid.tier].push(raid);
+        }
+        
+        for (const [tier, raids] of Object.entries(dynaByTier)) {
+            html += `<div class="raid-category"><h4>${tier}</h4><div class="raids-grid">`;
+            html += raids.map(r => `<div class="raid-card-small" onclick='showDynamaxOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
+            html += `</div></div>`;
         }
     }
     
@@ -182,7 +492,112 @@ async function loadRaids() {
     container.innerHTML = html;
 }
 
-// Load and display events
+function showRaidOrderDialog(raid) {
+    const modal = document.getElementById('orderModal');
+    const modalContent = document.getElementById('modalContent');
+    
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h2>Order ${raid.name} Raids</h2>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="order-stats">
+                <div>Tier: ${raid.tier}</div>
+                <div>Shiny Available: ${raid.isShiny ? '✨ Yes' : '❌ No'}</div>
+            </div>
+            
+            <div class="order-section">
+                <div class="section-title">📦 RAID PACKS</div>
+                <div class="raid-packs">
+                    <button class="pack-btn" onclick="selectRaidPack(10, 7)">10 Raids - $7</button>
+                    <button class="pack-btn" onclick="selectRaidPack(20, 12)">20 Raids - $12</button>
+                    <button class="pack-btn" onclick="selectRaidPack(50, 20)">50 Raids - $20</button>
+                </div>
+                <div id="raidSelectedInfo" style="margin-top: 12px; text-align: center;"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+            <button class="confirm-btn" onclick="addRaidToCart('${raid.name}', '${raid.tier}', ${raid.id})">Add to Cart</button>
+        </div>
+    `;
+    
+    window.selectedRaidPack = { quantity: 0, price: 0 };
+    modal.style.display = 'flex';
+}
+
+function showDynamaxOrderDialog(raid) {
+    const modal = document.getElementById('orderModal');
+    const modalContent = document.getElementById('modalContent');
+    
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h2>Order ${raid.name}</h2>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="order-stats">
+                <div>Tier: ${raid.tier}</div>
+            </div>
+            
+            <div class="order-section">
+                <div class="section-title">⚡ SELECT QUANTITY (4 for $10 or $2.50 each)</div>
+                <div class="quantity-selector">
+                    <button class="qty-btn" onclick="updateDynamaxQty(-1)">-</button>
+                    <span id="dynamaxQty" class="qty-num">0</span>
+                    <button class="qty-btn" onclick="updateDynamaxQty(1)">+</button>
+                    <span id="dynamaxPrice" class="item-price">$0.00</span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+            <button class="confirm-btn" onclick="addDynamaxToCart('${raid.name}', '${raid.tier}', ${raid.id})">Add to Cart</button>
+        </div>
+    `;
+    
+    window.dynamaxQuantity = 0;
+    modal.style.display = 'flex';
+}
+
+function selectRaidPack(quantity, price) {
+    window.selectedRaidPack = { quantity, price };
+    document.getElementById('raidSelectedInfo').innerHTML = `Selected: ${quantity} Raids - $${price}`;
+}
+
+function updateDynamaxQty(delta) {
+    const newQty = Math.max(0, window.dynamaxQuantity + delta);
+    window.dynamaxQuantity = newQty;
+    document.getElementById('dynamaxQty').textContent = newQty;
+    const price = Math.floor(newQty / 4) * 10 + (newQty % 4) * 2.5;
+    document.getElementById('dynamaxPrice').textContent = `$${price.toFixed(2)}`;
+}
+
+function addRaidToCart(pokemonName, raidTier, pokemonId) {
+    const { quantity, price } = window.selectedRaidPack;
+    if (quantity === 0) {
+        showToast('Please select a raid pack');
+        return;
+    }
+    addToCart({ type: 'raid', pokemonName, raidTier, pokemonId, quantity, price });
+    closeModal();
+}
+
+function addDynamaxToCart(pokemonName, raidTier, pokemonId) {
+    if (window.dynamaxQuantity === 0) {
+        showToast('Please select a quantity');
+        return;
+    }
+    const price = Math.floor(window.dynamaxQuantity / 4) * 10 + (window.dynamaxQuantity % 4) * 2.5;
+    addToCart({ type: 'dynamax', pokemonName, raidTier, pokemonId, quantity: window.dynamaxQuantity, price });
+    closeModal();
+}
+
+// ============================================
+// EVENT FUNCTIONS
+// ============================================
+
 async function loadEvents() {
     const events = await fetchEvents();
     const now = new Date();
@@ -203,49 +618,159 @@ async function loadEvents() {
         }
     }
     
-    // Display current events
     const currentContainer = document.getElementById('currentEventsList');
-    if (currentEvents.length === 0) {
-        currentContainer.innerHTML = '<div class="loading">No current events</div>';
-    } else {
-        currentContainer.innerHTML = currentEvents.map(e => `
-            <div class="event-card">
-                <div class="event-title">${e.name}</div>
-                <div class="event-date">📅 ${new Date(e.start).toLocaleDateString()} - ${new Date(e.end).toLocaleDateString()}</div>
-                <a href="${e.link}" target="_blank" class="event-link">🔗 View Event →</a>
-            </div>
-        `).join('');
+    if (currentContainer) {
+        if (currentEvents.length === 0) {
+            currentContainer.innerHTML = '<div class="loading">No current events</div>';
+        } else {
+            currentContainer.innerHTML = currentEvents.map(e => `
+                <div class="event-card">
+                    <div class="event-title">${e.name}</div>
+                    <div class="event-date">🟢 ${new Date(e.start).toLocaleString()}</div>
+                    <div class="event-date">🔴 ${new Date(e.end).toLocaleString()}</div>
+                    <a href="${e.link}" target="_blank" class="event-link">🔗 View Event →</a>
+                </div>
+            `).join('');
+        }
     }
     
-    // Display upcoming events
     const upcomingContainer = document.getElementById('upcomingEventsList');
-    if (upcomingEvents.length === 0) {
-        upcomingContainer.innerHTML = '<div class="loading">No upcoming events</div>';
-    } else {
-        upcomingContainer.innerHTML = upcomingEvents.map(e => `
-            <div class="event-card">
-                <div class="event-title">${e.name}</div>
-                <div class="event-date">🟢 Starts: ${new Date(e.start).toLocaleString()}</div>
-                <div class="event-date">🔴 Ends: ${new Date(e.end).toLocaleString()}</div>
-                <a href="${e.link}" target="_blank" class="event-link">🔗 View Event →</a>
-            </div>
-        `).join('');
+    if (upcomingContainer) {
+        if (upcomingEvents.length === 0) {
+            upcomingContainer.innerHTML = '<div class="loading">No upcoming events</div>';
+        } else {
+            upcomingContainer.innerHTML = upcomingEvents.map(e => `
+                <div class="event-card">
+                    <div class="event-title">${e.name}</div>
+                    <div class="event-date">🟢 Starts: ${new Date(e.start).toLocaleString()}</div>
+                    <div class="event-date">🔴 Ends: ${new Date(e.end).toLocaleString()}</div>
+                    <a href="${e.link}" target="_blank" class="event-link">🔗 View Event →</a>
+                    <button class="rsvp-btn" onclick="showRSVPDialog('${e.name}', '${e.link}', '${new Date(e.start).toLocaleString()}', '${new Date(e.end).toLocaleString()}')">📝 RSVP</button>
+                </div>
+            `).join('');
+        }
     }
 }
 
-// Order system
-function selectAdmin(admin) {
-    const paymentSection = document.getElementById('paymentSection');
-    const paymentOptions = document.getElementById('paymentOptions');
+function showRSVPDialog(eventName, eventLink, startDate, endDate) {
+    const modal = document.getElementById('orderModal');
+    const modalContent = document.getElementById('modalContent');
     
-    paymentSection.style.display = 'block';
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h2>RSVP for ${eventName}</h2>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="text" id="rsvpName" placeholder="Your Name *" class="rsvp-input">
+            <input type="text" id="rsvpIgn" placeholder="In-Game Name *" class="rsvp-input">
+            <div class="admin-select">
+                <button class="admin-option dan" onclick="submitRSVP('${eventName}', '${eventLink}', '${startDate}', '${endDate}', 'Dan')">Dan (Skatecrete)</button>
+                <button class="admin-option kingi" onclick="submitRSVP('${eventName}', '${eventLink}', '${startDate}', '${endDate}', 'Kingi')">Kingi (zEViLvSTON4z)</button>
+                <button class="admin-option thomas" onclick="submitRSVP('${eventName}', '${eventLink}', '${startDate}', '${endDate}', 'Thomas')">Thomas (RampageGamer)</button>
+            </div>
+        </div>
+    `;
     
+    modal.style.display = 'flex';
+}
+
+function submitRSVP(eventName, eventLink, startDate, endDate, admin) {
+    const name = document.getElementById('rsvpName')?.value.trim();
+    const ign = document.getElementById('rsvpIgn')?.value.trim();
+    
+    if (!name || !ign) {
+        showToast('Please enter your name and in-game name');
+        return;
+    }
+    
+    showToast(`RSVP sent to ${admin}! They will contact you.`);
+    closeModal();
+}
+
+// ============================================
+// ORDER SUBMISSION
+// ============================================
+
+function showCustomerDialog() {
+    const modal = document.getElementById('orderModal');
+    const modalContent = document.getElementById('modalContent');
+    
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h2>Who are you?!</h2>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="text" id="customerName" placeholder="Your Name *" class="rsvp-input" value="${customerName}">
+            <input type="text" id="customerIgn" placeholder="In-Game Name (PoGo Name) *" class="rsvp-input" value="${customerIgn}">
+            <div class="disclaimer" style="margin-top: 12px;">*Timed Events cannot have a predetermined time slot</div>
+        </div>
+        <div class="modal-footer">
+            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+            <button class="confirm-btn" onclick="saveCustomerInfo()">Save</button>
+        </div>
+    `;
+    
+    modal.style.display = 'flex';
+}
+
+function saveCustomerInfo() {
+    const name = document.getElementById('customerName')?.value.trim();
+    const ign = document.getElementById('customerIgn')?.value.trim();
+    
+    if (!name || !ign) {
+        showToast('Please enter both name and in-game name');
+        return;
+    }
+    
+    customerName = name;
+    customerIgn = ign;
+    
+    document.getElementById('customerNameBtn').textContent = `${name}\n${ign}`;
+    closeModal();
+    showAdminSelection();
+}
+
+function showAdminSelection() {
+    const modal = document.getElementById('orderModal');
+    const modalContent = document.getElementById('modalContent');
+    
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h2>Choose Your Admin</h2>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="admin-select">
+                <button class="admin-option dan" onclick="selectAdminAndPay('Dan')">Dan (Skatecrete)</button>
+                <button class="admin-option kingi" onclick="selectAdminAndPay('Kingi')">Kingi (zEViLvSTON4z)</button>
+                <button class="admin-option thomas" onclick="selectAdminAndPay('Thomas')">Thomas (RampageGamer)</button>
+            </div>
+        </div>
+    `;
+    
+    modal.style.display = 'flex';
+}
+
+function selectAdminAndPay(admin) {
+    selectedAdmin = admin;
+    closeModal();
+    showPaymentOptions();
+}
+
+function showPaymentOptions() {
+    const modal = document.getElementById('orderModal');
+    const modalContent = document.getElementById('modalContent');
+    const total = getCartTotal();
+    
+    let paymentHtml = '';
     if (admin === 'Dan') {
-        paymentOptions.innerHTML = `
+        paymentHtml = `
             <div class="payment-option">
                 <strong>💰 PayPal</strong>
                 <a href="https://paypal.me/danstudz" target="_blank">Pay with PayPal</a>
-                <div style="font-size:11px; color:#FFA500; margin-top:8px;">⚠️ Please send with Friends and Family option</div>
+                <div class="disclaimer-small">⚠️ Please send with Friends and Family option</div>
             </div>
             <div class="payment-option">
                 <strong>💚 CashApp</strong>
@@ -255,25 +780,78 @@ function selectAdmin(admin) {
                 <strong>💙 Venmo</strong>
                 <a href="https://venmo.com/DanStudz" target="_blank">Pay with Venmo</a>
             </div>
-            <div class="disclaimer">Once payment is received, your order will be placed in queue 🧙</div>
         `;
     } else if (admin === 'Thomas') {
-        paymentOptions.innerHTML = `
+        paymentHtml = `
             <div class="payment-option">
                 <strong>💰 PayPal</strong>
                 <a href="https://www.paypal.me/Thomas061298" target="_blank">Pay with PayPal</a>
-                <div style="font-size:11px; color:#FFA500; margin-top:8px;">⚠️ Please send with Friends and Family option</div>
+                <div class="disclaimer-small">⚠️ Please send with Friends and Family option</div>
             </div>
-            <div class="disclaimer">Once payment is received, your order will be placed in queue 🧙</div>
         `;
-    } else if (admin === 'Kingi') {
-        paymentOptions.innerHTML = `
+    } else {
+        paymentHtml = `
             <div class="payment-option">
                 <strong>⏳ Payment Options Coming Soon</strong>
-                <div style="font-size:12px; color:#FFA500; margin-top:8px;">Please contact Kingi directly for payment options</div>
+                <div class="disclaimer-small">Please contact Kingi directly for payment options</div>
             </div>
         `;
     }
+    
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h2>Complete Order</h2>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="order-summary">
+                <strong>Customer:</strong> ${customerName} (${customerIgn})<br>
+                <strong>Admin:</strong> ${admin}<br>
+                <strong>Total:</strong> $${total.toFixed(2)}
+            </div>
+            ${paymentHtml}
+            <div class="disclaimer">Once payment is received, your order will be placed in queue 🧙</div>
+        </div>
+        <div class="modal-footer">
+            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+            <button class="confirm-btn" onclick="submitOrder()">Submit Order</button>
+        </div>
+    `;
+    
+    modal.style.display = 'flex';
+}
+
+function submitOrder() {
+    // In a real implementation, this would send to Google Sheets
+    // For now, just show success and clear cart
+    showToast('Order submitted! You gained Aura 😎');
+    clearCart();
+    closeModal();
+}
+
+function closeModal() {
+    const modal = document.getElementById('orderModal');
+    if (modal) modal.style.display = 'none';
+}
+
+// ============================================
+// UI HELPERS
+// ============================================
+
+function filterSpawns() {
+    currentSearch = document.getElementById('spawnSearch')?.value.toLowerCase() || '';
+    displaySpawns();
+}
+
+function toggleFilter(filter) {
+    filters[filter] = !filters[filter];
+    const btn = event.target;
+    if (filters[filter]) {
+        btn.classList.add('active');
+    } else {
+        btn.classList.remove('active');
+    }
+    displaySpawns();
 }
 
 // Tab switching
@@ -287,12 +865,11 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.add('active');
         document.getElementById(tabId).classList.add('active');
         
-        // Load data when tab is opened
         if (tabId === 'spawns' && allPokemon.length === 0) loadSpawns();
         if (tabId === 'raids') loadRaids();
         if (tabId === 'current' || tabId === 'upcoming') loadEvents();
     });
 });
 
-// Initial load
+// Initial loads
 loadSpawns();
