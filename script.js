@@ -1,22 +1,16 @@
-// ============================================
-// POKESPAWN WEB APP - FULL FUNCTIONALITY
-// ============================================
-
 // Global variables
 let allPokemon = [];
-let allRaids = [];
 let cartItems = [];
 let customerName = '';
 let customerIgn = '';
 let selectedAdmin = '';
-let filters = { regional: false, shundo: false, pvp: false, shiny164: false };
+let filters = { shundo: false, shiny164: false };
 let currentSearch = '';
 
 // Pricing
 const PRICES = {
     shundo: 5.0,
     hundo: 3.0,
-    pvp: 5.0,
     shiny: 2.0,
     raid10: 7.0,
     raid20: 12.0,
@@ -25,9 +19,7 @@ const PRICES = {
     dynamaxSingle: 2.5
 };
 
-// ============================================
-// FETCH DATA
-// ============================================
+// ========== FETCH DATA ==========
 
 async function fetchSpawns() {
     try {
@@ -42,11 +34,9 @@ async function fetchSpawns() {
 
 async function fetchAllRaids() {
     try {
-        // Fetch from ScrapedDuck for regular raids
         const scrapedResponse = await fetch('https://raw.githubusercontent.com/bigfoott/ScrapedDuck/data/raids.min.json');
         const scrapedRaids = await scrapedResponse.json();
         
-        // Fetch from your GitHub for Dynamax/Gigantamax
         const dynaResponse = await fetch('https://raw.githubusercontent.com/Skatecrete/pogo-raid-data/main/current_raids.json');
         const dynaRaids = await dynaResponse.json();
         
@@ -77,9 +67,18 @@ async function getPokemonName(id) {
     }
 }
 
-// ============================================
-// CART FUNCTIONS
-// ============================================
+async function getPokemonIdFromName(name) {
+    const cleanName = name.replace('Shadow ', '').replace('Mega ', '').replace('D-Max ', '').trim().toLowerCase();
+    try {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${cleanName}`);
+        const data = await response.json();
+        return data.id;
+    } catch {
+        return 25;
+    }
+}
+
+// ========== CART FUNCTIONS ==========
 
 function addToCart(item) {
     const existingIndex = cartItems.findIndex(i => 
@@ -117,7 +116,6 @@ function updateQuantity(index, newQuantity) {
 function calculateItemPrice(item) {
     if (item.type === 'shundo') return item.quantity * PRICES.shundo;
     if (item.type === 'hundo') return item.quantity * PRICES.hundo;
-    if (item.type === 'pvp') return item.quantity * PRICES.pvp;
     if (item.type === 'shiny') return item.quantity * PRICES.shiny;
     if (item.type === 'raid') {
         const qty = item.quantity;
@@ -148,8 +146,8 @@ function updateCartDisplay() {
     const total = getCartTotal();
     const itemCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
     
-    if (cartCount) cartCount.textContent = itemCount;
-    if (cartTotal) cartTotal.textContent = `$${total.toFixed(2)}`;
+    if (cartCount) cartCount.textContent = `${itemCount} items`;
+    if (cartTotal) cartTotal.textContent = total.toFixed(2);
     
     if (cartItems.length === 0) {
         if (cartContainer) cartContainer.innerHTML = '';
@@ -168,7 +166,7 @@ function updateCartDisplay() {
                 </div>
                 <div class="cart-item-controls">
                     <button class="qty-btn" onclick="updateQuantity(${idx}, ${item.quantity - 1})">-</button>
-                    <span class="cart-qty">${item.quantity}</span>
+                    <span style="min-width:30px;text-align:center">${item.quantity}</span>
                     <button class="qty-btn" onclick="updateQuantity(${idx}, ${item.quantity + 1})">+</button>
                     <button class="delete-btn" onclick="removeFromCart(${idx})">🗑️</button>
                 </div>
@@ -187,7 +185,7 @@ function showToast(message) {
     if (!toast) {
         toast = document.createElement('div');
         toast.id = 'toast';
-        toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#4CAF50;color:white;padding:12px 24px;border-radius:25px;z-index:1000;opacity:0;transition:opacity 0.3s';
+        toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#4CAF50;color:white;padding:10px 20px;border-radius:25px;z-index:1001;opacity:0;transition:opacity 0.3s';
         document.body.appendChild(toast);
     }
     toast.textContent = message;
@@ -195,9 +193,7 @@ function showToast(message) {
     setTimeout(() => { toast.style.opacity = '0'; }, 2000);
 }
 
-// ============================================
-// SPAWN FUNCTIONS
-// ============================================
+// ========== SPAWN FUNCTIONS ==========
 
 async function loadSpawns() {
     const container = document.getElementById('spawnsList');
@@ -211,7 +207,7 @@ async function loadSpawns() {
     }
     
     const pokemonList = [];
-    for (let i = 0; i < Math.min(spawnData.length, 200); i++) {
+    for (let i = 0; i < Math.min(spawnData.length, 150); i++) {
         const item = spawnData[i];
         const pokedexId = item[0];
         const spawnRate = item[2];
@@ -283,92 +279,107 @@ function displaySpawns() {
     }).join('');
 }
 
+function filterSpawns() {
+    currentSearch = document.getElementById('spawnSearch')?.value.toLowerCase() || '';
+    displaySpawns();
+}
+
+function toggleFilter(filter) {
+    filters[filter] = !filters[filter];
+    const btn = event.target;
+    if (filters[filter]) {
+        btn.classList.add('active');
+    } else {
+        btn.classList.remove('active');
+    }
+    displaySpawns();
+}
+
+// Spawn Order Dialog
+let currentSpawnPokemon = null;
+let spawnQuantities = { shundo: 0, hundo: 0, shiny: 0 };
+
 function showSpawnOrderDialog(pokemon) {
-    const modal = document.getElementById('orderModal');
-    const modalContent = document.getElementById('modalContent');
+    currentSpawnPokemon = pokemon;
+    spawnQuantities = { shundo: 0, hundo: 0, shiny: 0 };
     
-    modalContent.innerHTML = `
-        <div class="modal-header">
-            <h2>Order ${pokemon.name}</h2>
-            <button class="modal-close" onclick="closeModal()">✕</button>
+    document.getElementById('modalTitle').textContent = `Order ${pokemon.name}`;
+    document.getElementById('modalBody').innerHTML = `
+        <div class="order-stats">
+            <div>Spawn Rate: ${pokemon.spawnRate.toFixed(2)}%</div>
+            <div>Shiny: ${pokemon.shinyRate}</div>
         </div>
-        <div class="modal-body">
-            <div class="order-stats">
-                <div>Spawn Rate: ${pokemon.spawnRate.toFixed(2)}%</div>
-                <div>Shiny: ${pokemon.shinyRate}</div>
-            </div>
-            
-            ${pokemon.spawnRate >= 0.65 && pokemon.isShiny ? `
-            <div class="order-section">
-                <div class="section-title">✨ SHUNDO (100% IV + SHINY) - $5 EACH</div>
-                <div class="quantity-selector">
-                    <button class="qty-btn" onclick="updateSpawnQty('shundo', -1)">-</button>
-                    <span id="shundoQty" class="qty-num">0</span>
-                    <button class="qty-btn" onclick="updateSpawnQty('shundo', 1)">+</button>
-                    <span id="shundoPrice" class="item-price">$0.00</span>
-                </div>
-            </div>
-            ` : ''}
-            
-            <div class="order-section">
-                <div class="section-title">💯 HUNDO (100% IV) - $3 EACH</div>
-                <div class="quantity-selector">
-                    <button class="qty-btn" onclick="updateSpawnQty('hundo', -1)">-</button>
-                    <span id="hundoQty" class="qty-num">0</span>
-                    <button class="qty-btn" onclick="updateSpawnQty('hundo', 1)">+</button>
-                    <span id="hundoPrice" class="item-price">$0.00</span>
-                </div>
-            </div>
-            
-            <div class="order-section">
-                <div class="section-title">✨ SHINY (Random IVs) - $2 EACH</div>
-                <div class="quantity-selector">
-                    <button class="qty-btn" onclick="updateSpawnQty('shiny', -1)">-</button>
-                    <span id="shinyQty" class="qty-num">0</span>
-                    <button class="qty-btn" onclick="updateSpawnQty('shiny', 1)">+</button>
-                    <span id="shinyPrice" class="item-price">$0.00</span>
-                </div>
+        
+        ${pokemon.spawnRate >= 0.65 && pokemon.isShiny ? `
+        <div class="order-section">
+            <div class="section-title">✨ SHUNDO (100% IV + SHINY) - $5 EACH</div>
+            <div class="quantity-selector">
+                <button class="qty-btn" onclick="updateSpawnQty('shundo', -1)">-</button>
+                <span id="shundoQty" class="qty-num">0</span>
+                <button class="qty-btn" onclick="updateSpawnQty('shundo', 1)">+</button>
+                <span id="shundoPrice" class="item-price">$0.00</span>
             </div>
         </div>
-        <div class="modal-footer">
-            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
-            <button class="confirm-btn" onclick="addSpawnOrderToCart('${pokemon.name}', ${pokemon.id})">Add to Cart</button>
+        ` : ''}
+        
+        <div class="order-section">
+            <div class="section-title">💯 HUNDO (100% IV) - $3 EACH</div>
+            <div class="quantity-selector">
+                <button class="qty-btn" onclick="updateSpawnQty('hundo', -1)">-</button>
+                <span id="hundoQty" class="qty-num">0</span>
+                <button class="qty-btn" onclick="updateSpawnQty('hundo', 1)">+</button>
+                <span id="hundoPrice" class="item-price">$0.00</span>
+            </div>
+        </div>
+        
+        <div class="order-section">
+            <div class="section-title">✨ SHINY (Random IVs) - $2 EACH</div>
+            <div class="quantity-selector">
+                <button class="qty-btn" onclick="updateSpawnQty('shiny', -1)">-</button>
+                <span id="shinyQty" class="qty-num">0</span>
+                <button class="qty-btn" onclick="updateSpawnQty('shiny', 1)">+</button>
+                <span id="shinyPrice" class="item-price">$0.00</span>
+            </div>
         </div>
     `;
-    
-    window.currentSpawnPokemon = pokemon;
-    window.spawnQuantities = { shundo: 0, hundo: 0, shiny: 0 };
-    modal.style.display = 'flex';
+    document.getElementById('modalFooter').innerHTML = `
+        <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+        <button class="confirm-btn" onclick="addSpawnOrderToCart()">Add to Cart</button>
+    `;
+    document.getElementById('orderModal').style.display = 'flex';
 }
 
 function updateSpawnQty(type, delta) {
-    const newQty = Math.max(0, window.spawnQuantities[type] + delta);
-    window.spawnQuantities[type] = newQty;
+    const newQty = Math.max(0, spawnQuantities[type] + delta);
+    spawnQuantities[type] = newQty;
     
-    document.getElementById(`${type}Qty`).textContent = newQty;
-    const price = newQty * (type === 'shundo' ? 5 : type === 'hundo' ? 3 : 2);
-    document.getElementById(`${type}Price`).textContent = `$${price.toFixed(2)}`;
+    const qtyElem = document.getElementById(`${type}Qty`);
+    const priceElem = document.getElementById(`${type}Price`);
+    if (qtyElem) qtyElem.textContent = newQty;
+    if (priceElem) {
+        const price = newQty * (type === 'shundo' ? 5 : type === 'hundo' ? 3 : 2);
+        priceElem.textContent = `$${price.toFixed(2)}`;
+    }
 }
 
-function addSpawnOrderToCart(pokemonName, pokemonId) {
-    const { shundo, hundo, shiny } = window.spawnQuantities;
+function addSpawnOrderToCart() {
+    const { shundo, hundo, shiny } = spawnQuantities;
     
     if (shundo > 0) {
-        addToCart({ type: 'shundo', pokemonName, pokemonId, quantity: shundo, price: shundo * 5 });
+        addToCart({ type: 'shundo', pokemonName: currentSpawnPokemon.name, pokemonId: currentSpawnPokemon.id, quantity: shundo, price: shundo * 5 });
     }
     if (hundo > 0) {
-        addToCart({ type: 'hundo', pokemonName, pokemonId, quantity: hundo, price: hundo * 3 });
+        addToCart({ type: 'hundo', pokemonName: currentSpawnPokemon.name, pokemonId: currentSpawnPokemon.id, quantity: hundo, price: hundo * 3 });
     }
     if (shiny > 0) {
-        addToCart({ type: 'shiny', pokemonName, pokemonId, quantity: shiny, price: shiny * 2 });
+        addToCart({ type: 'shiny', pokemonName: currentSpawnPokemon.name, pokemonId: currentSpawnPokemon.id, quantity: shiny, price: shiny * 2 });
     }
     
     closeModal();
+    showToast('Added to cart!');
 }
 
-// ============================================
-// RAID FUNCTIONS
-// ============================================
+// ========== RAID FUNCTIONS ==========
 
 async function loadRaids() {
     const container = document.getElementById('raidsList');
@@ -383,10 +394,8 @@ async function loadRaids() {
     
     const { scrapedRaids, dynaRaids } = raidData;
     
-    // Process regular raids from ScrapedDuck
     const regularRaids = {
-        mega: [], shadow5: [], shadow3: [], shadow1: [],
-        tier5: [], tier4: [], tier3: [], tier2: [], tier1: []
+        mega: [], shadow5: [], tier5: [], tier3: [], tier1: []
     };
     
     for (const raid of scrapedRaids) {
@@ -398,16 +407,11 @@ async function loadRaids() {
         
         if (tier.includes('Mega')) regularRaids.mega.push(raidObj);
         else if (tier.includes('Shadow') && tier.includes('5-Star')) regularRaids.shadow5.push(raidObj);
-        else if (tier.includes('Shadow') && tier.includes('3-Star')) regularRaids.shadow3.push(raidObj);
-        else if (tier.includes('Shadow') && tier.includes('1-Star')) regularRaids.shadow1.push(raidObj);
         else if (tier.includes('5-Star')) regularRaids.tier5.push(raidObj);
-        else if (tier.includes('4-Star')) regularRaids.tier4.push(raidObj);
         else if (tier.includes('3-Star')) regularRaids.tier3.push(raidObj);
-        else if (tier.includes('2-Star')) regularRaids.tier2.push(raidObj);
         else if (tier.includes('1-Star')) regularRaids.tier1.push(raidObj);
     }
     
-    // Process Dynamax raids
     const dynamaxRaids = [];
     const tiers = ['dynamax_tier1', 'dynamax_tier2', 'dynamax_tier3', 'dynamax_tier4', 'dynamax_tier5', 'gigantamax'];
     const tierNames = ['⚡ DYNAMAX TIER 1', '⚡⚡ DYNAMAX TIER 2', '⚡⚡⚡ DYNAMAX TIER 3', '⚡⚡⚡⚡ DYNAMAX TIER 4', '⚡⚡⚡⚡⚡ DYNAMAX TIER 5', '💥 GIGANTAMAX'];
@@ -426,51 +430,36 @@ async function loadRaids() {
     displayRaids(regularRaids, dynamaxRaids);
 }
 
-async function getPokemonIdFromName(name) {
-    const cleanName = name.replace('Shadow ', '').replace('Mega ', '').replace('D-Max ', '').trim().toLowerCase();
-    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${cleanName}`);
-    if (response.ok) {
-        const data = await response.json();
-        return data.id;
-    }
-    return 25; // Default to Pikachu
-}
-
 function displayRaids(regularRaids, dynamaxRaids) {
     const container = document.getElementById('raidsList');
     if (!container) return;
     
     let html = '';
     
-    // Mega Raids
     if (regularRaids.mega.length > 0) {
         html += `<div class="raid-category"><h4>🔴 MEGA RAIDS</h4><div class="raids-grid">`;
-        html += regularRaids.mega.map(r => `<div class="raid-card-small" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
+        html += regularRaids.mega.map(r => `<div class="raid-card" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
         html += `</div></div>`;
     }
     
-    // 5-Star Raids
     if (regularRaids.tier5.length > 0) {
         html += `<div class="raid-category"><h4>⭐⭐⭐⭐⭐ 5-STAR RAIDS</h4><div class="raids-grid">`;
-        html += regularRaids.tier5.map(r => `<div class="raid-card-small" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span>${r.isShiny ? '<span class="shiny-star">✨</span>' : ''}</div>`).join('');
+        html += regularRaids.tier5.map(r => `<div class="raid-card" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span>${r.isShiny ? '<span class="shiny-star"> ✨</span>' : ''}</div>`).join('');
         html += `</div></div>`;
     }
     
-    // 3-Star Raids
     if (regularRaids.tier3.length > 0) {
         html += `<div class="raid-category"><h4>⭐⭐⭐ 3-STAR RAIDS</h4><div class="raids-grid">`;
-        html += regularRaids.tier3.map(r => `<div class="raid-card-small" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
+        html += regularRaids.tier3.map(r => `<div class="raid-card" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
         html += `</div></div>`;
     }
     
-    // Shadow Legendary
     if (regularRaids.shadow5.length > 0) {
-        html += `<div class="raid-category"><h4>🌑 SHADOW LEGENDARY (5-STAR)</h4><div class="raids-grid">`;
-        html += regularRaids.shadow5.map(r => `<div class="raid-card-small" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
+        html += `<div class="raid-category"><h4>🌑 SHADOW LEGENDARY</h4><div class="raids-grid">`;
+        html += regularRaids.shadow5.map(r => `<div class="raid-card" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
         html += `</div></div>`;
     }
     
-    // Dynamax/Gigantamax
     if (dynamaxRaids.length > 0) {
         const dynaByTier = {};
         for (const raid of dynamaxRaids) {
@@ -480,7 +469,7 @@ function displayRaids(regularRaids, dynamaxRaids) {
         
         for (const [tier, raids] of Object.entries(dynaByTier)) {
             html += `<div class="raid-category"><h4>${tier}</h4><div class="raids-grid">`;
-            html += raids.map(r => `<div class="raid-card-small" onclick='showDynamaxOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
+            html += raids.map(r => `<div class="raid-card" onclick='showDynamaxOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'><img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'"><span>${r.name}</span></div>`).join('');
             html += `</div></div>`;
         }
     }
@@ -492,111 +481,102 @@ function displayRaids(regularRaids, dynamaxRaids) {
     container.innerHTML = html;
 }
 
-function showRaidOrderDialog(raid) {
-    const modal = document.getElementById('orderModal');
-    const modalContent = document.getElementById('modalContent');
-    
-    modalContent.innerHTML = `
-        <div class="modal-header">
-            <h2>Order ${raid.name} Raids</h2>
-            <button class="modal-close" onclick="closeModal()">✕</button>
-        </div>
-        <div class="modal-body">
-            <div class="order-stats">
-                <div>Tier: ${raid.tier}</div>
-                <div>Shiny Available: ${raid.isShiny ? '✨ Yes' : '❌ No'}</div>
-            </div>
-            
-            <div class="order-section">
-                <div class="section-title">📦 RAID PACKS</div>
-                <div class="raid-packs">
-                    <button class="pack-btn" onclick="selectRaidPack(10, 7)">10 Raids - $7</button>
-                    <button class="pack-btn" onclick="selectRaidPack(20, 12)">20 Raids - $12</button>
-                    <button class="pack-btn" onclick="selectRaidPack(50, 20)">50 Raids - $20</button>
-                </div>
-                <div id="raidSelectedInfo" style="margin-top: 12px; text-align: center;"></div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
-            <button class="confirm-btn" onclick="addRaidToCart('${raid.name}', '${raid.tier}', ${raid.id})">Add to Cart</button>
-        </div>
-    `;
-    
-    window.selectedRaidPack = { quantity: 0, price: 0 };
-    modal.style.display = 'flex';
-}
+let selectedRaidPack = { quantity: 0, price: 0 };
+let currentRaid = null;
+let dynamaxQuantity = 0;
 
-function showDynamaxOrderDialog(raid) {
-    const modal = document.getElementById('orderModal');
-    const modalContent = document.getElementById('modalContent');
+function showRaidOrderDialog(raid) {
+    currentRaid = raid;
+    selectedRaidPack = { quantity: 0, price: 0 };
     
-    modalContent.innerHTML = `
-        <div class="modal-header">
-            <h2>Order ${raid.name}</h2>
-            <button class="modal-close" onclick="closeModal()">✕</button>
+    document.getElementById('modalTitle').textContent = `Order ${raid.name} Raids`;
+    document.getElementById('modalBody').innerHTML = `
+        <div class="order-stats">
+            <div>Tier: ${raid.tier}</div>
+            <div>Shiny Available: ${raid.isShiny ? '✨ Yes' : '❌ No'}</div>
         </div>
-        <div class="modal-body">
-            <div class="order-stats">
-                <div>Tier: ${raid.tier}</div>
+        
+        <div class="order-section">
+            <div class="section-title">📦 RAID PACKS</div>
+            <div class="raid-packs">
+                <button class="pack-btn" onclick="selectRaidPack(10, 7)">10 Raids - $7</button>
+                <button class="pack-btn" onclick="selectRaidPack(20, 12)">20 Raids - $12</button>
+                <button class="pack-btn" onclick="selectRaidPack(50, 20)">50 Raids - $20</button>
             </div>
-            
-            <div class="order-section">
-                <div class="section-title">⚡ SELECT QUANTITY (4 for $10 or $2.50 each)</div>
-                <div class="quantity-selector">
-                    <button class="qty-btn" onclick="updateDynamaxQty(-1)">-</button>
-                    <span id="dynamaxQty" class="qty-num">0</span>
-                    <button class="qty-btn" onclick="updateDynamaxQty(1)">+</button>
-                    <span id="dynamaxPrice" class="item-price">$0.00</span>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
-            <button class="confirm-btn" onclick="addDynamaxToCart('${raid.name}', '${raid.tier}', ${raid.id})">Add to Cart</button>
+            <div id="raidSelectedInfo" style="margin-top: 12px; text-align: center;"></div>
         </div>
     `;
-    
-    window.dynamaxQuantity = 0;
-    modal.style.display = 'flex';
+    document.getElementById('modalFooter').innerHTML = `
+        <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+        <button class="confirm-btn" onclick="addRaidToCart()">Add to Cart</button>
+    `;
+    document.getElementById('orderModal').style.display = 'flex';
 }
 
 function selectRaidPack(quantity, price) {
-    window.selectedRaidPack = { quantity, price };
+    selectedRaidPack = { quantity, price };
     document.getElementById('raidSelectedInfo').innerHTML = `Selected: ${quantity} Raids - $${price}`;
 }
 
-function updateDynamaxQty(delta) {
-    const newQty = Math.max(0, window.dynamaxQuantity + delta);
-    window.dynamaxQuantity = newQty;
-    document.getElementById('dynamaxQty').textContent = newQty;
-    const price = Math.floor(newQty / 4) * 10 + (newQty % 4) * 2.5;
-    document.getElementById('dynamaxPrice').textContent = `$${price.toFixed(2)}`;
-}
-
-function addRaidToCart(pokemonName, raidTier, pokemonId) {
-    const { quantity, price } = window.selectedRaidPack;
-    if (quantity === 0) {
+function addRaidToCart() {
+    if (selectedRaidPack.quantity === 0) {
         showToast('Please select a raid pack');
         return;
     }
-    addToCart({ type: 'raid', pokemonName, raidTier, pokemonId, quantity, price });
+    addToCart({ type: 'raid', pokemonName: currentRaid.name, raidTier: currentRaid.tier, pokemonId: currentRaid.id, quantity: selectedRaidPack.quantity, price: selectedRaidPack.price });
     closeModal();
 }
 
-function addDynamaxToCart(pokemonName, raidTier, pokemonId) {
-    if (window.dynamaxQuantity === 0) {
+function showDynamaxOrderDialog(raid) {
+    currentRaid = raid;
+    dynamaxQuantity = 0;
+    
+    document.getElementById('modalTitle').textContent = `Order ${raid.name}`;
+    document.getElementById('modalBody').innerHTML = `
+        <div class="order-stats">
+            <div>Tier: ${raid.tier}</div>
+        </div>
+        
+        <div class="order-section">
+            <div class="section-title">⚡ SELECT QUANTITY (4 for $10 or $2.50 each)</div>
+            <div class="quantity-selector">
+                <button class="qty-btn" onclick="updateDynamaxQty(-1)">-</button>
+                <span id="dynamaxQty" class="qty-num">0</span>
+                <button class="qty-btn" onclick="updateDynamaxQty(1)">+</button>
+                <span id="dynamaxPrice" class="item-price">$0.00</span>
+            </div>
+        </div>
+    `;
+    document.getElementById('modalFooter').innerHTML = `
+        <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+        <button class="confirm-btn" onclick="addDynamaxToCart()">Add to Cart</button>
+    `;
+    document.getElementById('orderModal').style.display = 'flex';
+}
+
+function updateDynamaxQty(delta) {
+    const newQty = Math.max(0, dynamaxQuantity + delta);
+    dynamaxQuantity = newQty;
+    const qtyElem = document.getElementById('dynamaxQty');
+    const priceElem = document.getElementById('dynamaxPrice');
+    if (qtyElem) qtyElem.textContent = newQty;
+    if (priceElem) {
+        const price = Math.floor(newQty / 4) * 10 + (newQty % 4) * 2.5;
+        priceElem.textContent = `$${price.toFixed(2)}`;
+    }
+}
+
+function addDynamaxToCart() {
+    if (dynamaxQuantity === 0) {
         showToast('Please select a quantity');
         return;
     }
-    const price = Math.floor(window.dynamaxQuantity / 4) * 10 + (window.dynamaxQuantity % 4) * 2.5;
-    addToCart({ type: 'dynamax', pokemonName, raidTier, pokemonId, quantity: window.dynamaxQuantity, price });
+    const price = Math.floor(dynamaxQuantity / 4) * 10 + (dynamaxQuantity % 4) * 2.5;
+    addToCart({ type: 'dynamax', pokemonName: currentRaid.name, raidTier: currentRaid.tier, pokemonId: currentRaid.id, quantity: dynamaxQuantity, price: price });
     closeModal();
 }
 
-// ============================================
-// EVENT FUNCTIONS
-// ============================================
+// ========== EVENT FUNCTIONS ==========
 
 async function loadEvents() {
     const events = await fetchEvents();
@@ -645,7 +625,7 @@ async function loadEvents() {
                     <div class="event-date">🟢 Starts: ${new Date(e.start).toLocaleString()}</div>
                     <div class="event-date">🔴 Ends: ${new Date(e.end).toLocaleString()}</div>
                     <a href="${e.link}" target="_blank" class="event-link">🔗 View Event →</a>
-                    <button class="rsvp-btn" onclick="showRSVPDialog('${e.name}', '${e.link}', '${new Date(e.start).toLocaleString()}', '${new Date(e.end).toLocaleString()}')">📝 RSVP</button>
+                    <button class="rsvp-btn" onclick='showRSVPDialog("${e.name}", "${e.link}", "${new Date(e.start).toLocaleString()}", "${new Date(e.end).toLocaleString()}")'>📝 RSVP</button>
                 </div>
             `).join('');
         }
@@ -653,26 +633,18 @@ async function loadEvents() {
 }
 
 function showRSVPDialog(eventName, eventLink, startDate, endDate) {
-    const modal = document.getElementById('orderModal');
-    const modalContent = document.getElementById('modalContent');
-    
-    modalContent.innerHTML = `
-        <div class="modal-header">
-            <h2>RSVP for ${eventName}</h2>
-            <button class="modal-close" onclick="closeModal()">✕</button>
-        </div>
-        <div class="modal-body">
-            <input type="text" id="rsvpName" placeholder="Your Name *" class="rsvp-input">
-            <input type="text" id="rsvpIgn" placeholder="In-Game Name *" class="rsvp-input">
-            <div class="admin-select">
-                <button class="admin-option dan" onclick="submitRSVP('${eventName}', '${eventLink}', '${startDate}', '${endDate}', 'Dan')">Dan (Skatecrete)</button>
-                <button class="admin-option kingi" onclick="submitRSVP('${eventName}', '${eventLink}', '${startDate}', '${endDate}', 'Kingi')">Kingi (zEViLvSTON4z)</button>
-                <button class="admin-option thomas" onclick="submitRSVP('${eventName}', '${eventLink}', '${startDate}', '${endDate}', 'Thomas')">Thomas (RampageGamer)</button>
-            </div>
+    document.getElementById('modalTitle').textContent = `RSVP for ${eventName}`;
+    document.getElementById('modalBody').innerHTML = `
+        <input type="text" id="rsvpName" placeholder="Your Name *" class="rsvp-input">
+        <input type="text" id="rsvpIgn" placeholder="In-Game Name *" class="rsvp-input">
+        <div class="admin-select">
+            <button class="admin-option dan" onclick='submitRSVP("${eventName}", "${eventLink}", "${startDate}", "${endDate}", "Dan")'>Dan (Skatecrete)</button>
+            <button class="admin-option kingi" onclick='submitRSVP("${eventName}", "${eventLink}", "${startDate}", "${endDate}", "Kingi")'>Kingi (zEViLvSTON4z)</button>
+            <button class="admin-option thomas" onclick='submitRSVP("${eventName}", "${eventLink}", "${startDate}", "${endDate}", "Thomas")'>Thomas (RampageGamer)</button>
         </div>
     `;
-    
-    modal.style.display = 'flex';
+    document.getElementById('modalFooter').innerHTML = '';
+    document.getElementById('orderModal').style.display = 'flex';
 }
 
 function submitRSVP(eventName, eventLink, startDate, endDate, admin) {
@@ -688,31 +660,20 @@ function submitRSVP(eventName, eventLink, startDate, endDate, admin) {
     closeModal();
 }
 
-// ============================================
-// ORDER SUBMISSION
-// ============================================
+// ========== ORDER CHECKOUT ==========
 
 function showCustomerDialog() {
-    const modal = document.getElementById('orderModal');
-    const modalContent = document.getElementById('modalContent');
-    
-    modalContent.innerHTML = `
-        <div class="modal-header">
-            <h2>Who are you?!</h2>
-            <button class="modal-close" onclick="closeModal()">✕</button>
-        </div>
-        <div class="modal-body">
-            <input type="text" id="customerName" placeholder="Your Name *" class="rsvp-input" value="${customerName}">
-            <input type="text" id="customerIgn" placeholder="In-Game Name (PoGo Name) *" class="rsvp-input" value="${customerIgn}">
-            <div class="disclaimer" style="margin-top: 12px;">*Timed Events cannot have a predetermined time slot</div>
-        </div>
-        <div class="modal-footer">
-            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
-            <button class="confirm-btn" onclick="saveCustomerInfo()">Save</button>
-        </div>
+    document.getElementById('modalTitle').textContent = 'Who are you?!';
+    document.getElementById('modalBody').innerHTML = `
+        <input type="text" id="customerName" placeholder="Your Name *" class="rsvp-input" value="${customerName}">
+        <input type="text" id="customerIgn" placeholder="In-Game Name (PoGo Name) *" class="rsvp-input" value="${customerIgn}">
+        <div class="disclaimer">*Timed Events cannot have a predetermined time slot</div>
     `;
-    
-    modal.style.display = 'flex';
+    document.getElementById('modalFooter').innerHTML = `
+        <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+        <button class="confirm-btn" onclick="saveCustomerInfo()">Save</button>
+    `;
+    document.getElementById('orderModal').style.display = 'flex';
 }
 
 function saveCustomerInfo() {
@@ -726,42 +687,25 @@ function saveCustomerInfo() {
     
     customerName = name;
     customerIgn = ign;
-    
-    document.getElementById('customerNameBtn').textContent = `${name}\n${ign}`;
     closeModal();
     showAdminSelection();
 }
 
 function showAdminSelection() {
-    const modal = document.getElementById('orderModal');
-    const modalContent = document.getElementById('modalContent');
-    
-    modalContent.innerHTML = `
-        <div class="modal-header">
-            <h2>Choose Your Admin</h2>
-            <button class="modal-close" onclick="closeModal()">✕</button>
-        </div>
-        <div class="modal-body">
-            <div class="admin-select">
-                <button class="admin-option dan" onclick="selectAdminAndPay('Dan')">Dan (Skatecrete)</button>
-                <button class="admin-option kingi" onclick="selectAdminAndPay('Kingi')">Kingi (zEViLvSTON4z)</button>
-                <button class="admin-option thomas" onclick="selectAdminAndPay('Thomas')">Thomas (RampageGamer)</button>
-            </div>
+    document.getElementById('modalTitle').textContent = 'Choose Your Admin';
+    document.getElementById('modalBody').innerHTML = `
+        <div class="admin-select">
+            <button class="admin-option dan" onclick="selectAdminAndPay('Dan')">Dan (Skatecrete)</button>
+            <button class="admin-option kingi" onclick="selectAdminAndPay('Kingi')">Kingi (zEViLvSTON4z)</button>
+            <button class="admin-option thomas" onclick="selectAdminAndPay('Thomas')">Thomas (RampageGamer)</button>
         </div>
     `;
-    
-    modal.style.display = 'flex';
+    document.getElementById('modalFooter').innerHTML = '';
+    document.getElementById('orderModal').style.display = 'flex';
 }
 
 function selectAdminAndPay(admin) {
     selectedAdmin = admin;
-    closeModal();
-    showPaymentOptions();
-}
-
-function showPaymentOptions() {
-    const modal = document.getElementById('orderModal');
-    const modalContent = document.getElementById('modalContent');
     const total = getCartTotal();
     
     let paymentHtml = '';
@@ -798,63 +742,34 @@ function showPaymentOptions() {
         `;
     }
     
-    modalContent.innerHTML = `
-        <div class="modal-header">
-            <h2>Complete Order</h2>
-            <button class="modal-close" onclick="closeModal()">✕</button>
+    document.getElementById('modalTitle').textContent = 'Complete Order';
+    document.getElementById('modalBody').innerHTML = `
+        <div class="order-summary" style="background:#0d0d1a;padding:12px;border-radius:12px;margin-bottom:16px;">
+            <strong>Customer:</strong> ${customerName} (${customerIgn})<br>
+            <strong>Admin:</strong> ${admin}<br>
+            <strong>Total:</strong> $${total.toFixed(2)}
         </div>
-        <div class="modal-body">
-            <div class="order-summary">
-                <strong>Customer:</strong> ${customerName} (${customerIgn})<br>
-                <strong>Admin:</strong> ${admin}<br>
-                <strong>Total:</strong> $${total.toFixed(2)}
-            </div>
-            ${paymentHtml}
-            <div class="disclaimer">Once payment is received, your order will be placed in queue 🧙</div>
-        </div>
-        <div class="modal-footer">
-            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
-            <button class="confirm-btn" onclick="submitOrder()">Submit Order</button>
-        </div>
+        ${paymentHtml}
+        <div class="disclaimer">Once payment is received, your order will be placed in queue 🧙</div>
     `;
-    
-    modal.style.display = 'flex';
+    document.getElementById('modalFooter').innerHTML = `
+        <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+        <button class="confirm-btn" onclick="submitOrder()">Submit Order</button>
+    `;
+    document.getElementById('orderModal').style.display = 'flex';
 }
 
 function submitOrder() {
-    // In a real implementation, this would send to Google Sheets
-    // For now, just show success and clear cart
     showToast('Order submitted! You gained Aura 😎');
     clearCart();
     closeModal();
 }
 
 function closeModal() {
-    const modal = document.getElementById('orderModal');
-    if (modal) modal.style.display = 'none';
+    document.getElementById('orderModal').style.display = 'none';
 }
 
-// ============================================
-// UI HELPERS
-// ============================================
-
-function filterSpawns() {
-    currentSearch = document.getElementById('spawnSearch')?.value.toLowerCase() || '';
-    displaySpawns();
-}
-
-function toggleFilter(filter) {
-    filters[filter] = !filters[filter];
-    const btn = event.target;
-    if (filters[filter]) {
-        btn.classList.add('active');
-    } else {
-        btn.classList.remove('active');
-    }
-    displaySpawns();
-}
-
-// Tab switching
+// ========== TAB SWITCHING ==========
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const tabId = btn.dataset.tab;
@@ -871,5 +786,5 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     });
 });
 
-// Initial loads
+// Initial load
 loadSpawns();
