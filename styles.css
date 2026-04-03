@@ -302,6 +302,10 @@
     margin-top: 4px;
 }
 
+.contact-btn.facebook {
+    background: #1877F2;
+}
+
 /* Badges */
 .badge-heavy { background: #F44336; }
 .badge-medium { background: #FF9800; }
