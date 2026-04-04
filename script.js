@@ -401,39 +401,63 @@ async function loadRaids() {
     };
     
     for (const raid of scrapedRaids) {
-        const tier = raid.tier;
-        const name = raid.name;
-        const id = await getPokemonIdFromName(name);
-        
-        const raidObj = { 
-            name: name, 
-            tier: tier, 
-            id: id, 
-            isShiny: raid.canBeShiny, 
-            image: raid.image || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png`
-        };
-        
-        // Correct categorization
-        if (tier.includes('6-Star')) {
-            regularRaids.tier6.push(raidObj);
-        } else if (tier.includes('5-Star') && !tier.includes('Shadow')) {
-            regularRaids.tier5.push(raidObj);
-        } else if (tier.includes('4-Star') && !tier.includes('Shadow')) {
-            regularRaids.tier4.push(raidObj);
-        } else if (tier.includes('3-Star') && !tier.includes('Shadow')) {
-            regularRaids.tier3.push(raidObj);
-        } else if (tier.includes('2-Star') && !tier.includes('Shadow')) {
-            regularRaids.tier2.push(raidObj);
-        } else if (tier.includes('1-Star') && !tier.includes('Shadow')) {
-            regularRaids.tier1.push(raidObj);
-        } else if (tier.includes('Mega')) {
-            regularRaids.mega.push(raidObj);
-        } else if (tier.includes('Shadow') && tier.includes('5-Star')) {
+    const tier = raid.tier;
+    const name = raid.name;
+    const id = await getPokemonIdFromName(name);
+    
+    const raidObj = { 
+        name: name, 
+        tier: tier, 
+        id: id, 
+        isShiny: raid.canBeShiny, 
+        image: raid.image || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png`
+    };
+    
+    // Convert to lowercase for easier checking
+    const tierLower = tier.toLowerCase();
+    const nameLower = name.toLowerCase();
+    
+    // Check for Shadow FIRST (before star checks)
+    if (nameLower.includes('shadow') || tierLower.includes('shadow')) {
+        if (tierLower.includes('5-star') || tierLower.includes('legendary') || nameLower.includes('latias') || nameLower.includes('latios')) {
             regularRaids.shadow5.push(raidObj);
-        } else if (tier.includes('Shadow') && tier.includes('3-Star')) {
+        } else if (tierLower.includes('3-star')) {
             regularRaids.shadow3.push(raidObj);
-        } else if (tier.includes('Shadow') && tier.includes('1-Star')) {
+        } else if (tierLower.includes('1-star')) {
             regularRaids.shadow1.push(raidObj);
+        } else {
+            // Default shadow to appropriate tier based on name
+            if (nameLower.includes('latias') || nameLower.includes('latios') || nameLower.includes('mewtwo') || nameLower.includes('lugia')) {
+                regularRaids.shadow5.push(raidObj);
+            } else if (nameLower.includes('metagross') || nameLower.includes('salamence')) {
+                regularRaids.shadow3.push(raidObj);
+            } else {
+                regularRaids.shadow1.push(raidObj);
+            }
+        }
+    }
+    // Check for Mega
+    else if (tierLower.includes('mega')) {
+        regularRaids.mega.push(raidObj);
+    }
+    // Check for regular tiers (non-shadow)
+    else if (tierLower.includes('6-star')) {
+        regularRaids.tier6.push(raidObj);
+    }
+    else if (tierLower.includes('5-star')) {
+        regularRaids.tier5.push(raidObj);
+    }
+    else if (tierLower.includes('4-star')) {
+        regularRaids.tier4.push(raidObj);
+    }
+    else if (tierLower.includes('3-star')) {
+        regularRaids.tier3.push(raidObj);
+    }
+    else if (tierLower.includes('2-star')) {
+        regularRaids.tier2.push(raidObj);
+    }
+    else if (tierLower.includes('1-star')) {
+        regularRaids.tier1.push(raidObj);
         }
     }
     
