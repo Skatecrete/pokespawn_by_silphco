@@ -393,6 +393,12 @@ async function loadRaids() {
     }
     
     const { scrapedRaids, dynaRaids } = raidData;
+    console.log('=== ALL SCRAPED RAIDS ===');
+    for (const raid of scrapedRaids) {
+    if (raid.name.toLowerCase().includes('shadow')) {
+        console.log(`Shadow Raid: ${raid.name} | Tier: "${raid.tier}"`);
+    }
+}
     
     // Initialize all categories
     const regularRaids = {
