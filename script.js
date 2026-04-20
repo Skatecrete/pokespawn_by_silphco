@@ -659,7 +659,7 @@ function showCustomerDialog() {
     
     document.getElementById('modalTitle').textContent = 'Who are you?! Reveal Yourself!';
     document.getElementById('modalBody').innerHTML = `
-        <input type="text" id="customerName" placeholder="Your Name *" class="rsvp-input" value="${customerName}">
+        <input type="text" id="customerName" placeholder="Your First Name *" class="rsvp-input" value="${customerName}">
         <input type="text" id="customerIgn" placeholder="In-Game Name (PoGo Name) *" class="rsvp-input" value="${customerIgn}">
         
         <div style="margin-top: 12px; margin-bottom: 8px;">
