@@ -101,7 +101,7 @@ async function loadSpawns() {
         var spawnData = data.result || [];
         
         var pokemonList = [];
-        for (var i = 0; i < Math.min(spawnData.length, 200); i++) {
+        for (var i = 0; i < spawnData.length; i++) {
             var item = spawnData[i];
             var pokedexId = item[0];
             var spawnRate = item[2];
@@ -261,7 +261,7 @@ function displaySpawns() {
         html += '<div class="pokemon-info">';
         html += '<div class="pokemon-name">' + p.name + '<span class="spawn-badge ' + badgeClass + '">' + badgeText + '</span></div>';
         html += '<div class="pokemon-tags">' + tagsHtml + '</div>';
-        html += '<div class="pokemon-details">Spawn Rate: ' + p.spawnRate.toFixed(2) + '% | <span class="shiny-rate">' + p.shinyRate + '</span></div>';
+        html += '<div class="pokemon-details"><span class="spawn-rate">Spawn Rate: ' + p.spawnRate.toFixed(2) + '%</span> | <span class="shiny-rate">' + p.shinyRate + '</span></div>';
         html += '</div>';
         html += '<button class="order-btn" onclick="event.stopPropagation(); showSpawnOrderDialog(' + JSON.stringify(p).replace(/'/g, "&#39;") + ')">➕ Order</button>';
         html += '</div>';
