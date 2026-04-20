@@ -32,7 +32,6 @@
             <div class="tab-row">
                 <button class="tab-btn" data-tab="upcoming">🔮 UPCOMING</button>
                 <button class="tab-btn" data-tab="orders">📦 ORDERS</button>
-                <button class="tab-btn" data-tab="history">📜 HISTORY</button>
             </div>
         </div>
 
@@ -117,33 +116,15 @@
                     <textarea id="notesInput" rows="3" placeholder="Any other service ideas or questions please ask here! For example, if you want the 31k Coin order split between 2 accounts or want details on upcoming Go Fests, etc..."></textarea>
                 </div>
 
+                <!-- Contact Section with Admin Messenger Links -->
                 <div class="contact-section">
                     <h3>📱 Need Help?</h3>
-                    <div class="contact-buttons">
-                        <a href="https://www.facebook.com/share/g/18A1Q6CLfg/" target="_blank" class="contact-btn facebook">📘 Facebook Group</a>
-                        <a href="mailto:pokespawn@gmail.com" class="contact-btn email">📧 Email</a>
+                    <div class="admin-buttons">
+                        <a href="https://m.me/danstudz.skatecrete" target="_blank" class="admin-btn dan">💬 Dan (Skatecrete)</a>
+                        <a href="https://m.me/thomas.keelan.733" target="_blank" class="admin-btn thomas">💬 Thomas (RampageGamer)</a>
+                        <div class="admin-btn kingi disabled" onclick="showKingiMessage()">💬 Kingi (zEViLvSTON4z)</div>
                     </div>
-                    <p class="facebook-info">💡 Reach out to your admin through the <strong>Members</strong> tab in the Facebook group!</p>
-                </div>
-            </div>
-
-            <!-- History Tab -->
-            <div id="history" class="tab-content">
-                <div class="history-section">
-                    <div class="history-search">
-                        <input type="text" id="historyName" placeholder="Your Name *">
-                        <input type="text" id="historyIgn" placeholder="In-Game Name *">
-                        <button class="search-history-btn" onclick="loadCustomerHistory()">🔍 View My History</button>
-                    </div>
-                    <div id="historyOrders" class="history-orders" style="display:none">
-                        <div class="history-title">📦 My Orders</div>
-                        <div id="ordersHistoryList"></div>
-                    </div>
-                    <div id="historyRSVPs" class="history-rsvps" style="display:none">
-                        <div class="history-title">📅 My RSVPs</div>
-                        <div id="rsvpsHistoryList"></div>
-                    </div>
-                    <div id="historyEmpty" class="empty-history" style="display:none">No orders or RSVPs found</div>
+                    <p class="facebook-info">💡 Reach out to your admin through Facebook Messenger!</p>
                 </div>
             </div>
         </div>
