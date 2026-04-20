@@ -695,13 +695,48 @@ function selectAdminAndPay(admin) {
     
     var paymentHtml = '';
     if (admin === 'Dan') {
-        paymentHtml = '<div class="payment-option"><strong>💰 PayPal</strong><a href="https://paypal.me/danstudz" target="_blank" class="payment-link">Pay with PayPal</a><div class="disclaimer">⚠️ Please send with Friends and Family option</div></div>' +
-                       '<div class="payment-option"><strong>💚 CashApp</strong><a href="https://cash.app/$DanStudz" target="_blank" class="payment-link">Pay with CashApp</a></div>' +
-                       '<div class="payment-option"><strong>💙 Venmo</strong><a href="https://venmo.com/DanStudz" target="_blank" class="payment-link">Pay with Venmo</a></div>';
+        paymentHtml = `
+            <div class="payment-option">
+                <strong>💰 PayPal</strong>
+                <div class="copy-row">
+                    <span class="payment-username">@danstudz</span>
+                    <button class="copy-btn" onclick="copyToClipboard('@danstudz')">Copy</button>
+                </div>
+                <div class="disclaimer">⚠️ Please send with Friends and Family option</div>
+            </div>
+            <div class="payment-option">
+                <strong>💚 CashApp</strong>
+                <div class="copy-row">
+                    <span class="payment-username">$DanStudz</span>
+                    <button class="copy-btn" onclick="copyToClipboard('$DanStudz')">Copy</button>
+                </div>
+            </div>
+            <div class="payment-option">
+                <strong>💙 Venmo</strong>
+                <div class="copy-row">
+                    <span class="payment-username">@DanStudz</span>
+                    <button class="copy-btn" onclick="copyToClipboard('@DanStudz')">Copy</button>
+                </div>
+            </div>
+        `;
     } else if (admin === 'Thomas') {
-        paymentHtml = '<div class="payment-option"><strong>💰 PayPal</strong><a href="https://www.paypal.me/Thomas061298" target="_blank" class="payment-link">Pay with PayPal</a><div class="disclaimer">⚠️ Please send with Friends and Family option</div></div>';
+        paymentHtml = `
+            <div class="payment-option">
+                <strong>💰 PayPal</strong>
+                <div class="copy-row">
+                    <span class="payment-username">@Thomas061298</span>
+                    <button class="copy-btn" onclick="copyToClipboard('@Thomas061298')">Copy</button>
+                </div>
+                <div class="disclaimer">⚠️ Please send with Friends and Family option</div>
+            </div>
+        `;
     } else {
-        paymentHtml = '<div class="payment-option"><strong>⏳ Payment Options Coming Soon</strong><div class="disclaimer">Please contact Kingi directly for payment options</div></div>';
+        paymentHtml = `
+            <div class="payment-option">
+                <strong>⏳ Payment Options Coming Soon</strong>
+                <div class="disclaimer">Please contact Kingi directly for payment options</div>
+            </div>
+        `;
     }
     
     document.getElementById('modalTitle').textContent = 'Complete Order';
@@ -717,6 +752,11 @@ function selectAdminAndPay(admin) {
     `;
     document.getElementById('modalFooter').innerHTML = '<button class="cancel-btn" onclick="closeModal()">Cancel</button><button class="confirm-btn" onclick="submitOrder()">Submit Order</button>';
     document.getElementById('orderModal').style.display = 'flex';
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text);
+    showToast('Copied: ' + text);
 }
 
 async function submitOrder() {
