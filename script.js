@@ -9,14 +9,14 @@ let currentSearch = '';
 let currentDebutData = null;
 
 // Apps Script URL
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx9OcqWQQGFO2CT8UyWSiTGl5cyJ63p9BG1g1BXGf9eBlgiWZ1hcWQYt50E3dxX7KSx-A/exec';
+const SCRIPT_URL = 'https://cors-anywhere.herokuapp.com/https://script.google.com/macros/s/AKfycbx6i6Yn7ezXqwJKgZF3Mbq_MbgNeb4mQ8weT0Qipu0c9ASFRVK6l-HIdH83xFbJOeI4/exec';
 
 // Pricing cache
 let pricingCache = {};
 let coinPrices = { 5600: 24, 15500: 45, 31000: 85 };
 
 // ========== INITIALIZATION ==========
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     loadSpawns();
     loadRaids();
     loadEvents();
@@ -25,19 +25,30 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupTabListeners() {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tabId = btn.dataset.tab;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            btn.classList.add('active');
+    var btns = document.querySelectorAll('.tab-btn');
+    for (var i = 0; i < btns.length; i++) {
+        btns[i].addEventListener('click', function() {
+            var tabId = this.dataset.tab;
+            var allBtns = document.querySelectorAll('.tab-btn');
+            for (var j = 0; j < allBtns.length; j++) {
+                allBtns[j].classList.remove('active');
+            }
+            var allContents = document.querySelectorAll('.tab-content');
+            for (var k = 0; k < allContents.length; k++) {
+                allContents[k].classList.remove('active');
+            }
+            this.classList.add('active');
             document.getElementById(tabId).classList.add('active');
             
             if (tabId === 'spawns' && allPokemon.length === 0) loadSpawns();
             if (tabId === 'raids') loadRaids();
             if (tabId === 'current' || tabId === 'upcoming') loadEvents();
         });
-    });
+    }
+}
+
+function showKingiMessage() {
+    showToast("Kingi's messenger link coming soon!");
 }
 
 // ========== PRICING ==========
@@ -64,9 +75,9 @@ async function loadPricing() {
 }
 
 function updateCoinPriceDisplay() {
-    const price5600 = document.getElementById('coinPrice5600');
-    const price15500 = document.getElementById('coinPrice15500');
-    const price31000 = document.getElementById('coinPrice31000');
+    var price5600 = document.getElementById('coinPrice5600');
+    var price15500 = document.getElementById('coinPrice15500');
+    var price31000 = document.getElementById('coinPrice31000');
     if (price5600) price5600.textContent = coinPrices[5600];
     if (price15500) price15500.textContent = coinPrices[15500];
     if (price31000) price31000.textContent = coinPrices[31000];
@@ -74,24 +85,24 @@ function updateCoinPriceDisplay() {
 
 // ========== SPAWNS ==========
 async function loadSpawns() {
-    const container = document.getElementById('spawnsList');
+    var container = document.getElementById('spawnsList');
     if (!container) return;
     container.innerHTML = '<div class="loading">Loading spawns...</div>';
     
     try {
         const response = await fetch('https://shungo.app/api/shungo/data/spawns');
         const data = await response.json();
-        const spawnData = data.result || [];
+        var spawnData = data.result || [];
         
-        const pokemonList = [];
-        for (let i = 0; i < Math.min(spawnData.length, 200); i++) {
-            const item = spawnData[i];
-            const pokedexId = item[0];
-            const spawnRate = item[2];
-            const isShiny = item[3];
+        var pokemonList = [];
+        for (var i = 0; i < Math.min(spawnData.length, 200); i++) {
+            var item = spawnData[i];
+            var pokedexId = item[0];
+            var spawnRate = item[2];
+            var isShiny = item[3];
             
-            const name = await getPokemonName(pokedexId);
-            const isPermaboosted = [144,145,146,150,243,244,245,249,250,251,380,381,382,383,384,480,481,482,483,484,485,486,487,488,785,786,787,788,888,889,894,895].includes(pokedexId);
+            var name = await getPokemonName(pokedexId);
+            var isPermaboosted = [144,145,146,150,243,244,245,249,250,251,380,381,382,383,384,480,481,482,483,484,485,486,487,488,785,786,787,788,888,889,894,895].includes(pokedexId);
             
             pokemonList.push({
                 id: pokedexId,
@@ -104,7 +115,7 @@ async function loadSpawns() {
             });
         }
         
-        pokemonList.sort((a, b) => b.spawnRate - a.spawnRate);
+        pokemonList.sort(function(a, b) { return b.spawnRate - a.spawnRate; });
         allPokemon = pokemonList;
         displaySpawns();
     } catch (e) {
@@ -113,47 +124,58 @@ async function loadSpawns() {
 }
 
 function isRegionalPokemon(name) {
-    const regionals = ['Farfetch\'d', 'Kangaskhan', 'Mr. Mime', 'Tauros', 'Corsola', 'Heracross', 'Illumise', 'Lunatone', 'Relicanth', 'Seviper', 'Solrock', 'Torkoal', 'Tropius', 'Volbeat', 'Zangoose', 'Carnivine', 'Chatot', 'Pachirisu', 'Shellos', 'Maractus', 'Sigilyph', 'Hawlucha', 'Klefki', 'Comfey', 'Stonjourner'];
-    return regionals.some(r => name.includes(r));
+    var regionals = ['Farfetch\'d', 'Kangaskhan', 'Mr. Mime', 'Tauros', 'Corsola', 'Heracross', 'Illumise', 'Lunatone', 'Relicanth', 'Seviper', 'Solrock', 'Torkoal', 'Tropius', 'Volbeat', 'Zangoose', 'Carnivine', 'Chatot', 'Pachirisu', 'Shellos', 'Maractus', 'Sigilyph', 'Hawlucha', 'Klefki', 'Comfey', 'Stonjourner'];
+    for (var i = 0; i < regionals.length; i++) {
+        if (name.includes(regionals[i])) return true;
+    }
+    return false;
 }
 
 function isTopPvPPokemon(name) {
-    const pvpPokemon = ['Aegislash', 'Carbink', 'Giratina', 'Zygarde', 'Clodsire', 'Registeel', 'Azumarill', 'Lucario', 'Altaria', 'Cresselia', 'Forretress', 'Tentacruel', 'Moltres', 'Jellicent', 'Cobalion', 'Regidrago', 'Dialga', 'Metagross', 'Garchomp', 'Snorlax'];
-    return pvpPokemon.some(p => name.includes(p));
+    var pvpPokemon = ['Aegislash', 'Carbink', 'Giratina', 'Zygarde', 'Clodsire', 'Registeel', 'Azumarill', 'Lucario', 'Altaria', 'Cresselia', 'Forretress', 'Tentacruel', 'Moltres', 'Jellicent', 'Cobalion', 'Regidrago', 'Dialga', 'Metagross', 'Garchomp', 'Snorlax'];
+    for (var i = 0; i < pvpPokemon.length; i++) {
+        if (name.includes(pvpPokemon[i])) return true;
+    }
+    return false;
 }
 
 async function getPokemonName(id) {
     try {
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}/`);
+        const response = await fetch('https://pokeapi.co/api/v2/pokemon-species/' + id + '/');
         const data = await response.json();
-        const englishName = data.names.find(n => n.language.name === 'en');
-        return englishName ? englishName.name : `Pokemon #${id}`;
+        var names = data.names;
+        for (var i = 0; i < names.length; i++) {
+            if (names[i].language.name === 'en') {
+                return names[i].name;
+            }
+        }
+        return 'Pokemon #' + id;
     } catch {
-        return `Pokemon #${id}`;
+        return 'Pokemon #' + id;
     }
 }
 
 function displaySpawns() {
-    const container = document.getElementById('spawnsList');
+    var container = document.getElementById('spawnsList');
     if (!container) return;
     
-    let filtered = [...allPokemon];
+    var filtered = allPokemon.slice();
     
     if (currentSearch) {
-        filtered = filtered.filter(p => p.name.toLowerCase().includes(currentSearch));
+        filtered = filtered.filter(function(p) { return p.name.toLowerCase().includes(currentSearch); });
     }
     
     if (filters.shundo) {
-        filtered = filtered.filter(p => p.spawnRate >= 0.65 && p.isShiny);
+        filtered = filtered.filter(function(p) { return p.spawnRate >= 0.65 && p.isShiny; });
     }
     if (filters.shiny164) {
-        filtered = filtered.filter(p => p.isShiny && p.spawnRate >= 0.65);
+        filtered = filtered.filter(function(p) { return p.isShiny && p.spawnRate >= 0.65; });
     }
     if (filters.regional) {
-        filtered = filtered.filter(p => p.isRegional);
+        filtered = filtered.filter(function(p) { return p.isRegional; });
     }
     if (filters.pvp) {
-        filtered = filtered.filter(p => p.isTopPvP);
+        filtered = filtered.filter(function(p) { return p.isTopPvP; });
     }
     
     if (filtered.length === 0) {
@@ -161,60 +183,61 @@ function displaySpawns() {
         return;
     }
     
-    container.innerHTML = filtered.map(p => {
-        let badgeClass = '', badgeText = '';
+    var html = '';
+    for (var i = 0; i < filtered.length; i++) {
+        var p = filtered[i];
+        var badgeClass = '', badgeText = '';
         if (p.spawnRate >= 0.85) { badgeClass = 'badge-heavy'; badgeText = 'HEAVY'; }
         else if (p.spawnRate >= 0.65) { badgeClass = 'badge-medium'; badgeText = 'MEDIUM'; }
         else if (p.spawnRate >= 0.30) { badgeClass = 'badge-low'; badgeText = 'LOW'; }
         else { badgeClass = 'badge-minimal'; badgeText = 'MINIMAL'; }
         
-        return `
-            <div class="pokemon-card" onclick='showSpawnOrderDialog(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
-                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${p.id}.png" 
-                     onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png'">
-                <div class="pokemon-info">
-                    <div class="pokemon-name">
-                        ${p.name}
-                        <span class="spawn-badge ${badgeClass}">${badgeText}</span>
-                        ${p.isRegional ? '<span style="background:#2196F3;font-size:10px;padding:2px 6px;border-radius:12px;margin-left:4px;">🌍 Regional</span>' : ''}
-                        ${p.isTopPvP ? '<span style="background:#F44336;font-size:10px;padding:2px 6px;border-radius:12px;margin-left:4px;">🏆 PvP</span>' : ''}
-                    </div>
-                    <div class="pokemon-details">
-                        Rate: ${p.spawnRate.toFixed(2)}% | 
-                        <span class="shiny-rate">${p.shinyRate}</span>
-                    </div>
-                </div>
-                <button class="order-btn" onclick="event.stopPropagation(); showSpawnOrderDialog(${JSON.stringify(p).replace(/'/g, "&#39;")})">➕ Order</button>
-            </div>
-        `;
-    }).join('');
+        html += '<div class="pokemon-card" onclick=\'showSpawnOrderDialog(' + JSON.stringify(p).replace(/'/g, "&#39;") + ')\'>';
+        html += '<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + p.id + '.png" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + p.id + '.png\'">';
+        html += '<div class="pokemon-info">';
+        html += '<div class="pokemon-name">' + p.name;
+        html += '<span class="spawn-badge ' + badgeClass + '">' + badgeText + '</span>';
+        if (p.isRegional) html += '<span style="background:#2196F3;font-size:10px;padding:2px 6px;border-radius:12px;margin-left:4px;">🌍 Regional</span>';
+        if (p.isTopPvP) html += '<span style="background:#F44336;font-size:10px;padding:2px 6px;border-radius:12px;margin-left:4px;">🏆 PvP</span>';
+        html += '</div>';
+        html += '<div class="pokemon-details">Rate: ' + p.spawnRate.toFixed(2) + '% | <span class="shiny-rate">' + p.shinyRate + '</span></div>';
+        html += '</div>';
+        html += '<button class="order-btn" onclick="event.stopPropagation(); showSpawnOrderDialog(' + JSON.stringify(p).replace(/'/g, "&#39;") + ')">➕ Order</button>';
+        html += '</div>';
+    }
+    container.innerHTML = html;
 }
 
 function filterSpawns() {
-    currentSearch = document.getElementById('spawnSearch')?.value.toLowerCase() || '';
+    var searchInput = document.getElementById('spawnSearch');
+    currentSearch = searchInput ? searchInput.value.toLowerCase() : '';
     displaySpawns();
 }
 
 function toggleFilter(filter) {
     filters[filter] = !filters[filter];
-    const btn = event.target;
-    btn.classList.toggle('active');
+    var btn = event.target;
+    if (filters[filter]) {
+        btn.classList.add('active');
+    } else {
+        btn.classList.remove('active');
+    }
     displaySpawns();
 }
 
 // ========== SPAWN ORDER DIALOG ==========
-let currentSpawnPokemon = null;
-let spawnQuantities = { shundo: 0, hundo: 0, shiny: 0 };
+var currentSpawnPokemon = null;
+var spawnQuantities = { shundo: 0, hundo: 0, shiny: 0 };
 
 function showSpawnOrderDialog(pokemon) {
     currentSpawnPokemon = pokemon;
     spawnQuantities = { shundo: 0, hundo: 0, shiny: 0 };
     
-    const shundoPrice = pricingCache['Spawn_Shundo'] || 5;
-    const hundoPrice = pricingCache['Spawn_Hundo'] || 3;
-    const shinyPrice = pricingCache['Spawn_Shiny'] || 2;
+    var shundoPrice = pricingCache['Spawn_Shundo'] || 5;
+    var hundoPrice = pricingCache['Spawn_Hundo'] || 3;
+    var shinyPrice = pricingCache['Spawn_Shiny'] || 2;
     
-    document.getElementById('modalTitle').textContent = `Order ${pokemon.name}`;
+    document.getElementById('modalTitle').textContent = 'Order ' + pokemon.name;
     document.getElementById('modalBody').innerHTML = `
         <div class="order-stats">
             <div>Spawn Rate: ${pokemon.spawnRate.toFixed(2)}%</div>
@@ -253,30 +276,29 @@ function showSpawnOrderDialog(pokemon) {
             </div>
         </div>
     `;
-    document.getElementById('modalFooter').innerHTML = `
-        <button class="cancel-btn" onclick="closeModal()">Cancel</button>
-        <button class="confirm-btn" onclick="addSpawnOrderToCart()">Add to Cart</button>
-    `;
+    document.getElementById('modalFooter').innerHTML = '<button class="cancel-btn" onclick="closeModal()">Cancel</button><button class="confirm-btn" onclick="addSpawnOrderToCart()">Add to Cart</button>';
     document.getElementById('orderModal').style.display = 'flex';
 }
 
 function updateSpawnQty(type, delta) {
-    const newQty = Math.max(0, spawnQuantities[type] + delta);
+    var newQty = Math.max(0, spawnQuantities[type] + delta);
     spawnQuantities[type] = newQty;
     
-    const priceMap = { shundo: pricingCache['Spawn_Shundo'] || 5, hundo: pricingCache['Spawn_Hundo'] || 3, shiny: pricingCache['Spawn_Shiny'] || 2 };
+    var priceMap = { shundo: pricingCache['Spawn_Shundo'] || 5, hundo: pricingCache['Spawn_Hundo'] || 3, shiny: pricingCache['Spawn_Shiny'] || 2 };
     
-    const qtyElem = document.getElementById(`${type}Qty`);
-    const priceElem = document.getElementById(`${type}Price`);
+    var qtyElem = document.getElementById(type + 'Qty');
+    var priceElem = document.getElementById(type + 'Price');
     if (qtyElem) qtyElem.textContent = newQty;
     if (priceElem) {
-        const price = newQty * priceMap[type];
-        priceElem.textContent = `$${price.toFixed(2)}`;
+        var price = newQty * priceMap[type];
+        priceElem.textContent = '$' + price.toFixed(2);
     }
 }
 
 function addSpawnOrderToCart() {
-    const { shundo, hundo, shiny } = spawnQuantities;
+    var shundo = spawnQuantities.shundo;
+    var hundo = spawnQuantities.hundo;
+    var shiny = spawnQuantities.shiny;
     
     if (shundo > 0) {
         addToCart({ type: 'shundo', pokemonName: currentSpawnPokemon.name, quantity: shundo, price: shundo * (pricingCache['Spawn_Shundo'] || 5) });
@@ -294,29 +316,28 @@ function addSpawnOrderToCart() {
 
 // ========== RAIDS ==========
 async function loadRaids() {
-    const container = document.getElementById('raidsList');
+    var container = document.getElementById('raidsList');
     if (!container) return;
     container.innerHTML = '<div class="loading">Loading raids...</div>';
     
     try {
-        const [scrapedResponse, dynaResponse] = await Promise.all([
-            fetch('https://raw.githubusercontent.com/bigfoott/ScrapedDuck/data/raids.min.json'),
-            fetch('https://raw.githubusercontent.com/Skatecrete/pogo-raid-data/main/current_raids.json')
-        ]);
+        var scrapedResponse = await fetch('https://raw.githubusercontent.com/bigfoott/ScrapedDuck/data/raids.min.json');
+        var dynaResponse = await fetch('https://raw.githubusercontent.com/Skatecrete/pogo-raid-data/main/current_raids.json');
         
-        const scrapedRaids = await scrapedResponse.json();
-        const dynaRaids = await dynaResponse.json();
+        var scrapedRaids = await scrapedResponse.json();
+        var dynaRaids = await dynaResponse.json();
         
-        const regularRaids = { tier6: [], tier5: [], tier4: [], tier3: [], tier2: [], tier1: [], mega: [], shadow5: [], shadow3: [], shadow1: [] };
+        var regularRaids = { tier6: [], tier5: [], tier4: [], tier3: [], tier2: [], tier1: [], mega: [], shadow5: [], shadow3: [], shadow1: [] };
         
-        for (const raid of scrapedRaids) {
-            const tier = raid.tier;
-            const name = raid.name;
-            const id = await getPokemonIdFromName(name);
-            const raidObj = { name, tier, id, isShiny: raid.canBeShiny, image: raid.image || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png` };
+        for (var i = 0; i < scrapedRaids.length; i++) {
+            var raid = scrapedRaids[i];
+            var tier = raid.tier;
+            var name = raid.name;
+            var id = await getPokemonIdFromName(name);
+            var raidObj = { name: name, tier: tier, id: id, isShiny: raid.canBeShiny, image: raid.image || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + id + '.png' };
             
-            const tierLower = tier.toLowerCase();
-            const nameLower = name.toLowerCase();
+            var tierLower = tier.toLowerCase();
+            var nameLower = name.toLowerCase();
             
             if (nameLower.includes('shadow') || tierLower.includes('shadow')) {
                 if (tierLower.includes('5-star') || tierLower.includes('legendary') || nameLower.includes('latias') || nameLower.includes('latios')) {
@@ -343,20 +364,21 @@ async function loadRaids() {
             }
         }
         
-        const dynamaxRaids = [];
-        const tierMapping = {
+        var dynamaxRaids = [];
+        var tierMapping = {
             'dynamax_tier1': '⚡ DYNAMAX TIER 1', 'dynamax_tier2': '⚡⚡ DYNAMAX TIER 2', 'dynamax_tier3': '⚡⚡⚡ DYNAMAX TIER 3',
             'dynamax_tier4': '⚡⚡⚡⚡ DYNAMAX TIER 4', 'dynamax_tier5': '⚡⚡⚡⚡⚡ DYNAMAX TIER 5', 'gigantamax': '💥 GIGANTAMAX'
         };
         
-        const invalidNames = ['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'flying', 'ghost', 'grass', 'ground', 'ice', 'normal', 'poison', 'psychic', 'rock', 'steel', 'water', 'Search...'];
+        var invalidNames = ['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'flying', 'ghost', 'grass', 'ground', 'ice', 'normal', 'poison', 'psychic', 'rock', 'steel', 'water', 'Search...'];
         
-        for (const [key, title] of Object.entries(tierMapping)) {
+        for (var key in tierMapping) {
             if (dynaRaids[key] && dynaRaids[key].length) {
-                for (const name of dynaRaids[key]) {
-                    if (!name || name.length < 2 || invalidNames.includes(name) || invalidNames.includes(name.toLowerCase())) continue;
-                    const id = await getPokemonIdFromName(name);
-                    dynamaxRaids.push({ name, tier: title, id, isShiny: true, image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png` });
+                for (var j = 0; j < dynaRaids[key].length; j++) {
+                    var raidName = dynaRaids[key][j];
+                    if (!raidName || raidName.length < 2 || invalidNames.includes(raidName) || invalidNames.includes(raidName.toLowerCase())) continue;
+                    var raidId = await getPokemonIdFromName(raidName);
+                    dynamaxRaids.push({ name: raidName, tier: tierMapping[key], id: raidId, isShiny: true, image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png' });
                 }
             }
         }
@@ -368,11 +390,11 @@ async function loadRaids() {
 }
 
 async function getPokemonIdFromName(name) {
-    const cleanName = name.replace('Shadow ', '').replace('Mega ', '').replace('D-Max ', '').trim().toLowerCase();
-    const simpleMap = { 'dratini': 147, 'gligar': 207, 'cacnea': 331, 'joltik': 595, 'lapras': 131, 'stantler': 234, 'latios': 381, 'latias': 380 };
+    var cleanName = name.replace('Shadow ', '').replace('Mega ', '').replace('D-Max ', '').trim().toLowerCase();
+    var simpleMap = { 'dratini': 147, 'gligar': 207, 'cacnea': 331, 'joltik': 595, 'lapras': 131, 'stantler': 234, 'latios': 381, 'latias': 380 };
     if (simpleMap[cleanName]) return simpleMap[cleanName];
     try {
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${cleanName}`);
+        const response = await fetch('https://pokeapi.co/api/v2/pokemon/' + cleanName);
         const data = await response.json();
         return data.id;
     } catch {
@@ -381,10 +403,10 @@ async function getPokemonIdFromName(name) {
 }
 
 function displayRaids(regularRaids, dynamaxRaids) {
-    const container = document.getElementById('raidsList');
+    var container = document.getElementById('raidsList');
     if (!container) return;
     
-    const categoryOrder = [
+    var categoryOrder = [
         { key: 'tier6', title: '⭐⭐⭐⭐⭐⭐ 6-STAR RAIDS' }, { key: 'tier5', title: '⭐⭐⭐⭐⭐ 5-STAR RAIDS' },
         { key: 'tier4', title: '⭐⭐⭐⭐ 4-STAR RAIDS' }, { key: 'tier3', title: '⭐⭐⭐ 3-STAR RAIDS' },
         { key: 'tier2', title: '⭐⭐ 2-STAR RAIDS' }, { key: 'tier1', title: '⭐ 1-STAR RAIDS' },
@@ -392,50 +414,52 @@ function displayRaids(regularRaids, dynamaxRaids) {
         { key: 'shadow3', title: '🌑 SHADOW 3-STAR RAIDS' }, { key: 'shadow1', title: '🌑 SHADOW 1-STAR RAIDS' }
     ];
     
-    const dynaOrder = [
+    var dynaOrder = [
         { key: 'dynamax_tier5', title: '⚡⚡⚡⚡⚡ DYNAMAX TIER 5' }, { key: 'dynamax_tier4', title: '⚡⚡⚡⚡ DYNAMAX TIER 4' },
         { key: 'dynamax_tier3', title: '⚡⚡⚡ DYNAMAX TIER 3' }, { key: 'dynamax_tier2', title: '⚡⚡ DYNAMAX TIER 2' },
         { key: 'dynamax_tier1', title: '⚡ DYNAMAX TIER 1' }, { key: 'gigantamax', title: '💥 GIGANTAMAX' }
     ];
     
-    let html = '';
+    var html = '';
     
-    for (const cat of categoryOrder) {
+    for (var c = 0; c < categoryOrder.length; c++) {
+        var cat = categoryOrder[c];
         if (regularRaids[cat.key] && regularRaids[cat.key].length) {
-            html += `<div class="raid-header"><h4>${cat.title}</h4></div><div class="raids-grid">`;
-            html += regularRaids[cat.key].map(r => `
-                <div class="raid-card" onclick='showRaidOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'>
-                    <div class="raid-image-container">
-                        ${r.name.includes('Shadow') ? '<div class="shadow-underlay"></div>' : ''}
-                        ${r.tier.includes('Dynamax') || r.tier.includes('Gigantamax') ? '<div class="dynamax-underlay"></div>' : ''}
-                        <img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'">
-                    </div>
-                    <span>${r.name}${r.isShiny ? ' ✨' : ''}</span>
-                </div>
-            `).join('');
-            html += `</div>`;
+            html += '<div class="raid-header"><h4>' + cat.title + '</h4></div><div class="raids-grid">';
+            for (var r = 0; r < regularRaids[cat.key].length; r++) {
+                var raid = regularRaids[cat.key][r];
+                html += '<div class="raid-card" onclick=\'showRaidOrderDialog(' + JSON.stringify(raid).replace(/'/g, "&#39;") + ')\'>';
+                html += '<div class="raid-image-container">';
+                if (raid.name.includes('Shadow')) html += '<div class="shadow-underlay"></div>';
+                if (raid.tier.includes('Dynamax') || raid.tier.includes('Gigantamax')) html += '<div class="dynamax-underlay"></div>';
+                html += '<img src="' + raid.image + '" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png\'">';
+                html += '</div>';
+                html += '<span>' + raid.name + (raid.isShiny ? ' ✨' : '') + '</span>';
+                html += '</div>';
+            }
+            html += '</div>';
         }
     }
     
-    const dynaByTier = {};
-    for (const raid of dynamaxRaids) {
+    var dynaByTier = {};
+    for (var d = 0; d < dynamaxRaids.length; d++) {
+        var raid = dynamaxRaids[d];
         if (!dynaByTier[raid.tier]) dynaByTier[raid.tier] = [];
         dynaByTier[raid.tier].push(raid);
     }
     
-    for (const dyna of dynaOrder) {
+    for (var dt = 0; dt < dynaOrder.length; dt++) {
+        var dyna = dynaOrder[dt];
         if (dynaByTier[dyna.title] && dynaByTier[dyna.title].length) {
-            html += `<div class="raid-header"><h4>${dyna.title}</h4></div><div class="raids-grid">`;
-            html += dynaByTier[dyna.title].map(r => `
-                <div class="raid-card" onclick='showDynamaxOrderDialog(${JSON.stringify(r).replace(/'/g, "&#39;")})'>
-                    <div class="raid-image-container">
-                        <div class="dynamax-underlay"></div>
-                        <img src="${r.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'">
-                    </div>
-                    <span>${r.name}</span>
-                </div>
-            `).join('');
-            html += `</div>`;
+            html += '<div class="raid-header"><h4>' + dyna.title + '</h4></div><div class="raids-grid">';
+            for (var dr = 0; dr < dynaByTier[dyna.title].length; dr++) {
+                var raid = dynaByTier[dyna.title][dr];
+                html += '<div class="raid-card" onclick=\'showDynamaxOrderDialog(' + JSON.stringify(raid).replace(/'/g, "&#39;") + ')\'>';
+                html += '<div class="raid-image-container"><div class="dynamax-underlay"></div><img src="' + raid.image + '" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png\'"></div>';
+                html += '<span>' + raid.name + '</span>';
+                html += '</div>';
+            }
+            html += '</div>';
         }
     }
     
@@ -443,15 +467,15 @@ function displayRaids(regularRaids, dynamaxRaids) {
 }
 
 // ========== RAID ORDER DIALOGS ==========
-let selectedRaidPack = { quantity: 0, price: 0 };
-let currentRaid = null;
-let dynamaxQuantity = 0;
+var selectedRaidPack = { quantity: 0, price: 0 };
+var currentRaid = null;
+var dynamaxQuantity = 0;
 
 function showRaidOrderDialog(raid) {
     currentRaid = raid;
     selectedRaidPack = { quantity: 0, price: 0 };
     
-    document.getElementById('modalTitle').textContent = `Order ${raid.name} Raids`;
+    document.getElementById('modalTitle').textContent = 'Order ' + raid.name + ' Raids';
     document.getElementById('modalBody').innerHTML = `
         <div class="order-stats"><div>Tier: ${raid.tier}</div><div>Shiny Available: ${raid.isShiny ? '✨ Yes' : '❌ No'}</div></div>
         <div class="order-section">
@@ -464,13 +488,13 @@ function showRaidOrderDialog(raid) {
             <div id="raidSelectedInfo" style="margin-top:12px;text-align:center"></div>
         </div>
     `;
-    document.getElementById('modalFooter').innerHTML = `<button class="cancel-btn" onclick="closeModal()">Cancel</button><button class="confirm-btn" onclick="addRaidToCart()">Add to Cart</button>`;
+    document.getElementById('modalFooter').innerHTML = '<button class="cancel-btn" onclick="closeModal()">Cancel</button><button class="confirm-btn" onclick="addRaidToCart()">Add to Cart</button>';
     document.getElementById('orderModal').style.display = 'flex';
 }
 
 function selectRaidPack(quantity, price) {
-    selectedRaidPack = { quantity, price };
-    document.getElementById('raidSelectedInfo').innerHTML = `Selected: ${quantity} Raids - $${price}`;
+    selectedRaidPack = { quantity: quantity, price: price };
+    document.getElementById('raidSelectedInfo').innerHTML = 'Selected: ' + quantity + ' Raids - $' + price;
 }
 
 function addRaidToCart() {
@@ -483,7 +507,7 @@ function showDynamaxOrderDialog(raid) {
     currentRaid = raid;
     dynamaxQuantity = 0;
     
-    document.getElementById('modalTitle').textContent = `Order ${raid.name}`;
+    document.getElementById('modalTitle').textContent = 'Order ' + raid.name;
     document.getElementById('modalBody').innerHTML = `
         <div class="order-stats"><div>Tier: ${raid.tier}</div></div>
         <div class="order-section">
@@ -496,31 +520,37 @@ function showDynamaxOrderDialog(raid) {
             </div>
         </div>
     `;
-    document.getElementById('modalFooter').innerHTML = `<button class="cancel-btn" onclick="closeModal()">Cancel</button><button class="confirm-btn" onclick="addDynamaxToCart()">Add to Cart</button>`;
+    document.getElementById('modalFooter').innerHTML = '<button class="cancel-btn" onclick="closeModal()">Cancel</button><button class="confirm-btn" onclick="addDynamaxToCart()">Add to Cart</button>';
     document.getElementById('orderModal').style.display = 'flex';
 }
 
 function updateDynamaxQty(delta) {
     dynamaxQuantity = Math.max(0, dynamaxQuantity + delta);
-    const qtyElem = document.getElementById('dynamaxQty');
-    const priceElem = document.getElementById('dynamaxPrice');
+    var qtyElem = document.getElementById('dynamaxQty');
+    var priceElem = document.getElementById('dynamaxPrice');
     if (qtyElem) qtyElem.textContent = dynamaxQuantity;
     if (priceElem) {
-        const price = Math.floor(dynamaxQuantity / 4) * (pricingCache['Raid_Dynamax_4'] || 10) + (dynamaxQuantity % 4) * (pricingCache['Raid_Dynamax_Single'] || 2.5);
-        priceElem.textContent = `$${price.toFixed(2)}`;
+        var price = Math.floor(dynamaxQuantity / 4) * (pricingCache['Raid_Dynamax_4'] || 10) + (dynamaxQuantity % 4) * (pricingCache['Raid_Dynamax_Single'] || 2.5);
+        priceElem.textContent = '$' + price.toFixed(2);
     }
 }
 
 function addDynamaxToCart() {
     if (!dynamaxQuantity) { showToast('Please select a quantity'); return; }
-    const price = Math.floor(dynamaxQuantity / 4) * (pricingCache['Raid_Dynamax_4'] || 10) + (dynamaxQuantity % 4) * (pricingCache['Raid_Dynamax_Single'] || 2.5);
+    var price = Math.floor(dynamaxQuantity / 4) * (pricingCache['Raid_Dynamax_4'] || 10) + (dynamaxQuantity % 4) * (pricingCache['Raid_Dynamax_Single'] || 2.5);
     addToCart({ type: 'dynamax', pokemonName: currentRaid.name, raidTier: currentRaid.tier, quantity: dynamaxQuantity, price: price });
     closeModal();
 }
 
 // ========== CART FUNCTIONS ==========
 function addToCart(item) {
-    const existingIndex = cartItems.findIndex(i => i.type === item.type && i.pokemonName === item.pokemonName && i.raidTier === item.raidTier);
+    var existingIndex = -1;
+    for (var i = 0; i < cartItems.length; i++) {
+        if (cartItems[i].type === item.type && cartItems[i].pokemonName === item.pokemonName && cartItems[i].raidTier === item.raidTier) {
+            existingIndex = i;
+            break;
+        }
+    }
     if (existingIndex >= 0) {
         cartItems[existingIndex].quantity += item.quantity;
         cartItems[existingIndex].price = calculateItemPrice(cartItems[existingIndex]);
@@ -528,7 +558,7 @@ function addToCart(item) {
         cartItems.push(item);
     }
     updateCartDisplay();
-    showToast(`Added ${item.quantity}x ${item.pokemonName} to cart`);
+    showToast('Added ' + item.quantity + 'x ' + item.pokemonName + ' to cart');
 }
 
 function calculateItemPrice(item) {
@@ -542,20 +572,27 @@ function calculateItemPrice(item) {
 }
 
 function getCartTotal() {
-    return cartItems.reduce((sum, item) => sum + (item.price || calculateItemPrice(item)), 0);
+    var total = 0;
+    for (var i = 0; i < cartItems.length; i++) {
+        total += (cartItems[i].price || calculateItemPrice(cartItems[i]));
+    }
+    return total;
 }
 
 function updateCartDisplay() {
-    const cartContainer = document.getElementById('cartItems');
-    const cartTotal = document.getElementById('cartTotal');
-    const cartCount = document.getElementById('cartCount');
-    const emptyCartMsg = document.getElementById('emptyCartMsg');
+    var cartContainer = document.getElementById('cartItems');
+    var cartTotalElem = document.getElementById('cartTotal');
+    var cartCountElem = document.getElementById('cartCount');
+    var emptyCartMsg = document.getElementById('emptyCartMsg');
     
-    const total = getCartTotal();
-    const itemCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
+    var total = getCartTotal();
+    var itemCount = 0;
+    for (var i = 0; i < cartItems.length; i++) {
+        itemCount += cartItems[i].quantity;
+    }
     
-    if (cartCount) cartCount.textContent = `${itemCount} items`;
-    if (cartTotal) cartTotal.textContent = total.toFixed(2);
+    if (cartCountElem) cartCountElem.textContent = itemCount + ' items';
+    if (cartTotalElem) cartTotalElem.textContent = total.toFixed(2);
     
     if (!cartItems.length) {
         if (cartContainer) cartContainer.innerHTML = '';
@@ -566,20 +603,22 @@ function updateCartDisplay() {
     if (emptyCartMsg) emptyCartMsg.style.display = 'none';
     
     if (cartContainer) {
-        cartContainer.innerHTML = cartItems.map((item, idx) => `
-            <div class="cart-item">
-                <div class="cart-item-info">
-                    <div class="cart-item-name">${item.pokemonName} ${item.raidTier ? `(${item.raidTier})` : ''}</div>
-                    <div class="cart-item-price">$${(item.price || calculateItemPrice(item)).toFixed(2)}</div>
-                </div>
-                <div class="cart-item-controls">
-                    <button class="qty-btn" onclick="updateCartQuantity(${idx}, ${item.quantity - 1})">-</button>
-                    <span style="min-width:30px;text-align:center">${item.quantity}</span>
-                    <button class="qty-btn" onclick="updateCartQuantity(${idx}, ${item.quantity + 1})">+</button>
-                    <button class="delete-btn" onclick="removeFromCart(${idx})">🗑️</button>
-                </div>
-            </div>
-        `).join('');
+        var html = '';
+        for (var j = 0; j < cartItems.length; j++) {
+            var item = cartItems[j];
+            html += '<div class="cart-item">';
+            html += '<div class="cart-item-info">';
+            html += '<div class="cart-item-name">' + item.pokemonName + (item.raidTier ? ' (' + item.raidTier + ')' : '') + '</div>';
+            html += '<div class="cart-item-price">$' + (item.price || calculateItemPrice(item)).toFixed(2) + '</div>';
+            html += '</div>';
+            html += '<div class="cart-item-controls">';
+            html += '<button class="qty-btn" onclick="updateCartQuantity(' + j + ', ' + (item.quantity - 1) + ')">-</button>';
+            html += '<span style="min-width:30px;text-align:center">' + item.quantity + '</span>';
+            html += '<button class="qty-btn" onclick="updateCartQuantity(' + j + ', ' + (item.quantity + 1) + ')">+</button>';
+            html += '<button class="delete-btn" onclick="removeFromCart(' + j + ')">🗑️</button>';
+            html += '</div></div>';
+        }
+        cartContainer.innerHTML = html;
     }
 }
 
@@ -604,8 +643,8 @@ function clearCart() {
 }
 
 function addCoinToCart(amount) {
-    const price = coinPrices[amount];
-    addToCart({ type: 'coins', pokemonName: `${amount} Coins`, quantity: 1, price: price, coinAmount: amount });
+    var price = coinPrices[amount];
+    addToCart({ type: 'coins', pokemonName: amount + ' Coins', quantity: 1, price: price, coinAmount: amount });
 }
 
 // ========== CHECKOUT ==========
@@ -616,13 +655,13 @@ function showCustomerDialog() {
         <input type="text" id="customerIgn" placeholder="In-Game Name (PoGo Name) *" class="rsvp-input" value="${customerIgn}">
         <div class="disclaimer">*Timed Events cannot have a predetermined time slot</div>
     `;
-    document.getElementById('modalFooter').innerHTML = `<button class="cancel-btn" onclick="closeModal()">Cancel</button><button class="confirm-btn" onclick="saveCustomerInfo()">Save</button>`;
+    document.getElementById('modalFooter').innerHTML = '<button class="cancel-btn" onclick="closeModal()">Cancel</button><button class="confirm-btn" onclick="saveCustomerInfo()">Save</button>';
     document.getElementById('orderModal').style.display = 'flex';
 }
 
 function saveCustomerInfo() {
-    const name = document.getElementById('customerName')?.value.trim();
-    const ign = document.getElementById('customerIgn')?.value.trim();
+    var name = document.getElementById('customerName')?.value.trim();
+    var ign = document.getElementById('customerIgn')?.value.trim();
     if (!name || !ign) { showToast('Please enter both name and in-game name'); return; }
     customerName = name;
     customerIgn = ign;
@@ -645,18 +684,18 @@ function showAdminSelection() {
 
 function selectAdminAndPay(admin) {
     selectedAdmin = admin;
-    const total = getCartTotal();
-    const notes = document.getElementById('notesInput')?.value || '';
+    var total = getCartTotal();
+    var notes = document.getElementById('notesInput')?.value || '';
     
-    let paymentHtml = '';
+    var paymentHtml = '';
     if (admin === 'Dan') {
-        paymentHtml = `<div class="payment-option"><strong>💰 PayPal</strong><a href="https://paypal.me/danstudz" target="_blank" class="payment-link">Pay with PayPal</a><div class="disclaimer">⚠️ Please send with Friends and Family option</div></div>
-                       <div class="payment-option"><strong>💚 CashApp</strong><a href="https://cash.app/\$DanStudz" target="_blank" class="payment-link">Pay with CashApp</a></div>
-                       <div class="payment-option"><strong>💙 Venmo</strong><a href="https://venmo.com/DanStudz" target="_blank" class="payment-link">Pay with Venmo</a></div>`;
+        paymentHtml = '<div class="payment-option"><strong>💰 PayPal</strong><a href="https://paypal.me/danstudz" target="_blank" class="payment-link">Pay with PayPal</a><div class="disclaimer">⚠️ Please send with Friends and Family option</div></div>' +
+                       '<div class="payment-option"><strong>💚 CashApp</strong><a href="https://cash.app/$DanStudz" target="_blank" class="payment-link">Pay with CashApp</a></div>' +
+                       '<div class="payment-option"><strong>💙 Venmo</strong><a href="https://venmo.com/DanStudz" target="_blank" class="payment-link">Pay with Venmo</a></div>';
     } else if (admin === 'Thomas') {
-        paymentHtml = `<div class="payment-option"><strong>💰 PayPal</strong><a href="https://www.paypal.me/Thomas061298" target="_blank" class="payment-link">Pay with PayPal</a><div class="disclaimer">⚠️ Please send with Friends and Family option</div></div>`;
+        paymentHtml = '<div class="payment-option"><strong>💰 PayPal</strong><a href="https://www.paypal.me/Thomas061298" target="_blank" class="payment-link">Pay with PayPal</a><div class="disclaimer">⚠️ Please send with Friends and Family option</div></div>';
     } else {
-        paymentHtml = `<div class="payment-option"><strong>⏳ Payment Options Coming Soon</strong><div class="disclaimer">Please contact Kingi directly for payment options</div></div>`;
+        paymentHtml = '<div class="payment-option"><strong>⏳ Payment Options Coming Soon</strong><div class="disclaimer">Please contact Kingi directly for payment options</div></div>';
     }
     
     document.getElementById('modalTitle').textContent = 'Complete Order';
@@ -666,11 +705,11 @@ function selectAdminAndPay(admin) {
             <strong>Admin:</strong> ${admin}<br>
             <strong>Total:</strong> $${total.toFixed(2)}
         </div>
-        ${notes ? `<div class="order-section"><div class="section-title">📝 Notes</div><div>${notes}</div></div>` : ''}
+        ${notes ? '<div class="order-section"><div class="section-title">📝 Notes</div><div>' + notes + '</div></div>' : ''}
         ${paymentHtml}
         <div class="disclaimer">Once payment is received, your order will be placed in queue 🧙</div>
     `;
-    document.getElementById('modalFooter').innerHTML = `<button class="cancel-btn" onclick="closeModal()">Cancel</button><button class="confirm-btn" onclick="submitOrder()">Submit Order</button>`;
+    document.getElementById('modalFooter').innerHTML = '<button class="cancel-btn" onclick="closeModal()">Cancel</button><button class="confirm-btn" onclick="submitOrder()">Submit Order</button>';
     document.getElementById('orderModal').style.display = 'flex';
 }
 
@@ -682,23 +721,25 @@ async function submitOrder() {
     
     showLoading('Submitting order...');
     
-    const notes = document.getElementById('notesInput')?.value || '';
-    const fullCustomerName = `${customerName} (${customerIgn})`;
+    var notes = document.getElementById('notesInput')?.value || '';
+    var fullCustomerName = customerName + ' (' + customerIgn + ')';
     
-    const orderData = {
+    var orderData = {
         type: 'submitOrder',
         customerName: fullCustomerName,
         otherRequests: notes,
         paymentMethod: 'Web Order',
         assignedAdmin: selectedAdmin,
-        items: cartItems.map(item => ({
-            type: item.type,
-            pokemonName: item.pokemonName,
-            quantity: item.quantity,
-            price: item.price || calculateItemPrice(item),
-            raidTier: item.raidTier,
-            coinAmount: item.coinAmount
-        }))
+        items: cartItems.map(function(item) {
+            return {
+                type: item.type,
+                pokemonName: item.pokemonName,
+                quantity: item.quantity,
+                price: item.price || calculateItemPrice(item),
+                raidTier: item.raidTier,
+                coinAmount: item.coinAmount
+            };
+        })
     };
     
     try {
@@ -724,20 +765,21 @@ async function submitOrder() {
     }
 }
 
-// ========== EVENTS WITH POKEMON IMAGES ==========
+// ========== EVENTS ==========
 async function loadEvents() {
     try {
         const response = await fetch('https://leekduck.com/feeds/events.json');
-        const events = await response.json();
-        const now = new Date();
+        var events = await response.json();
+        var now = new Date();
         now.setHours(0, 0, 0, 0);
         
-        const currentEvents = [];
-        const upcomingEvents = [];
+        var currentEvents = [];
+        var upcomingEvents = [];
         
-        for (const event of events) {
-            const startDate = new Date(event.start);
-            const endDate = new Date(event.end);
+        for (var i = 0; i < events.length; i++) {
+            var event = events[i];
+            var startDate = new Date(event.start);
+            var endDate = new Date(event.end);
             startDate.setHours(0, 0, 0, 0);
             
             if (startDate <= now && endDate >= now) {
@@ -756,7 +798,7 @@ async function loadEvents() {
 }
 
 function displayCurrentEvents(events) {
-    const container = document.getElementById('currentEventsList');
+    var container = document.getElementById('currentEventsList');
     if (!container) return;
     
     if (!events.length) {
@@ -764,24 +806,26 @@ function displayCurrentEvents(events) {
         return;
     }
     
-    container.innerHTML = events.map(e => `
-        <div class="event-card-with-img">
-            <img src="${getEventPokemonImage(e.name)}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'">
-            <div class="event-info">
-                <div class="event-name">${e.name}</div>
-                <div class="event-heading">${e.heading || 'Event'}</div>
-                <div class="event-time">🟢 ${new Date(e.start).toLocaleString()}</div>
-                <div class="event-time">🔴 ${new Date(e.end).toLocaleString()}</div>
-            </div>
-            <div class="event-buttons">
-                <button class="event-view-btn" onclick="window.open('${e.link}', '_blank')">View</button>
-            </div>
-        </div>
-    `).join('');
+    var html = '';
+    for (var i = 0; i < events.length; i++) {
+        var e = events[i];
+        html += '<div class="event-card-with-img">';
+        html += '<img src="' + getEventPokemonImage(e.name) + '" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png\'">';
+        html += '<div class="event-info">';
+        html += '<div class="event-name">' + e.name + '</div>';
+        html += '<div class="event-heading">' + (e.heading || 'Event') + '</div>';
+        html += '<div class="event-time">🟢 ' + new Date(e.start).toLocaleString() + '</div>';
+        html += '<div class="event-time">🔴 ' + new Date(e.end).toLocaleString() + '</div>';
+        html += '</div>';
+        html += '<div class="event-buttons">';
+        html += '<button class="event-view-btn" onclick="window.open(\'' + e.link + '\', \'_blank\')">View</button>';
+        html += '</div></div>';
+    }
+    container.innerHTML = html;
 }
 
 function displayUpcomingEvents(events) {
-    const container = document.getElementById('upcomingEventsList');
+    var container = document.getElementById('upcomingEventsList');
     if (!container) return;
     
     if (!events.length) {
@@ -789,25 +833,27 @@ function displayUpcomingEvents(events) {
         return;
     }
     
-    container.innerHTML = events.map(e => `
-        <div class="event-card-with-img">
-            <img src="${getEventPokemonImage(e.name)}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'">
-            <div class="event-info">
-                <div class="event-name">${e.name}</div>
-                <div class="event-heading">${e.heading || 'Event'}</div>
-                <div class="event-time">🟢 Starts: ${new Date(e.start).toLocaleString()}</div>
-                <div class="event-time">🔴 Ends: ${new Date(e.end).toLocaleString()}</div>
-            </div>
-            <div class="event-buttons">
-                <button class="event-view-btn" onclick="window.open('${e.link}', '_blank')">View</button>
-                <button class="event-rsvp-btn" onclick='showRSVPDialog("${e.name.replace(/'/g, "\\'")}", "${e.link}", "${new Date(e.start).toLocaleString()}", "${new Date(e.end).toLocaleString()}")'>RSVP</button>
-            </div>
-        </div>
-    `).join('');
+    var html = '';
+    for (var i = 0; i < events.length; i++) {
+        var e = events[i];
+        html += '<div class="event-card-with-img">';
+        html += '<img src="' + getEventPokemonImage(e.name) + '" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png\'">';
+        html += '<div class="event-info">';
+        html += '<div class="event-name">' + e.name + '</div>';
+        html += '<div class="event-heading">' + (e.heading || 'Event') + '</div>';
+        html += '<div class="event-time">🟢 Starts: ' + new Date(e.start).toLocaleString() + '</div>';
+        html += '<div class="event-time">🔴 Ends: ' + new Date(e.end).toLocaleString() + '</div>';
+        html += '</div>';
+        html += '<div class="event-buttons">';
+        html += '<button class="event-view-btn" onclick="window.open(\'' + e.link + '\', \'_blank\')">View</button>';
+        html += '<button class="event-rsvp-btn" onclick=\'showRSVPDialog("' + e.name.replace(/'/g, "\\'") + '", "' + e.link + '", "' + new Date(e.start).toLocaleString() + '", "' + new Date(e.end).toLocaleString() + '")\'>RSVP</button>';
+        html += '</div></div>';
+    }
+    container.innerHTML = html;
 }
 
 function getEventPokemonImage(eventName) {
-    const pokemonMap = {
+    var pokemonMap = {
         'Pikachu': 25, 'Slowbro': 80, 'Zamazenta': 889, 'Regieleki': 894,
         'Houndoom': 229, 'Latias': 380, 'Regidrago': 895, 'Kyogre': 382,
         'Groudon': 383, 'Tapu Koko': 785, 'Tapu Lele': 786, 'Manectric': 310,
@@ -816,9 +862,9 @@ function getEventPokemonImage(eventName) {
         'Drilbur': 529, 'Regirock': 377, 'Shuckle': 213
     };
     
-    for (const [pokemon, id] of Object.entries(pokemonMap)) {
+    for (var pokemon in pokemonMap) {
         if (eventName.includes(pokemon)) {
-            return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+            return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + pokemonMap[pokemon] + '.png';
         }
     }
     return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png';
@@ -829,21 +875,22 @@ async function loadDebutData() {
     try {
         const response = await fetch('https://raw.githubusercontent.com/Skatecrete/pogo-raid-data/main/debuts.json');
         const data = await response.json();
-        const debuts = data.debuts || [];
+        var debuts = data.debuts || [];
         
-        const nzTime = new Date().toLocaleString('en-US', { timeZone: 'Pacific/Auckland' });
-        const todayNz = new Date(nzTime);
+        var nzTime = new Date().toLocaleString('en-US', { timeZone: 'Pacific/Auckland' });
+        var todayNz = new Date(nzTime);
         todayNz.setHours(0, 0, 0, 0);
         
-        let activeDebut = null;
-        for (const debut of debuts) {
-            const dateMatch = debut.event_date.match(/(\w+)\s+(\d+)(?:st|nd|rd|th)?/);
+        var activeDebut = null;
+        for (var i = 0; i < debuts.length; i++) {
+            var debut = debuts[i];
+            var dateMatch = debut.event_date.match(/(\w+)\s+(\d+)(?:st|nd|rd|th)?/);
             if (dateMatch) {
-                const month = dateMatch[1];
-                const day = parseInt(dateMatch[2]);
-                const year = new Date().getFullYear();
-                const monthMap = { January: 0, February: 1, March: 2, April: 3, May: 4, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 };
-                const startDate = new Date(year, monthMap[month], day);
+                var month = dateMatch[1];
+                var day = parseInt(dateMatch[2]);
+                var year = new Date().getFullYear();
+                var monthMap = { January: 0, February: 1, March: 2, April: 3, May: 4, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 };
+                var startDate = new Date(year, monthMap[month], day);
                 
                 if (startDate >= todayNz) {
                     activeDebut = debut;
@@ -861,24 +908,24 @@ async function loadDebutData() {
 }
 
 function displayDebutBanner(debut) {
-    const banner = document.getElementById('debutBanner');
-    const eventNameElem = document.getElementById('debutEventName');
-    const countdownElem = document.getElementById('debutCountdown');
-    const viewEventBtn = document.getElementById('debutViewEventBtn');
+    var banner = document.getElementById('debutBanner');
+    var eventNameElem = document.getElementById('debutEventName');
+    var countdownElem = document.getElementById('debutCountdown');
+    var viewEventBtn = document.getElementById('debutViewEventBtn');
     
     if (!banner) return;
     
     eventNameElem.textContent = debut.event_name;
-    viewEventBtn.onclick = () => findAndOpenLeekDuckEvent(debut.event_name);
+    viewEventBtn.onclick = function() { findAndOpenLeekDuckEvent(debut.event_name); };
     currentDebutData = debut;
     
-    const endMatch = debut.event_date.match(/-\s*(\w+)\s+(\d+)(?:st|nd|rd|th)?\s+(\d{4})/);
+    var endMatch = debut.event_date.match(/-\s*(\w+)\s+(\d+)(?:st|nd|rd|th)?\s+(\d{4})/);
     if (endMatch) {
-        const monthMap = { January: 0, February: 1, March: 2, April: 3, May: 4, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 };
-        const endDate = new Date(parseInt(endMatch[3]), monthMap[endMatch[1]], parseInt(endMatch[2]));
-        const now = new Date();
-        const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-        countdownElem.textContent = daysLeft > 0 ? `Ends in ${daysLeft} days` : 'Ends soon!';
+        var monthMap = { January: 0, February: 1, March: 2, April: 3, May: 4, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 };
+        var endDate = new Date(parseInt(endMatch[3]), monthMap[endMatch[1]], parseInt(endMatch[2]));
+        var now = new Date();
+        var daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+        countdownElem.textContent = daysLeft > 0 ? 'Ends in ' + daysLeft + ' days' : 'Ends soon!';
     }
     
     banner.style.display = 'block';
@@ -886,18 +933,17 @@ function displayDebutBanner(debut) {
 
 function showDebutDetails() {
     if (!currentDebutData) return;
-    const allPokemon = [...(currentDebutData.new_pokemon || []), ...(currentDebutData.new_shiny || [])];
-    const isShiny = currentDebutData.new_shiny || [];
+    var allPokemon = (currentDebutData.new_pokemon || []).concat(currentDebutData.new_shiny || []);
+    var isShiny = currentDebutData.new_shiny || [];
     
-    let html = '<div class="order-stats"><div>New Pokémon Debuts</div></div>';
-    for (const pokemon of allPokemon) {
-        const isShinyPokemon = isShiny.includes(pokemon);
-        html += `
-            <div class="order-section">
-                <div class="section-title">${isShinyPokemon ? '✨ NEW SHINY ✨' : '🌟 NEW POKÉMON 🌟'}</div>
-                <div>${pokemon}</div>
-            </div>
-        `;
+    var html = '<div class="order-stats"><div>New Pokémon Debuts</div></div>';
+    for (var i = 0; i < allPokemon.length; i++) {
+        var pokemon = allPokemon[i];
+        var isShinyPokemon = isShiny.includes(pokemon);
+        html += '<div class="order-section">';
+        html += '<div class="section-title">' + (isShinyPokemon ? '✨ NEW SHINY ✨' : '🌟 NEW POKÉMON 🌟') + '</div>';
+        html += '<div>' + pokemon + '</div>';
+        html += '</div>';
     }
     
     document.getElementById('modalTitle').textContent = 'Debut Pokémon';
@@ -909,10 +955,16 @@ function showDebutDetails() {
 async function findAndOpenLeekDuckEvent(eventName) {
     try {
         const response = await fetch('https://leekduck.com/feeds/events.json');
-        const events = await response.json();
-        const event = events.find(e => e.name.includes(eventName) || eventName.includes(e.name));
-        if (event && event.link) {
-            window.open(event.link, '_blank');
+        var events = await response.json();
+        var foundEvent = null;
+        for (var i = 0; i < events.length; i++) {
+            if (events[i].name.includes(eventName) || eventName.includes(events[i].name)) {
+                foundEvent = events[i];
+                break;
+            }
+        }
+        if (foundEvent && foundEvent.link) {
+            window.open(foundEvent.link, '_blank');
         } else {
             showToast('Event link not found');
         }
@@ -922,7 +974,7 @@ async function findAndOpenLeekDuckEvent(eventName) {
 }
 
 function showRSVPDialog(eventName, eventLink, startDate, endDate) {
-    document.getElementById('modalTitle').textContent = `RSVP for ${eventName}`;
+    document.getElementById('modalTitle').textContent = 'RSVP for ' + eventName;
     document.getElementById('modalBody').innerHTML = `
         <input type="text" id="rsvpName" placeholder="Your Name *" class="rsvp-input">
         <input type="text" id="rsvpIgn" placeholder="In-Game Name *" class="rsvp-input">
@@ -937,8 +989,8 @@ function showRSVPDialog(eventName, eventLink, startDate, endDate) {
 }
 
 async function submitRSVP(eventName, eventLink, startDate, endDate, admin) {
-    const name = document.getElementById('rsvpName')?.value.trim();
-    const ign = document.getElementById('rsvpIgn')?.value.trim();
+    var name = document.getElementById('rsvpName')?.value.trim();
+    var ign = document.getElementById('rsvpIgn')?.value.trim();
     
     if (!name || !ign) {
         showToast('Please enter your name and in-game name');
@@ -966,7 +1018,7 @@ async function submitRSVP(eventName, eventLink, startDate, endDate, admin) {
         
         hideLoading();
         if (data.status === 'success') {
-            showToast(`RSVP sent to ${admin}! They will contact you.`);
+            showToast('RSVP sent to ' + admin + '! They will contact you.');
             closeModal();
         } else {
             showToast('Failed to save RSVP. Please try again.');
@@ -977,190 +1029,21 @@ async function submitRSVP(eventName, eventLink, startDate, endDate, admin) {
     }
 }
 
-// ========== CUSTOMER HISTORY ==========
-async function loadCustomerHistory() {
-    const name = document.getElementById('historyName')?.value.trim();
-    const ign = document.getElementById('historyIgn')?.value.trim();
-    
-    if (!name || !ign) {
-        showToast('Enter both your name and in-game name');
-        return;
-    }
-    
-    showLoading('Loading your history...');
-    
-    try {
-        // Format exactly like Android app: "Name (IGN)"
-        const fullCustomerName = `${name} (${ign})`;
-        
-        console.log('Fetching orders for:', fullCustomerName);
-        
-        const orderResponse = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                type: 'getCustomerOrders', 
-                customerName: fullCustomerName 
-            })
-        });
-        
-        const orderText = await orderResponse.text();
-        console.log('Order Response Raw:', orderText);
-        
-        let orderData;
-        try {
-            orderData = JSON.parse(orderText);
-        } catch (e) {
-            console.error('Failed to parse order response:', e);
-            orderData = { status: 'error', message: 'Invalid response' };
-        }
-        
-        console.log('Order Data:', orderData);
-        
-        // Fetch RSVPs
-        const rsvpResponse = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                type: 'getCustomerRSVPs', 
-                customerName: name, 
-                ingameName: ign 
-            })
-        });
-        
-        const rsvpText = await rsvpResponse.text();
-        console.log('RSVP Response Raw:', rsvpText);
-        
-        let rsvpData;
-        try {
-            rsvpData = JSON.parse(rsvpText);
-        } catch (e) {
-            console.error('Failed to parse RSVP response:', e);
-            rsvpData = { status: 'error', message: 'Invalid response' };
-        }
-        
-        console.log('RSVP Data:', rsvpData);
-        
-        hideLoading();
-        
-        const orders = orderData.status === 'success' ? (orderData.orders || []) : [];
-        const rsvps = rsvpData.status === 'success' ? (rsvpData.rsvps || []) : [];
-        
-        if (orders.length === 0 && rsvps.length === 0) {
-            document.getElementById('historyEmpty').style.display = 'block';
-            document.getElementById('historyOrders').style.display = 'none';
-            document.getElementById('historyRSVPs').style.display = 'none';
-            showToast('No orders or RSVPs found');
-        } else {
-            displayCustomerHistory(orders, rsvps);
-        }
-        
-    } catch (e) {
-        hideLoading();
-        console.error('History error:', e);
-        showToast('Failed to load history: ' + e.message);
-    }
-}
-
-function displayCustomerHistory(orders, rsvps) {
-    const ordersContainer = document.getElementById('ordersHistoryList');
-    const rsvpsContainer = document.getElementById('rsvpsHistoryList');
-    const ordersSection = document.getElementById('historyOrders');
-    const rsvpsSection = document.getElementById('historyRSVPs');
-    const emptySection = document.getElementById('historyEmpty');
-    
-    let hasData = false;
-    
-    if (orders && orders.length) {
-        ordersSection.style.display = 'block';
-        ordersContainer.innerHTML = orders.map(order => {
-            // Parse items if it's a string
-            let itemsDisplay = order.items || '';
-            if (typeof order.items === 'string') {
-                // Split by comma and format as bullet points
-                const itemsList = order.items.split(', ');
-                itemsDisplay = itemsList.map(item => `• ${item}`).join('<br>');
-            } else if (Array.isArray(order.items)) {
-                itemsDisplay = order.items.map(item => `• ${item.pokemon || item}`).join('<br>');
-            }
-            
-            return `
-                <div class="order-history-item" onclick='showOrderDetail(${JSON.stringify(order).replace(/'/g, "&#39;")})'>
-                    <div class="order-history-header">
-                        <span class="order-id">${order.orderId || 'Order'}</span>
-                        <span class="order-total">$${(order.total || 0).toFixed(2)}</span>
-                    </div>
-                    <div class="order-details">${itemsDisplay || 'No items'}</div>
-                    <div class="order-status ${order.status === 'Paid' ? 'status-paid' : 'status-pending'}">${order.status || 'Pending'}</div>
-                    <div class="order-details">${order.date ? order.date.split(' ')[0] : ''}</div>
-                </div>
-            `;
-        }).join('');
-        hasData = true;
-    } else {
-        ordersSection.style.display = 'none';
-    }
-    
-    if (rsvps && rsvps.length) {
-        rsvpsSection.style.display = 'block';
-        rsvpsContainer.innerHTML = rsvps.map(rsvp => `
-            <div class="rsvp-history-item">
-                <div class="rsvp-event-name" onclick="window.open('${rsvp.eventLink || ''}', '_blank')">${rsvp.eventName || 'Event'}</div>
-                <div class="rsvp-event-date">📅 ${rsvp.eventDate || rsvp.eventStartDate || ''}</div>
-                <div class="order-details">RSVP'd: ${rsvp.date ? rsvp.date.split(' ')[0] : ''}</div>
-                <div class="order-status ${rsvp.status === 'Confirmed' ? 'status-paid' : 'status-pending'}">${rsvp.status || 'Pending'}</div>
-            </div>
-        `).join('');
-        hasData = true;
-    } else {
-        rsvpsSection.style.display = 'none';
-    }
-    
-    emptySection.style.display = hasData ? 'none' : 'block';
-}
-
-function showOrderDetail(order) {
-    let itemsHtml = '';
-    if (order.items) {
-        if (typeof order.items === 'string') {
-            const itemsList = order.items.split(', ');
-            itemsHtml = itemsList.map(item => `<div>• ${item}</div>`).join('');
-        } else if (Array.isArray(order.items)) {
-            itemsHtml = order.items.map(item => `<div>• ${item.pokemon || item}</div>`).join('');
-        }
-    }
-    
-    document.getElementById('modalTitle').textContent = `Order ${order.orderId || 'Details'}`;
-    document.getElementById('modalBody').innerHTML = `
-        <div class="order-stats">
-            <div><strong>Date:</strong> ${order.date || 'N/A'}</div>
-            <div><strong>Customer:</strong> ${order.customer || 'N/A'}</div>
-            <div><strong>Status:</strong> <span class="${order.status === 'Paid' ? 'status-paid' : 'status-pending'}">${order.status || 'Pending'}</span></div>
-            <div><strong>Payment:</strong> ${order.paymentMethod || 'N/A'}</div>
-            <div><strong>Total:</strong> <span class="status-paid">$${(order.total || 0).toFixed(2)}</span></div>
-        </div>
-        ${itemsHtml ? `<div class="order-section"><div class="section-title">📦 Items</div>${itemsHtml}</div>` : ''}
-        ${order.otherRequests ? `<div class="order-section"><div class="section-title">📝 Notes</div><div>${order.otherRequests}</div></div>` : ''}
-    `;
-    document.getElementById('modalFooter').innerHTML = '<button class="confirm-btn" onclick="closeModal()">Close</button>';
-    document.getElementById('orderModal').style.display = 'flex';
-}
-
 // ========== UTILITIES ==========
 function showLoading(message) {
-    const modal = document.getElementById('loadingModal');
-    const msgElem = document.getElementById('loadingMessage');
+    var modal = document.getElementById('loadingModal');
+    var msgElem = document.getElementById('loadingMessage');
     if (msgElem) msgElem.textContent = message;
     if (modal) modal.style.display = 'flex';
 }
 
 function hideLoading() {
-    const modal = document.getElementById('loadingModal');
+    var modal = document.getElementById('loadingModal');
     if (modal) modal.style.display = 'none';
 }
 
 function showToast(message) {
-    let toast = document.getElementById('toast');
+    var toast = document.getElementById('toast');
     if (!toast) {
         toast = document.createElement('div');
         toast.id = 'toast';
@@ -1169,7 +1052,7 @@ function showToast(message) {
     }
     toast.textContent = message;
     toast.style.opacity = '1';
-    setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+    setTimeout(function() { toast.style.opacity = '0'; }, 2000);
 }
 
 function closeModal() {
@@ -1197,6 +1080,6 @@ window.selectAdminAndPay = selectAdminAndPay;
 window.submitOrder = submitOrder;
 window.showRSVPDialog = showRSVPDialog;
 window.submitRSVP = submitRSVP;
-window.loadCustomerHistory = loadCustomerHistory;
 window.showDebutDetails = showDebutDetails;
+window.showKingiMessage = showKingiMessage;
 window.closeModal = closeModal;
