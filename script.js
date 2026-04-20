@@ -24,10 +24,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setupTabListeners();
 });
 
-function getEventPokemonImage(eventName) {
-    return '';
-}
-
 function setupTabListeners() {
     var btns = document.querySelectorAll('.tab-btn');
     for (var i = 0; i < btns.length; i++) {
@@ -810,6 +806,10 @@ async function loadEvents() {
     } catch (e) {
         console.error('Error loading events:', e);
     }
+}
+
+function getEventPokemonImage(eventName) {
+    return '';
 }
 
 function displayCurrentEvents(events) {
