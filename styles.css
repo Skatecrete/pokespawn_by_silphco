@@ -173,6 +173,72 @@ body {
     color: white;
 }
 
+/* Event Card with Image */
+.event-card-with-img {
+    background: #2a2a3e;
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.event-card-with-img img {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: white;
+    padding: 4px;
+    object-fit: contain;
+}
+
+.event-info {
+    flex: 1;
+}
+
+.event-name {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: white;
+}
+
+.event-heading {
+    font-size: 11px;
+    color: #FFA500;
+    margin-bottom: 4px;
+}
+
+.event-time {
+    font-size: 10px;
+    color: #aaa;
+    line-height: 1.4;
+}
+
+.event-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.event-view-btn, .event-rsvp-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 20px;
+    color: white;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.event-view-btn {
+    background: #2196F3;
+}
+
+.event-rsvp-btn {
+    background: #4CAF50;
+}
+
 /* Pokémon Card */
 .pokemon-card {
     background: #2a2a3e;
@@ -240,10 +306,6 @@ body {
 }
 
 /* Raid Card */
-.raid-category {
-    margin-bottom: 20px;
-}
-
 .raid-header {
     background: #0d0d1a;
     padding: 10px 12px;
@@ -291,7 +353,6 @@ body {
     margin-top: 5px;
 }
 
-/* Raid Underlays */
 .raid-image-container {
     position: relative;
     width: 55px;
@@ -305,67 +366,30 @@ body {
     object-fit: contain;
 }
 
-.shadow-underlay, .dynamax-underlay {
+.shadow-underlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+    background: radial-gradient(ellipse at 50% 50%, rgba(68, 0, 68, 0.6) 0%, transparent 70%);
     pointer-events: none;
-}
-
-.shadow-underlay {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><radialGradient id="shadow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="%23440044" stop-opacity="0.6"/><stop offset="100%" stop-color="%23000000" stop-opacity="0"/></radialGradient><rect width="100" height="100" fill="url(%23shadow)"/></svg>');
+    border-radius: 50%;
 }
 
 .dynamax-underlay {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><radialGradient id="dynamax" cx="50%" cy="30%" r="60%"><stop offset="0%" stop-color="%23FF0000" stop-opacity="0.5"/><stop offset="100%" stop-color="%23FF0000" stop-opacity="0"/></radialGradient><rect width="100" height="100" fill="url(%23dynamax)"/></svg>');
-}
-
-/* Event Card */
-.event-card {
-    background: #2a2a3e;
-    border-radius: 12px;
-    padding: 12px;
-    margin-bottom: 10px;
-}
-
-.event-title {
-    font-weight: bold;
-    font-size: 14px;
-    margin-bottom: 8px;
-}
-
-.event-date {
-    font-size: 11px;
-    color: #FFA500;
-    margin-bottom: 4px;
-}
-
-.event-link {
-    font-size: 11px;
-    color: #2196F3;
-    text-decoration: none;
-    display: inline-block;
-    margin-top: 8px;
-}
-
-.rsvp-btn {
-    margin-top: 10px;
-    padding: 6px 12px;
-    background: #4CAF50;
-    border: none;
-    border-radius: 20px;
-    color: white;
-    cursor: pointer;
-    font-size: 12px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at 50% 30%, rgba(255, 0, 0, 0.4) 0%, transparent 70%);
+    pointer-events: none;
+    border-radius: 50%;
 }
 
 /* Cart Section */
-.cart-section, .coins-section {
+.cart-section, .coins-section, .other-requests-section {
     background: #0d0d1a;
     border-radius: 16px;
     padding: 16px;
@@ -457,7 +481,6 @@ body {
     cursor: pointer;
 }
 
-/* Coins Section */
 .section-title {
     font-weight: bold;
     margin-bottom: 12px;
@@ -480,6 +503,17 @@ body {
     cursor: pointer;
     font-size: 12px;
     line-height: 1.4;
+}
+
+.other-requests-section textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: #2a2a3e;
+    color: white;
+    font-family: inherit;
+    resize: vertical;
 }
 
 /* Contact Section */
@@ -570,6 +604,7 @@ body {
     border-radius: 10px;
     padding: 12px;
     margin-bottom: 8px;
+    cursor: pointer;
 }
 
 .order-history-header {
