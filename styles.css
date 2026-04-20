@@ -379,12 +379,57 @@ body {
 .pokemon-name {
     font-weight: bold;
     font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.pokemon-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.pokemon-tag {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.tag-regional {
+    background: #2196F3;
+    color: white;
+}
+
+.tag-pvp {
+    background: #F44336;
+    color: white;
+}
+
+.tag-great {
+    background: #4CAF50;
+    color: white;
+}
+
+.tag-ultra {
+    background: #FF9800;
+    color: white;
+}
+
+.tag-master {
+    background: #9C27B0;
+    color: white;
 }
 
 .pokemon-details {
     font-size: 11px;
     color: #aaa;
-    margin-top: 4px;
+}
+
+.shiny-rate {
+    color: #FFD700;
+    font-weight: bold;
 }
 
 .spawn-badge {
@@ -399,10 +444,6 @@ body {
 .badge-medium { background: #FF9800; }
 .badge-low { background: #4CAF50; }
 .badge-minimal { background: #2196F3; }
-
-.shiny-rate {
-    color: #FFD700;
-}
 
 .order-btn {
     background: #4CAF50;
