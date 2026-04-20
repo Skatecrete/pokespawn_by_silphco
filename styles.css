@@ -36,7 +36,7 @@ body {
     opacity: 0.8;
 }
 
-/* Tabs - 2 rows */
+/* Tabs */
 .tabs {
     background: #0d0d1a;
     padding: 12px;
@@ -115,132 +115,65 @@ body {
     background: #7627C5;
 }
 
-/* ========== EVENT HEADER (Like Android App) ========== */
-.event-header {
-    background: linear-gradient(135deg, #FFC107, #1a1a2e);
-    border-radius: 30px;
-    padding: 10px 16px;
-    margin: 16px 8px 12px 8px;
+/* Debut Banner */
+.debut-banner {
+    background: linear-gradient(135deg, #2a1a3e, #1a1a2e);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    border: 1px solid #FFA500;
+}
+
+.debut-content {
+    padding: 12px;
     text-align: center;
 }
 
-.event-header h3 {
-    color: white;
+.debut-title {
     font-size: 14px;
     font-weight: bold;
-    letter-spacing: 1px;
-    margin: 0;
-}
-
-/* ========== EVENT CARD WITH IMAGE (Like Android App) ========== */
-.event-card-with-img {
-    background: #2a2a3e;
-    border-radius: 16px;
-    padding: 12px;
-    margin-bottom: 10px;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-}
-
-.event-card-with-img img {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    background: white;
-    padding: 4px;
-    object-fit: contain;
-}
-
-.event-info {
-    flex: 1;
-}
-
-.event-name {
-    font-weight: bold;
-    font-size: 14px;
-    margin-bottom: 4px;
-    color: white;
-}
-
-.event-heading {
-    font-size: 11px;
     color: #FFA500;
     margin-bottom: 4px;
 }
 
-.event-time {
-    font-size: 10px;
-    color: #aaa;
-    line-height: 1.4;
-}
-
-.event-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.event-view-btn {
-    padding: 6px 12px;
-    background: #2196F3;
-    border: none;
-    border-radius: 20px;
-    color: white;
-    font-size: 11px;
-    cursor: pointer;
-}
-
-.event-rsvp-btn {
-    padding: 6px 12px;
-    background: #4CAF50;
-    border: none;
-    border-radius: 20px;
-    color: white;
-    font-size: 11px;
-    cursor: pointer;
-}
-
-/* Fallback simple event card */
-.event-card {
-    background: #2a2a3e;
-    border-radius: 12px;
-    padding: 12px;
-    margin-bottom: 10px;
-}
-
-.event-title {
+.debut-event-name {
+    font-size: 16px;
     font-weight: bold;
-    font-size: 14px;
-    margin-bottom: 8px;
-}
-
-.event-date {
-    font-size: 11px;
-    color: #FFA500;
+    color: #03DAC5;
     margin-bottom: 4px;
 }
 
-.event-link {
-    font-size: 11px;
-    color: #2196F3;
-    text-decoration: none;
-    display: inline-block;
-    margin-top: 8px;
-}
-
-.rsvp-btn {
-    margin-top: 10px;
-    padding: 6px 12px;
-    background: #4CAF50;
-    border: none;
-    border-radius: 20px;
-    color: white;
-    cursor: pointer;
+.debut-countdown {
     font-size: 12px;
+    color: #fff;
+    margin-bottom: 12px;
 }
 
-/* ========== POKEMON CARD ========== */
+.debut-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.debut-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.view-debuts {
+    background: #7627C5;
+    color: white;
+}
+
+.view-event {
+    background: #2196F3;
+    color: white;
+}
+
+/* Pokémon Card */
 .pokemon-card {
     background: #2a2a3e;
     border-radius: 12px;
@@ -250,6 +183,11 @@ body {
     gap: 12px;
     margin-bottom: 8px;
     cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.pokemon-card:active {
+    transform: scale(0.99);
 }
 
 .pokemon-card img {
@@ -301,7 +239,7 @@ body {
     font-size: 12px;
 }
 
-/* ========== RAID SECTION (Like Android App) ========== */
+/* Raid Card */
 .raid-category {
     margin-bottom: 20px;
 }
@@ -320,12 +258,6 @@ body {
     margin: 0;
 }
 
-.raid-category h4 {
-    color: #FFA500;
-    margin-bottom: 10px;
-    font-size: 14px;
-}
-
 .raids-grid {
     display: flex;
     flex-wrap: wrap;
@@ -340,6 +272,7 @@ body {
     width: 85px;
     cursor: pointer;
     transition: transform 0.1s;
+    position: relative;
 }
 
 .raid-card:active {
@@ -358,13 +291,81 @@ body {
     margin-top: 5px;
 }
 
-.shiny-star {
-    color: #FFD700;
+/* Raid Underlays */
+.raid-image-container {
+    position: relative;
+    width: 55px;
+    height: 55px;
+    margin: 0 auto;
+}
+
+.raid-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.shadow-underlay, .dynamax-underlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+}
+
+.shadow-underlay {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><radialGradient id="shadow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="%23440044" stop-opacity="0.6"/><stop offset="100%" stop-color="%23000000" stop-opacity="0"/></radialGradient><rect width="100" height="100" fill="url(%23shadow)"/></svg>');
+}
+
+.dynamax-underlay {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><radialGradient id="dynamax" cx="50%" cy="30%" r="60%"><stop offset="0%" stop-color="%23FF0000" stop-opacity="0.5"/><stop offset="100%" stop-color="%23FF0000" stop-opacity="0"/></radialGradient><rect width="100" height="100" fill="url(%23dynamax)"/></svg>');
+}
+
+/* Event Card */
+.event-card {
+    background: #2a2a3e;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.event-title {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.event-date {
+    font-size: 11px;
+    color: #FFA500;
+    margin-bottom: 4px;
+}
+
+.event-link {
+    font-size: 11px;
+    color: #2196F3;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 8px;
+}
+
+.rsvp-btn {
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: #4CAF50;
+    border: none;
+    border-radius: 20px;
+    color: white;
+    cursor: pointer;
     font-size: 12px;
 }
 
-/* ========== CART SECTION (Orders Tab) ========== */
-.cart-section {
+/* Cart Section */
+.cart-section, .coins-section {
     background: #0d0d1a;
     border-radius: 16px;
     padding: 16px;
@@ -456,7 +457,32 @@ body {
     cursor: pointer;
 }
 
-/* ========== CONTACT SECTION ========== */
+/* Coins Section */
+.section-title {
+    font-weight: bold;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.coin-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.coin-btn {
+    flex: 1;
+    padding: 12px;
+    background: #7627C5;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+/* Contact Section */
 .contact-section {
     background: #0d0d1a;
     border-radius: 16px;
@@ -499,7 +525,104 @@ body {
     margin-top: 12px;
 }
 
-/* ========== MODAL ========== */
+/* History Tab */
+.history-section {
+    background: #0d0d1a;
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.history-search {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.history-search input {
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: #2a2a3e;
+    color: white;
+}
+
+.search-history-btn {
+    padding: 12px;
+    background: #2196F3;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.history-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 16px 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #333;
+}
+
+.order-history-item, .rsvp-history-item {
+    background: #1a1a2e;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+}
+
+.order-history-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.order-id {
+    color: #FFA500;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.order-total {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.order-details {
+    font-size: 11px;
+    color: #aaa;
+    margin-bottom: 4px;
+}
+
+.order-status {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.status-paid { color: #4CAF50; }
+.status-pending { color: #FFA500; }
+
+.rsvp-event-name {
+    font-weight: bold;
+    font-size: 13px;
+    color: #2196F3;
+    cursor: pointer;
+}
+
+.rsvp-event-date {
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 4px;
+}
+
+.empty-history {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+}
+
+/* Modal */
 .modal {
     display: none;
     position: fixed;
@@ -549,29 +672,7 @@ body {
     border-top: 1px solid #333;
 }
 
-.cancel-btn {
-    flex: 1;
-    padding: 12px;
-    background: #F44336;
-    border: none;
-    border-radius: 25px;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.confirm-btn {
-    flex: 1;
-    padding: 12px;
-    background: #4CAF50;
-    border: none;
-    border-radius: 25px;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-/* ========== ORDER DIALOG STYLES ========== */
+/* Order Dialog */
 .order-stats {
     background: #0d0d1a;
     padding: 12px;
@@ -587,16 +688,11 @@ body {
     margin-bottom: 12px;
 }
 
-.section-title {
-    font-weight: bold;
-    margin-bottom: 12px;
-    font-size: 13px;
-}
-
 .quantity-selector {
     display: flex;
     align-items: center;
     gap: 12px;
+    margin-top: 8px;
 }
 
 .qty-num {
@@ -617,6 +713,7 @@ body {
     gap: 10px;
     justify-content: center;
     flex-wrap: wrap;
+    margin-top: 8px;
 }
 
 .pack-btn {
@@ -630,7 +727,7 @@ body {
     font-size: 12px;
 }
 
-.admin-option {
+.admin-option, .payment-option-btn {
     width: 100%;
     padding: 12px;
     margin-bottom: 10px;
@@ -645,16 +742,6 @@ body {
 .admin-option.kingi { background: #2196F3; }
 .admin-option.thomas { background: #FF9800; }
 
-.rsvp-input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 12px;
-    border-radius: 12px;
-    border: none;
-    background: #2a2a3e;
-    color: white;
-}
-
 .payment-option {
     background: #0d0d1a;
     border-radius: 12px;
@@ -663,7 +750,7 @@ body {
     text-align: center;
 }
 
-.payment-option a {
+.payment-link {
     display: inline-block;
     margin-top: 8px;
     padding: 10px 20px;
@@ -674,6 +761,16 @@ body {
     font-weight: bold;
 }
 
+.rsvp-input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    border: none;
+    background: #2a2a3e;
+    color: white;
+}
+
 .disclaimer {
     font-size: 10px;
     color: #FFA500;
@@ -681,11 +778,18 @@ body {
     margin-top: 12px;
 }
 
-.disclaimer-small {
-    font-size: 10px;
-    color: #FFA500;
-    margin-top: 8px;
+.cancel-btn, .confirm-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 25px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
 }
+
+.cancel-btn { background: #F44336; }
+.confirm-btn { background: #4CAF50; }
 
 .loading {
     text-align: center;
@@ -693,12 +797,36 @@ body {
     color: #888;
 }
 
-/* Disclaimer text at bottom of spawns */
-.disclaimer-bottom {
-    font-size: 10px;
-    color: #FFA500;
+.loading-modal {
     text-align: center;
-    padding: 12px;
-    margin-top: 16px;
-    border-top: 1px solid #333;
+    background: #1a1a2e;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #333;
+    border-top-color: #7627C5;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    z-index: 1001;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
 }
