@@ -4,7 +4,7 @@ let cartItems = [];
 let customerName = '';
 let customerIgn = '';
 let selectedAdmin = '';
-let filters = { shundo: false, shiny164: false, regional: false, greatLeague: false, ultraLeague: false, masterLeague: false };
+let filters = { shundo: false, shiny164: false, regional: false, greatLeague: false, ultraLeague: false, masterLeague: false, premierCup: false, ultraPremier: false };
 let currentSearch = '';
 let currentDebutData = null;
 
@@ -119,7 +119,9 @@ async function loadSpawns() {
                 isRegional: isRegionalPokemon(name),
                 isTopGreatLeague: isTopGreatLeaguePokemon(name),
                 isTopUltraLeague: isTopUltraLeaguePokemon(name),
-                isTopMasterLeague: isTopMasterLeaguePokemon(name)
+                isTopMasterLeague: isTopMasterLeaguePokemon(name),
+                isTopPremierCup: isTopPremierCupPokemon(name),
+                isTopUltraPremier: isTopUltraPremierPokemon(name)
             });
         }
         
@@ -159,6 +161,22 @@ function isTopMasterLeaguePokemon(name) {
     var masterLeague = ['Zygarde', 'Eternatus', 'Dialga', 'Giratina', 'Meloetta', 'Yveltal', 'Kyurem', 'Reshiram', 'Palkia', 'Zekrom', 'Zamazenta', 'Lugia', 'Ho-Oh', 'Metagross', 'Goodra', 'Lunala', 'Xerneas', 'Urshifu', 'Garchomp', 'Latias'];
     for (var i = 0; i < masterLeague.length; i++) {
         if (name.includes(masterLeague[i])) return true;
+    }
+    return false;
+}
+
+function isTopPremierCupPokemon(name) {
+    var premierCup = ['Zygarde', 'Eternatus', 'Meloetta', 'Dialga', 'Kyurem', 'Giratina', 'Palkia', 'Zamazenta', 'Zacian', 'Metagross', 'Goodra', 'Urshifu', 'Garchomp', 'Moltres', 'Hydreigon', 'Gholdengo', 'Marshadow', 'Ho-Oh', 'Kommo-o', 'Genesect', 'Baxcalibur'];
+    for (var i = 0; i < premierCup.length; i++) {
+        if (name.includes(premierCup[i])) return true;
+    }
+    return false;
+}
+
+function isTopUltraPremierPokemon(name) {
+    var ultraPremier = ['Forretress', 'Zygarde', 'Jellicent', 'Tinkaton', 'Moltres', 'Skeledirge', 'Mewtwo', 'Regidrago', 'Pecharunt', 'Cresselia', 'Turtonator', 'Giratina', 'Cradily', 'Lucario', 'Lapras', 'Crustle', 'Tentacruel', 'Ninetales', 'Florges', 'Dialga', 'Genesect', 'Toucannon', 'Goodra', 'Kingdra', 'Talonflame', 'Lickilicky'];
+    for (var i = 0; i < ultraPremier.length; i++) {
+        if (name.includes(ultraPremier[i])) return true;
     }
     return false;
 }
@@ -207,6 +225,12 @@ function displaySpawns() {
     if (filters.masterLeague) {
         filtered = filtered.filter(function(p) { return p.isTopMasterLeague; });
     }
+    if (filters.premierCup) {
+    filtered = filtered.filter(function(p) { return p.isTopPremierCup; });
+    }
+    if (filters.ultraPremier) {
+    filtered = filtered.filter(function(p) { return p.isTopUltraPremier; });
+    }
     
     if (filtered.length === 0) {
         container.innerHTML = '<div class="loading">No spawns found</div>';
@@ -229,6 +253,8 @@ function displaySpawns() {
         if (p.isTopUltraLeague) tagsHtml += '<span class="pokemon-tag tag-ultra">🏆 Ultra League</span>';
         if (p.isTopMasterLeague) tagsHtml += '<span class="pokemon-tag tag-master">🏆 Master League</span>';
         if (p.isTopGreatLeague && !p.isTopUltraLeague && !p.isTopMasterLeague) tagsHtml += '<span class="pokemon-tag tag-pvp">🏆 Top PvP</span>';
+        if (p.isTopPremierCup) tagsHtml += '<span class="pokemon-tag tag-premier">🏆 Premier Cup</span>';
+        if (p.isTopUltraPremier) tagsHtml += '<span class="pokemon-tag tag-ultra-premier">🏆 Ultra Premier</span>';
         
         html += '<div class="pokemon-card" onclick=\'showSpawnOrderDialog(' + JSON.stringify(p).replace(/'/g, "&#39;") + ')\'>';
         html += '<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + p.id + '.png" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + p.id + '.png\'">';
