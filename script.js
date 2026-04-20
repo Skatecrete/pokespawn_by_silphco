@@ -42,7 +42,13 @@ function setupTabListeners() {
             
             if (tabId === 'spawns' && allPokemon.length === 0) loadSpawns();
             if (tabId === 'raids') loadRaids();
-            if (tabId === 'current' || tabId === 'upcoming') loadEvents();
+            if (tabId === 'current' || tabId === 'upcoming') {
+                loadEvents();
+                // Load debut data only when switching to Upcoming tab
+                if (tabId === 'upcoming') {
+                    loadDebutData();
+                }
+            }
         });
     }
 }
@@ -791,7 +797,12 @@ async function loadEvents() {
         
         displayCurrentEvents(currentEvents);
         displayUpcomingEvents(upcomingEvents);
-        loadDebutData();
+        
+        // ONLY load debut data if we're on the Upcoming tab
+        var activeTab = document.querySelector('.tab-content.active')?.id;
+        if (activeTab === 'upcoming') {
+            loadDebutData();
+        }
     } catch (e) {
         console.error('Error loading events:', e);
     }
