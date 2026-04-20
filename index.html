@@ -25,13 +25,16 @@
         <!-- Tab Buttons -->
         <div class="tabs">
     <div class="tab-row">
-        <button class="tab-btn active" data-tab="spawns">🔥 SPAWNS</button>
-        <button class="tab-btn" data-tab="raids">🏆 RAIDS</button>
-        <button class="tab-btn" data-tab="orders">📦 ORDERS</button>
-    </div>
-    <div class="tab-row">
         <button class="tab-btn" data-tab="current">📅 CURRENT EVENTS</button>
         <button class="tab-btn" data-tab="upcoming">🔮 UPCOMING EVENTS</button>
+    </div>
+    <div class="tab-row">
+        <button class="tab-btn active" data-tab="spawns">🔥 SPAWNS</button>
+        <button class="tab-btn" data-tab="raids">🏆 RAIDS</button>
+        <button class="tab-btn" data-tab="history">📜 HISTORY</button>
+    </div>
+    <div class="tab-row">
+        <button class="tab-btn" data-tab="orders">📦 ORDERS CART</button>
     </div>
 </div>
 
@@ -60,31 +63,6 @@
                     <div class="loading">Loading raids...</div>
                 </div>
             </div>
-
-            <!-- Current Events Tab -->
-<div id="current" class="tab-content">
-    <div id="currentEventsList" class="list-container">
-        <div class="loading">Loading events...</div>
-    </div>
-</div>
-
-            <!-- Upcoming Events Tab -->
-<div id="upcoming" class="tab-content">
-    <div id="debutBanner" class="debut-banner" style="display:none">
-        <div class="debut-content">
-            <div class="debut-title">🎉 NEW POKÉMON DEBUT 🎉</div>
-            <div class="debut-event-name" id="debutEventName"></div>
-            <div class="debut-countdown" id="debutCountdown"></div>
-            <div class="debut-buttons">
-                <button class="debut-btn view-debuts" onclick="showDebutDetails()">View Debut Mon</button>
-                <button class="debut-btn view-event" id="debutViewEventBtn">View Event</button>
-            </div>
-        </div>
-    </div>
-    <div id="upcomingEventsList" class="list-container">
-        <div class="loading">Loading events...</div>
-    </div>
-</div></div>
 
             <!-- Orders Tab -->
             <div id="orders" class="tab-content">
@@ -124,6 +102,51 @@
                         <div class="admin-btn kingi disabled" onclick="showKingiMessage()">💬 Kingi (zEViLvSTON4z)</div>
                     </div>
                     <p class="facebook-info">💡 Reach out to your admin through Facebook Messenger!</p>
+                </div>
+            </div>
+
+            <!-- Current Events Tab -->
+            <div id="current" class="tab-content">
+                <div id="currentEventsList" class="list-container">
+                    <div class="loading">Loading events...</div>
+                </div>
+            </div>
+
+            <!-- Upcoming Events Tab -->
+            <div id="upcoming" class="tab-content">
+                <div id="debutBanner" class="debut-banner" style="display:none">
+                    <div class="debut-content">
+                        <div class="debut-title">🎉 NEW POKÉMON DEBUT 🎉</div>
+                        <div class="debut-event-name" id="debutEventName"></div>
+                        <div class="debut-countdown" id="debutCountdown"></div>
+                        <div class="debut-buttons">
+                            <button class="debut-btn view-debuts" onclick="showDebutDetails()">View Debut Mon</button>
+                            <button class="debut-btn view-event" id="debutViewEventBtn">View Event</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="upcomingEventsList" class="list-container">
+                    <div class="loading">Loading events...</div>
+                </div>
+            </div>
+
+            <!-- History Tab -->
+            <div id="history" class="tab-content">
+                <div class="history-section">
+                    <div class="history-search">
+                        <input type="text" id="historyName" placeholder="Your Name *">
+                        <input type="text" id="historyIgn" placeholder="In-Game Name *">
+                        <button class="search-history-btn" onclick="loadCustomerHistory()">🔍 View My History</button>
+                    </div>
+                    <div id="historyOrders" class="history-orders" style="display:none">
+                        <div class="history-title">📦 My Orders</div>
+                        <div id="ordersHistoryList"></div>
+                    </div>
+                    <div id="historyRSVPs" class="history-rsvps" style="display:none">
+                        <div class="history-title">📅 My RSVPs</div>
+                        <div id="rsvpsHistoryList"></div>
+                    </div>
+                    <div id="historyEmpty" class="empty-history" style="display:none">No orders or RSVPs found</div>
                 </div>
             </div>
         </div>
