@@ -117,7 +117,6 @@ async function loadSpawns() {
                 isShiny: isShiny,
                 shinyRate: isShiny ? (isPermaboosted ? '✨ 1/64' : '✨ 1/512') : '❌ Not available',
                 isRegional: isRegionalPokemon(name),
-                isTopPvP: isTopPvPPokemon(name),
                 isTopGreatLeague: isTopGreatLeaguePokemon(name),
                 isTopUltraLeague: isTopUltraLeaguePokemon(name),
                 isTopMasterLeague: isTopMasterLeaguePokemon(name)
@@ -199,9 +198,6 @@ function displaySpawns() {
     if (filters.regional) {
         filtered = filtered.filter(function(p) { return p.isRegional; });
     }
-    if (filters.pvp) {
-        filtered = filtered.filter(function(p) { return p.isTopPvP; });
-    }
     if (filters.greatLeague) {
         filtered = filtered.filter(function(p) { return p.isTopGreatLeague; });
     }
@@ -232,7 +228,7 @@ function displaySpawns() {
         if (p.isTopGreatLeague) tagsHtml += '<span class="pokemon-tag tag-great">🏆 Great League</span>';
         if (p.isTopUltraLeague) tagsHtml += '<span class="pokemon-tag tag-ultra">🏆 Ultra League</span>';
         if (p.isTopMasterLeague) tagsHtml += '<span class="pokemon-tag tag-master">🏆 Master League</span>';
-        if (p.isTopPvP && !p.isTopGreatLeague && !p.isTopUltraLeague && !p.isTopMasterLeague) tagsHtml += '<span class="pokemon-tag tag-pvp">🏆 Top PvP</span>';
+        if (p.isTopGreatLeague && !p.isTopUltraLeague && !p.isTopMasterLeague) tagsHtml += '<span class="pokemon-tag tag-pvp">🏆 Top PvP</span>';
         
         html += '<div class="pokemon-card" onclick=\'showSpawnOrderDialog(' + JSON.stringify(p).replace(/'/g, "&#39;") + ')\'>';
         html += '<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + p.id + '.png" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + p.id + '.png\'">';
