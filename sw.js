@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pokespawn-v1';
+const CACHE_NAME = 'pokespawn-web-v1';
 const urlsToCache = [
     '/',
     '/index.html',
