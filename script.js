@@ -990,38 +990,75 @@ async function loadCustomerHistory() {
     showLoading('Loading your history...');
     
     try {
+        // Format exactly like Android app: "Name (IGN)"
         const fullCustomerName = `${name} (${ign})`;
+        
+        console.log('Fetching orders for:', fullCustomerName);
         
         const orderResponse = await fetch(SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: 'getCustomerOrders', customerName: fullCustomerName })
+            body: JSON.stringify({ 
+                type: 'getCustomerOrders', 
+                customerName: fullCustomerName 
+            })
         });
-        const orderData = await orderResponse.json();
         
+        const orderText = await orderResponse.text();
+        console.log('Order Response Raw:', orderText);
+        
+        let orderData;
+        try {
+            orderData = JSON.parse(orderText);
+        } catch (e) {
+            console.error('Failed to parse order response:', e);
+            orderData = { status: 'error', message: 'Invalid response' };
+        }
+        
+        console.log('Order Data:', orderData);
+        
+        // Fetch RSVPs
         const rsvpResponse = await fetch(SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: 'getCustomerRSVPs', customerName: name, ingameName: ign })
+            body: JSON.stringify({ 
+                type: 'getCustomerRSVPs', 
+                customerName: name, 
+                ingameName: ign 
+            })
         });
-        const rsvpData = await rsvpResponse.json();
+        
+        const rsvpText = await rsvpResponse.text();
+        console.log('RSVP Response Raw:', rsvpText);
+        
+        let rsvpData;
+        try {
+            rsvpData = JSON.parse(rsvpText);
+        } catch (e) {
+            console.error('Failed to parse RSVP response:', e);
+            rsvpData = { status: 'error', message: 'Invalid response' };
+        }
+        
+        console.log('RSVP Data:', rsvpData);
         
         hideLoading();
         
-        if (orderData.status === 'success' || rsvpData.status === 'success') {
-            displayCustomerHistory(orderData.orders || [], rsvpData.rsvps || []);
-        } else {
+        const orders = orderData.status === 'success' ? (orderData.orders || []) : [];
+        const rsvps = rsvpData.status === 'success' ? (rsvpData.rsvps || []) : [];
+        
+        if (orders.length === 0 && rsvps.length === 0) {
             document.getElementById('historyEmpty').style.display = 'block';
             document.getElementById('historyOrders').style.display = 'none';
             document.getElementById('historyRSVPs').style.display = 'none';
-            if (!orderData.orders?.length && !rsvpData.rsvps?.length) {
-                showToast('No history found');
-            }
+            showToast('No orders or RSVPs found');
+        } else {
+            displayCustomerHistory(orders, rsvps);
         }
+        
     } catch (e) {
         hideLoading();
         console.error('History error:', e);
-        showToast('Failed to load history');
+        showToast('Failed to load history: ' + e.message);
     }
 }
 
@@ -1037,10 +1074,14 @@ function displayCustomerHistory(orders, rsvps) {
     if (orders && orders.length) {
         ordersSection.style.display = 'block';
         ordersContainer.innerHTML = orders.map(order => {
+            // Parse items if it's a string
             let itemsDisplay = order.items || '';
             if (typeof order.items === 'string') {
-                itemsDisplay = order.items.replace(/, /g, '<br>• ');
-                if (itemsDisplay) itemsDisplay = '• ' + itemsDisplay;
+                // Split by comma and format as bullet points
+                const itemsList = order.items.split(', ');
+                itemsDisplay = itemsList.map(item => `• ${item}`).join('<br>');
+            } else if (Array.isArray(order.items)) {
+                itemsDisplay = order.items.map(item => `• ${item.pokemon || item}`).join('<br>');
             }
             
             return `
@@ -1051,7 +1092,7 @@ function displayCustomerHistory(orders, rsvps) {
                     </div>
                     <div class="order-details">${itemsDisplay || 'No items'}</div>
                     <div class="order-status ${order.status === 'Paid' ? 'status-paid' : 'status-pending'}">${order.status || 'Pending'}</div>
-                    <div class="order-details">${order.date || ''}</div>
+                    <div class="order-details">${order.date ? order.date.split(' ')[0] : ''}</div>
                 </div>
             `;
         }).join('');
@@ -1066,7 +1107,7 @@ function displayCustomerHistory(orders, rsvps) {
             <div class="rsvp-history-item">
                 <div class="rsvp-event-name" onclick="window.open('${rsvp.eventLink || ''}', '_blank')">${rsvp.eventName || 'Event'}</div>
                 <div class="rsvp-event-date">📅 ${rsvp.eventDate || rsvp.eventStartDate || ''}</div>
-                <div class="order-details">RSVP'd: ${rsvp.date || ''}</div>
+                <div class="order-details">RSVP'd: ${rsvp.date ? rsvp.date.split(' ')[0] : ''}</div>
                 <div class="order-status ${rsvp.status === 'Confirmed' ? 'status-paid' : 'status-pending'}">${rsvp.status || 'Pending'}</div>
             </div>
         `).join('');
@@ -1092,11 +1133,11 @@ function showOrderDetail(order) {
     document.getElementById('modalTitle').textContent = `Order ${order.orderId || 'Details'}`;
     document.getElementById('modalBody').innerHTML = `
         <div class="order-stats">
-            <div>Date: ${order.date || 'N/A'}</div>
-            <div>Customer: ${order.customer || 'N/A'}</div>
-            <div>Status: ${order.status || 'Pending'}</div>
-            <div>Payment: ${order.paymentMethod || 'N/A'}</div>
-            <div>Total: $${(order.total || 0).toFixed(2)}</div>
+            <div><strong>Date:</strong> ${order.date || 'N/A'}</div>
+            <div><strong>Customer:</strong> ${order.customer || 'N/A'}</div>
+            <div><strong>Status:</strong> <span class="${order.status === 'Paid' ? 'status-paid' : 'status-pending'}">${order.status || 'Pending'}</span></div>
+            <div><strong>Payment:</strong> ${order.paymentMethod || 'N/A'}</div>
+            <div><strong>Total:</strong> <span class="status-paid">$${(order.total || 0).toFixed(2)}</span></div>
         </div>
         ${itemsHtml ? `<div class="order-section"><div class="section-title">📦 Items</div>${itemsHtml}</div>` : ''}
         ${order.otherRequests ? `<div class="order-section"><div class="section-title">📝 Notes</div><div>${order.otherRequests}</div></div>` : ''}
