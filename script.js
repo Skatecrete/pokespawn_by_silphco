@@ -226,10 +226,10 @@ function displaySpawns() {
         filtered = filtered.filter(function(p) { return p.isTopMasterLeague; });
     }
     if (filters.premierCup) {
-    filtered = filtered.filter(function(p) { return p.isTopPremierCup; });
+        filtered = filtered.filter(function(p) { return p.isTopPremierCup; });
     }
     if (filters.ultraPremier) {
-    filtered = filtered.filter(function(p) { return p.isTopUltraPremier; });
+        filtered = filtered.filter(function(p) { return p.isTopUltraPremier; });
     }
     
     if (filtered.length === 0) {
@@ -240,11 +240,17 @@ function displaySpawns() {
     var html = '';
     for (var i = 0; i < filtered.length; i++) {
         var p = filtered[i];
+        
+        // Check for NOPE (spawn rate below 0.01%)
+        var isNope = p.spawnRate < 0.01;
+        
         var badgeClass = '', badgeText = '';
-        if (p.spawnRate >= 0.85) { badgeClass = 'badge-heavy'; badgeText = 'HEAVY'; }
-        else if (p.spawnRate >= 0.65) { badgeClass = 'badge-medium'; badgeText = 'MEDIUM'; }
-        else if (p.spawnRate >= 0.30) { badgeClass = 'badge-low'; badgeText = 'LOW'; }
-        else { badgeClass = 'badge-minimal'; badgeText = 'MINIMAL'; }
+        if (!isNope) {
+            if (p.spawnRate >= 0.85) { badgeClass = 'badge-heavy'; badgeText = 'HEAVY'; }
+            else if (p.spawnRate >= 0.65) { badgeClass = 'badge-medium'; badgeText = 'MEDIUM'; }
+            else if (p.spawnRate >= 0.30) { badgeClass = 'badge-low'; badgeText = 'LOW'; }
+            else { badgeClass = 'badge-minimal'; badgeText = 'MINIMAL'; }
+        }
         
         // Build tags HTML
         var tagsHtml = '';
@@ -252,16 +258,26 @@ function displaySpawns() {
         if (p.isTopGreatLeague) tagsHtml += '<span class="pokemon-tag tag-great">🏆 Great League</span>';
         if (p.isTopUltraLeague) tagsHtml += '<span class="pokemon-tag tag-ultra">🏆 Ultra League</span>';
         if (p.isTopMasterLeague) tagsHtml += '<span class="pokemon-tag tag-master">🏆 Master League</span>';
-        if (p.isTopGreatLeague && !p.isTopUltraLeague && !p.isTopMasterLeague) tagsHtml += '<span class="pokemon-tag tag-pvp">🏆 Top PvP</span>';
         if (p.isTopPremierCup) tagsHtml += '<span class="pokemon-tag tag-premier">🏆 Premier Cup</span>';
         if (p.isTopUltraPremier) tagsHtml += '<span class="pokemon-tag tag-ultra-premier">🏆 Ultra Premier</span>';
         
         html += '<div class="pokemon-card" onclick=\'showSpawnOrderDialog(' + JSON.stringify(p).replace(/'/g, "&#39;") + ')\'>';
         html += '<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + p.id + '.png" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + p.id + '.png\'">';
         html += '<div class="pokemon-info">';
-        html += '<div class="pokemon-name">' + p.name + '<span class="spawn-badge ' + badgeClass + '">' + badgeText + '</span></div>';
+        
+        // Pokemon name with NOPE badge or spawn badge
+        html += '<div class="pokemon-name">' + p.name;
+        if (isNope) {
+            html += '<span class="spawn-badge badge-nope">💀 NOPE</span>';
+        } else if (badgeText) {
+            html += '<span class="spawn-badge ' + badgeClass + '">' + badgeText + '</span>';
+        }
+        html += '</div>';
+        
         html += '<div class="pokemon-tags">' + tagsHtml + '</div>';
-        html += '<div class="pokemon-details"><span class="spawn-rate">Spawn Rate: ' + p.spawnRate.toFixed(2) + '%</span> | <span class="shiny-rate">' + p.shinyRate + '</span></div>';
+        
+        // Spawn rate and shiny rate - spawn rate in bright green
+        html += '<div class="pokemon-details"><span class="spawn-rate-green">Spawn Rate: ' + p.spawnRate.toFixed(2) + '%</span> | <span class="shiny-rate">' + p.shinyRate + '</span></div>';
         html += '</div>';
         html += '<button class="order-btn" onclick="event.stopPropagation(); showSpawnOrderDialog(' + JSON.stringify(p).replace(/'/g, "&#39;") + ')">➕ Order</button>';
         html += '</div>';
