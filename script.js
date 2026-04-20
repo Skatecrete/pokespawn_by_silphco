@@ -882,7 +882,7 @@ function getEventPokemonImage(eventName) {
             return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + pokemonMap[pokemon] + '.png';
         }
     }
-    return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png';
+    return '';
 }
 
 // ========== DEBUT DATA (Only for Upcoming) ==========
