@@ -870,18 +870,21 @@ function getEventPokemonImage(eventName) {
     return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png';
 }
 
-// ========== DEBUT DATA ==========
+// ========== DEBUT DATA (Only for Upcoming) ==========
 async function loadDebutData() {
     try {
         const response = await fetch('https://raw.githubusercontent.com/Skatecrete/pogo-raid-data/main/debuts.json');
         const data = await response.json();
         var debuts = data.debuts || [];
         
+        // Use NZ time
         var nzTime = new Date().toLocaleString('en-US', { timeZone: 'Pacific/Auckland' });
         var todayNz = new Date(nzTime);
         todayNz.setHours(0, 0, 0, 0);
         
-        var activeDebut = null;
+        var upcomingDebut = null;
+        var closestStartDate = null;
+        
         for (var i = 0; i < debuts.length; i++) {
             var debut = debuts[i];
             var dateMatch = debut.event_date.match(/(\w+)\s+(\d+)(?:st|nd|rd|th)?/);
@@ -892,22 +895,26 @@ async function loadDebutData() {
                 var monthMap = { January: 0, February: 1, March: 2, April: 3, May: 4, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 };
                 var startDate = new Date(year, monthMap[month], day);
                 
-                if (startDate >= todayNz) {
-                    activeDebut = debut;
-                    break;
+                // Only show if start date is IN THE FUTURE (not today or past)
+                if (startDate > todayNz) {
+                    // Find the closest upcoming debut
+                    if (closestStartDate === null || startDate < closestStartDate) {
+                        closestStartDate = startDate;
+                        upcomingDebut = debut;
+                    }
                 }
             }
         }
         
-        if (activeDebut) {
-            displayDebutBanner(activeDebut);
+        if (upcomingDebut) {
+            displayDebutBanner(upcomingDebut, closestStartDate);
         }
     } catch (e) {
         console.error('Error loading debut data:', e);
     }
 }
 
-function displayDebutBanner(debut) {
+function displayDebutBanner(debut, startDate) {
     var banner = document.getElementById('debutBanner');
     var eventNameElem = document.getElementById('debutEventName');
     var countdownElem = document.getElementById('debutCountdown');
@@ -919,13 +926,20 @@ function displayDebutBanner(debut) {
     viewEventBtn.onclick = function() { findAndOpenLeekDuckEvent(debut.event_name); };
     currentDebutData = debut;
     
-    var endMatch = debut.event_date.match(/-\s*(\w+)\s+(\d+)(?:st|nd|rd|th)?\s+(\d{4})/);
-    if (endMatch) {
-        var monthMap = { January: 0, February: 1, March: 2, April: 3, May: 4, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 };
-        var endDate = new Date(parseInt(endMatch[3]), monthMap[endMatch[1]], parseInt(endMatch[2]));
-        var now = new Date();
-        var daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-        countdownElem.textContent = daysLeft > 0 ? 'Ends in ' + daysLeft + ' days' : 'Ends soon!';
+    // Calculate days until event starts
+    var now = new Date();
+    var daysUntil = Math.ceil((startDate - now) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntil > 0) {
+        countdownElem.textContent = '⏰ Starts in ' + daysUntil + ' days';
+        countdownElem.style.color = '#4CAF50';
+    } else if (daysUntil === 0) {
+        countdownElem.textContent = '⏰ Starts today!';
+        countdownElem.style.color = '#FFA500';
+    } else {
+        // Event already started - don't show in upcoming
+        banner.style.display = 'none';
+        return;
     }
     
     banner.style.display = 'block';
