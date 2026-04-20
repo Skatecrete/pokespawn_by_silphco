@@ -432,7 +432,7 @@ body {
     color: #aaa;
 }
 
-.pokemon-details .spawn-rate {
+.pokemon-details {
     color: #FFD700;
     font-weight: bold;
 }
@@ -454,6 +454,7 @@ body {
 .badge-medium { background: #FF9800; }
 .badge-low { background: #4CAF50; }
 .badge-minimal { background: #2196F3; }
+.badge-nope { background: #757575; }
 
 .order-btn {
     background: #4CAF50;
