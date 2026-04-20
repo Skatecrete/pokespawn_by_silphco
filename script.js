@@ -655,11 +655,24 @@ function addCoinToCart(amount) {
 
 // ========== CHECKOUT ==========
 function showCustomerDialog() {
+    var savedTimePref = localStorage.getItem('timePreference') || 'Whenever Possible';
+    
     document.getElementById('modalTitle').textContent = 'Who are you?! Reveal Yourself!';
     document.getElementById('modalBody').innerHTML = `
         <input type="text" id="customerName" placeholder="Your Name *" class="rsvp-input" value="${customerName}">
         <input type="text" id="customerIgn" placeholder="In-Game Name (PoGo Name) *" class="rsvp-input" value="${customerIgn}">
-        <div class="disclaimer">*Timed Events cannot have a predetermined time slot</div>
+        
+        <div style="margin-top: 12px; margin-bottom: 8px;">
+            <label style="font-size: 13px; font-weight: bold;">⏰ Preferred Time to Start Order</label>
+        </div>
+        <select id="timePreference" class="rsvp-input" style="background: #2a2a3e; color: white;">
+            <option value="Whenever Possible" ${savedTimePref === 'Whenever Possible' ? 'selected' : ''}>Whenever Possible</option>
+            <option value="Morning (US)" ${savedTimePref === 'Morning (US)' ? 'selected' : ''}>Morning (US)</option>
+            <option value="Midday (US)" ${savedTimePref === 'Midday (US)' ? 'selected' : ''}>Midday (US)</option>
+            <option value="Night/Overnight (US)" ${savedTimePref === 'Night/Overnight (US)' ? 'selected' : ''}>Night/Overnight (US)</option>
+        </select>
+        
+        <div class="disclaimer" style="margin-top: 12px;">*Timed Events cannot have a predetermined time slot, nor can all orders be considered at certain times given the amount of orders we may have.</div>
     `;
     document.getElementById('modalFooter').innerHTML = '<button class="cancel-btn" onclick="closeModal()">Cancel</button><button class="confirm-btn" onclick="saveCustomerInfo()">Save</button>';
     document.getElementById('orderModal').style.display = 'flex';
@@ -668,14 +681,27 @@ function showCustomerDialog() {
 function saveCustomerInfo() {
     var name = document.getElementById('customerName')?.value.trim();
     var ign = document.getElementById('customerIgn')?.value.trim();
-    if (!name || !ign) { showToast('Please enter both name and in-game name'); return; }
+    var timePref = document.getElementById('timePreference')?.value || 'Whenever Possible';
+    
+    if (!name || !ign) {
+        showToast('Please enter both name and in-game name');
+        return;
+    }
+    
     customerName = name;
     customerIgn = ign;
+    
+    // Save time preference to localStorage for next time
+    localStorage.setItem('timePreference', timePref);
+    
     closeModal();
-    showAdminSelection();
+    showAdminSelection(timePref);
 }
 
-function showAdminSelection() {
+var currentTimePreference = '';
+
+function showAdminSelection(timePref) {
+    currentTimePreference = timePref;
     document.getElementById('modalTitle').textContent = 'Choose Your Admin';
     document.getElementById('modalBody').innerHTML = `
         <div class="admin-select">
@@ -692,6 +718,12 @@ function selectAdminAndPay(admin) {
     selectedAdmin = admin;
     var total = getCartTotal();
     var notes = document.getElementById('notesInput')?.value || '';
+    
+    // Add time preference to notes if not "Whenever Possible"
+    var finalNotes = notes;
+    if (currentTimePreference && currentTimePreference !== 'Whenever Possible') {
+        finalNotes = finalNotes ? finalNotes + '\n\n⏰ Time Preference: ' + currentTimePreference : '⏰ Time Preference: ' + currentTimePreference;
+    }
     
     var paymentHtml = '';
     if (admin === 'Dan') {
@@ -745,8 +777,9 @@ function selectAdminAndPay(admin) {
             <strong>Customer:</strong> ${customerName} (${customerIgn})<br>
             <strong>Admin:</strong> ${admin}<br>
             <strong>Total:</strong> $${total.toFixed(2)}
+            ${currentTimePreference && currentTimePreference !== 'Whenever Possible' ? '<br><strong>Time Preference:</strong> ' + currentTimePreference : ''}
         </div>
-        ${notes ? '<div class="order-section"><div class="section-title">📝 Notes</div><div>' + notes + '</div></div>' : ''}
+        ${finalNotes ? '<div class="order-section"><div class="section-title">📝 Notes</div><div>' + finalNotes + '</div></div>' : ''}
         ${paymentHtml}
         <div class="disclaimer">Once payment is received, your order will be placed in queue 🧙</div>
     `;
@@ -770,10 +803,16 @@ async function submitOrder() {
     var notes = document.getElementById('notesInput')?.value || '';
     var fullCustomerName = customerName + ' (' + customerIgn + ')';
     
+    // Add time preference to notes for the order
+    var finalNotes = notes;
+    if (currentTimePreference && currentTimePreference !== 'Whenever Possible') {
+        finalNotes = finalNotes ? finalNotes + '\n\nTime Preference: ' + currentTimePreference : 'Time Preference: ' + currentTimePreference;
+    }
+    
     var orderData = {
         type: 'submitOrder',
         customerName: fullCustomerName,
-        otherRequests: notes,
+        otherRequests: finalNotes,
         paymentMethod: 'Web Order',
         assignedAdmin: selectedAdmin,
         items: cartItems.map(function(item) {
