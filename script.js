@@ -210,6 +210,10 @@ function showSpawnOrderDialog(pokemon) {
     currentSpawnPokemon = pokemon;
     spawnQuantities = { shundo: 0, hundo: 0, shiny: 0 };
     
+    const shundoPrice = pricingCache['Spawn_Shundo'] || 5;
+    const hundoPrice = pricingCache['Spawn_Hundo'] || 3;
+    const shinyPrice = pricingCache['Spawn_Shiny'] || 2;
+    
     document.getElementById('modalTitle').textContent = `Order ${pokemon.name}`;
     document.getElementById('modalBody').innerHTML = `
         <div class="order-stats">
@@ -219,7 +223,7 @@ function showSpawnOrderDialog(pokemon) {
         
         ${pokemon.spawnRate >= 0.65 && pokemon.isShiny ? `
         <div class="order-section">
-            <div class="section-title">✨ SHUNDO (100% IV + SHINY) - $${pricingCache['Spawn_Shundo'] || 5} EACH</div>
+            <div class="section-title">✨ SHUNDO (100% IV + SHINY) - $${shundoPrice} EACH</div>
             <div class="quantity-selector">
                 <button class="qty-btn" onclick="updateSpawnQty('shundo', -1)">-</button>
                 <span id="shundoQty" class="qty-num">0</span>
@@ -230,7 +234,7 @@ function showSpawnOrderDialog(pokemon) {
         ` : ''}
         
         <div class="order-section">
-            <div class="section-title">💯 HUNDO (100% IV) - $${pricingCache['Spawn_Hundo'] || 3} EACH</div>
+            <div class="section-title">💯 HUNDO (100% IV) - $${hundoPrice} EACH</div>
             <div class="quantity-selector">
                 <button class="qty-btn" onclick="updateSpawnQty('hundo', -1)">-</button>
                 <span id="hundoQty" class="qty-num">0</span>
@@ -240,7 +244,7 @@ function showSpawnOrderDialog(pokemon) {
         </div>
         
         <div class="order-section">
-            <div class="section-title">✨ SHINY (Random IVs) - $${pricingCache['Spawn_Shiny'] || 2} EACH</div>
+            <div class="section-title">✨ SHINY (Random IVs) - $${shinyPrice} EACH</div>
             <div class="quantity-selector">
                 <button class="qty-btn" onclick="updateSpawnQty('shiny', -1)">-</button>
                 <span id="shinyQty" class="qty-num">0</span>
@@ -642,6 +646,7 @@ function showAdminSelection() {
 function selectAdminAndPay(admin) {
     selectedAdmin = admin;
     const total = getCartTotal();
+    const notes = document.getElementById('notesInput')?.value || '';
     
     let paymentHtml = '';
     if (admin === 'Dan') {
@@ -661,6 +666,7 @@ function selectAdminAndPay(admin) {
             <strong>Admin:</strong> ${admin}<br>
             <strong>Total:</strong> $${total.toFixed(2)}
         </div>
+        ${notes ? `<div class="order-section"><div class="section-title">📝 Notes</div><div>${notes}</div></div>` : ''}
         ${paymentHtml}
         <div class="disclaimer">Once payment is received, your order will be placed in queue 🧙</div>
     `;
@@ -669,18 +675,20 @@ function selectAdminAndPay(admin) {
 }
 
 async function submitOrder() {
-    if (!cartItems.length && !document.getElementById('otherRequests')?.value) {
-        showToast('Add items or enter custom requests');
+    if (!cartItems.length) {
+        showToast('Add items to your cart first');
         return;
     }
     
     showLoading('Submitting order...');
     
-    const otherRequests = document.getElementById('notesInput')?.value || '';
+    const notes = document.getElementById('notesInput')?.value || '';
+    const fullCustomerName = `${customerName} (${customerIgn})`;
+    
     const orderData = {
         type: 'submitOrder',
-        customerName: `${customerName} (${customerIgn})`,
-        otherRequests: otherRequests,
+        customerName: fullCustomerName,
+        otherRequests: notes,
         paymentMethod: 'Web Order',
         assignedAdmin: selectedAdmin,
         items: cartItems.map(item => ({
@@ -705,6 +713,7 @@ async function submitOrder() {
         if (data.status === 'success') {
             showToast('Order submitted! You gained Aura 😎');
             clearCart();
+            document.getElementById('notesInput').value = '';
             closeModal();
         } else {
             showToast('Order failed. Please try again or contact admin.');
@@ -715,7 +724,7 @@ async function submitOrder() {
     }
 }
 
-// ========== EVENTS ==========
+// ========== EVENTS WITH POKEMON IMAGES ==========
 async function loadEvents() {
     try {
         const response = await fetch('https://leekduck.com/feeds/events.json');
@@ -756,11 +765,17 @@ function displayCurrentEvents(events) {
     }
     
     container.innerHTML = events.map(e => `
-        <div class="event-card">
-            <div class="event-title">${e.name}</div>
-            <div class="event-date">🟢 ${new Date(e.start).toLocaleString()}</div>
-            <div class="event-date">🔴 ${new Date(e.end).toLocaleString()}</div>
-            <a href="${e.link}" target="_blank" class="event-link">🔗 View Event →</a>
+        <div class="event-card-with-img">
+            <img src="${getEventPokemonImage(e.name)}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'">
+            <div class="event-info">
+                <div class="event-name">${e.name}</div>
+                <div class="event-heading">${e.heading || 'Event'}</div>
+                <div class="event-time">🟢 ${new Date(e.start).toLocaleString()}</div>
+                <div class="event-time">🔴 ${new Date(e.end).toLocaleString()}</div>
+            </div>
+            <div class="event-buttons">
+                <button class="event-view-btn" onclick="window.open('${e.link}', '_blank')">View</button>
+            </div>
         </div>
     `).join('');
 }
@@ -775,16 +790,41 @@ function displayUpcomingEvents(events) {
     }
     
     container.innerHTML = events.map(e => `
-        <div class="event-card">
-            <div class="event-title">${e.name}</div>
-            <div class="event-date">🟢 Starts: ${new Date(e.start).toLocaleString()}</div>
-            <div class="event-date">🔴 Ends: ${new Date(e.end).toLocaleString()}</div>
-            <a href="${e.link}" target="_blank" class="event-link">🔗 View Event →</a>
-            <button class="rsvp-btn" onclick='showRSVPDialog("${e.name.replace(/'/g, "\\'")}", "${e.link}", "${new Date(e.start).toLocaleString()}", "${new Date(e.end).toLocaleString()}")'>📝 RSVP</button>
+        <div class="event-card-with-img">
+            <img src="${getEventPokemonImage(e.name)}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'">
+            <div class="event-info">
+                <div class="event-name">${e.name}</div>
+                <div class="event-heading">${e.heading || 'Event'}</div>
+                <div class="event-time">🟢 Starts: ${new Date(e.start).toLocaleString()}</div>
+                <div class="event-time">🔴 Ends: ${new Date(e.end).toLocaleString()}</div>
+            </div>
+            <div class="event-buttons">
+                <button class="event-view-btn" onclick="window.open('${e.link}', '_blank')">View</button>
+                <button class="event-rsvp-btn" onclick='showRSVPDialog("${e.name.replace(/'/g, "\\'")}", "${e.link}", "${new Date(e.start).toLocaleString()}", "${new Date(e.end).toLocaleString()}")'>RSVP</button>
+            </div>
         </div>
     `).join('');
 }
 
+function getEventPokemonImage(eventName) {
+    const pokemonMap = {
+        'Pikachu': 25, 'Slowbro': 80, 'Zamazenta': 889, 'Regieleki': 894,
+        'Houndoom': 229, 'Latias': 380, 'Regidrago': 895, 'Kyogre': 382,
+        'Groudon': 383, 'Tapu Koko': 785, 'Tapu Lele': 786, 'Manectric': 310,
+        'Aerodactyl': 142, 'Alakazam': 65, 'Sharpedo': 319, 'Banette': 354,
+        'Latios': 381, 'Tinkatink': 957, 'Woobat': 527, 'Trapinch': 328,
+        'Drilbur': 529, 'Regirock': 377, 'Shuckle': 213
+    };
+    
+    for (const [pokemon, id] of Object.entries(pokemonMap)) {
+        if (eventName.includes(pokemon)) {
+            return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+        }
+    }
+    return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png';
+}
+
+// ========== DEBUT DATA ==========
 async function loadDebutData() {
     try {
         const response = await fetch('https://raw.githubusercontent.com/Skatecrete/pogo-raid-data/main/debuts.json');
@@ -950,12 +990,14 @@ async function loadCustomerHistory() {
     showLoading('Loading your history...');
     
     try {
-        const response = await fetch(SCRIPT_URL, {
+        const fullCustomerName = `${name} (${ign})`;
+        
+        const orderResponse = await fetch(SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: 'getCustomerOrders', customerName: `${name} (${ign})` })
+            body: JSON.stringify({ type: 'getCustomerOrders', customerName: fullCustomerName })
         });
-        const data = await response.json();
+        const orderData = await orderResponse.json();
         
         const rsvpResponse = await fetch(SCRIPT_URL, {
             method: 'POST',
@@ -965,9 +1007,20 @@ async function loadCustomerHistory() {
         const rsvpData = await rsvpResponse.json();
         
         hideLoading();
-        displayCustomerHistory(data.orders || [], rsvpData.rsvps || []);
+        
+        if (orderData.status === 'success' || rsvpData.status === 'success') {
+            displayCustomerHistory(orderData.orders || [], rsvpData.rsvps || []);
+        } else {
+            document.getElementById('historyEmpty').style.display = 'block';
+            document.getElementById('historyOrders').style.display = 'none';
+            document.getElementById('historyRSVPs').style.display = 'none';
+            if (!orderData.orders?.length && !rsvpData.rsvps?.length) {
+                showToast('No history found');
+            }
+        }
     } catch (e) {
         hideLoading();
+        console.error('History error:', e);
         showToast('Failed to load history');
     }
 }
@@ -983,17 +1036,25 @@ function displayCustomerHistory(orders, rsvps) {
     
     if (orders && orders.length) {
         ordersSection.style.display = 'block';
-        ordersContainer.innerHTML = orders.map(order => `
-            <div class="order-history-item" onclick='showOrderDetail(${JSON.stringify(order).replace(/'/g, "&#39;")})'>
-                <div class="order-history-header">
-                    <span class="order-id">${order.orderId}</span>
-                    <span class="order-total">$${order.total.toFixed(2)}</span>
+        ordersContainer.innerHTML = orders.map(order => {
+            let itemsDisplay = order.items || '';
+            if (typeof order.items === 'string') {
+                itemsDisplay = order.items.replace(/, /g, '<br>• ');
+                if (itemsDisplay) itemsDisplay = '• ' + itemsDisplay;
+            }
+            
+            return `
+                <div class="order-history-item" onclick='showOrderDetail(${JSON.stringify(order).replace(/'/g, "&#39;")})'>
+                    <div class="order-history-header">
+                        <span class="order-id">${order.orderId || 'Order'}</span>
+                        <span class="order-total">$${(order.total || 0).toFixed(2)}</span>
+                    </div>
+                    <div class="order-details">${itemsDisplay || 'No items'}</div>
+                    <div class="order-status ${order.status === 'Paid' ? 'status-paid' : 'status-pending'}">${order.status || 'Pending'}</div>
+                    <div class="order-details">${order.date || ''}</div>
                 </div>
-                <div class="order-details">${order.items || 'Order details'}</div>
-                <div class="order-status ${order.status === 'Paid' ? 'status-paid' : 'status-pending'}">${order.status}</div>
-                <div class="order-details">${order.date}</div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
         hasData = true;
     } else {
         ordersSection.style.display = 'none';
@@ -1003,10 +1064,10 @@ function displayCustomerHistory(orders, rsvps) {
         rsvpsSection.style.display = 'block';
         rsvpsContainer.innerHTML = rsvps.map(rsvp => `
             <div class="rsvp-history-item">
-                <div class="rsvp-event-name" onclick="window.open('${rsvp.eventLink}', '_blank')">${rsvp.eventName}</div>
-                <div class="rsvp-event-date">📅 ${rsvp.eventDate}</div>
-                <div class="order-details">RSVP'd: ${rsvp.date}</div>
-                <div class="order-status ${rsvp.status === 'Confirmed' ? 'status-paid' : 'status-pending'}">${rsvp.status}</div>
+                <div class="rsvp-event-name" onclick="window.open('${rsvp.eventLink || ''}', '_blank')">${rsvp.eventName || 'Event'}</div>
+                <div class="rsvp-event-date">📅 ${rsvp.eventDate || rsvp.eventStartDate || ''}</div>
+                <div class="order-details">RSVP'd: ${rsvp.date || ''}</div>
+                <div class="order-status ${rsvp.status === 'Confirmed' ? 'status-paid' : 'status-pending'}">${rsvp.status || 'Pending'}</div>
             </div>
         `).join('');
         hasData = true;
@@ -1019,19 +1080,25 @@ function displayCustomerHistory(orders, rsvps) {
 
 function showOrderDetail(order) {
     let itemsHtml = '';
-    if (order.itemsList) {
-        itemsHtml = order.itemsList.map(item => `<div>• ${item}</div>`).join('');
+    if (order.items) {
+        if (typeof order.items === 'string') {
+            const itemsList = order.items.split(', ');
+            itemsHtml = itemsList.map(item => `<div>• ${item}</div>`).join('');
+        } else if (Array.isArray(order.items)) {
+            itemsHtml = order.items.map(item => `<div>• ${item.pokemon || item}</div>`).join('');
+        }
     }
     
-    document.getElementById('modalTitle').textContent = `Order ${order.orderId}`;
+    document.getElementById('modalTitle').textContent = `Order ${order.orderId || 'Details'}`;
     document.getElementById('modalBody').innerHTML = `
         <div class="order-stats">
-            <div>Date: ${order.date}</div>
-            <div>Customer: ${order.customer}</div>
-            <div>Status: ${order.status}</div>
+            <div>Date: ${order.date || 'N/A'}</div>
+            <div>Customer: ${order.customer || 'N/A'}</div>
+            <div>Status: ${order.status || 'Pending'}</div>
             <div>Payment: ${order.paymentMethod || 'N/A'}</div>
-            <div>Total: $${order.total.toFixed(2)}</div>
+            <div>Total: $${(order.total || 0).toFixed(2)}</div>
         </div>
+        ${itemsHtml ? `<div class="order-section"><div class="section-title">📦 Items</div>${itemsHtml}</div>` : ''}
         ${order.otherRequests ? `<div class="order-section"><div class="section-title">📝 Notes</div><div>${order.otherRequests}</div></div>` : ''}
     `;
     document.getElementById('modalFooter').innerHTML = '<button class="confirm-btn" onclick="closeModal()">Close</button>';
