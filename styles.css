@@ -432,6 +432,11 @@ body {
     color: #aaa;
 }
 
+.pokemon-details .spawn-rate {
+    color: #FFD700;
+    font-weight: bold;
+}
+
 .shiny-rate {
     color: #FFD700;
     font-weight: bold;
