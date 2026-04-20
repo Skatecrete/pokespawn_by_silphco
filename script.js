@@ -1178,22 +1178,46 @@ function displayCustomerHistory(orders, rsvps) {
         var ordersHtml = '';
         for (var i = 0; i < orders.length; i++) {
             var order = orders[i];
-            var itemsDisplay = order.items || '';
-            if (typeof order.items === 'string') {
+            
+            // Build items display correctly
+            var itemsDisplay = '';
+            if (order.items && order.items.length) {
+                for (var j = 0; j < order.items.length; j++) {
+                    var item = order.items[j];
+                    var huntType = item.huntType || '';
+                    var pokemon = item.pokemon || '';
+                    var quantity = item.quantity || '1';
+                    var coins = item.coins || '';
+                    
+                    if (huntType === 'Coins') {
+                        itemsDisplay += '• ' + coins + ' Coins<br>';
+                    } else if (huntType === 'Raid') {
+                        var raidType = item.raidType || '';
+                        itemsDisplay += '• ' + huntType + ': ' + pokemon + ' (' + raidType + ') x' + quantity + '<br>';
+                    } else {
+                        itemsDisplay += '• ' + huntType + ': ' + pokemon + ' x' + quantity + '<br>';
+                    }
+                }
+            } else if (typeof order.items === 'string') {
+                // Fallback for string format
                 var itemsList = order.items.split(', ');
-                itemsDisplay = '';
                 for (var j = 0; j < itemsList.length; j++) {
                     itemsDisplay += '• ' + itemsList[j] + '<br>';
                 }
             }
+            
+            var statusClass = (order.status === 'Paid' || order.status === 'Completed') ? 'status-paid' : 'status-pending';
+            var statusText = order.status || 'Pending';
+            var orderDate = order.date ? order.date.split(' ')[0] : '';
+            
             ordersHtml += '<div class="order-history-item" onclick=\'showOrderDetail(' + JSON.stringify(order).replace(/'/g, "&#39;") + ')\'>';
             ordersHtml += '<div class="order-history-header">';
             ordersHtml += '<span class="order-id">' + (order.orderId || 'Order') + '</span>';
             ordersHtml += '<span class="order-total">$' + (order.total || 0).toFixed(2) + '</span>';
             ordersHtml += '</div>';
             ordersHtml += '<div class="order-details">' + itemsDisplay + '</div>';
-            ordersHtml += '<div class="order-status ' + (order.status === 'Paid' ? 'status-paid' : 'status-pending') + '">' + (order.status || 'Pending') + '</div>';
-            ordersHtml += '<div class="order-details">' + (order.date ? order.date.split(' ')[0] : '') + '</div>';
+            ordersHtml += '<div class="order-status ' + statusClass + '">' + statusText + '</div>';
+            ordersHtml += '<div class="order-details">' + orderDate + '</div>';
             ordersHtml += '</div>';
         }
         ordersContainer.innerHTML = ordersHtml;
@@ -1207,11 +1231,12 @@ function displayCustomerHistory(orders, rsvps) {
         var rsvpsHtml = '';
         for (var i = 0; i < rsvps.length; i++) {
             var rsvp = rsvps[i];
+            var statusClass = (rsvp.status === 'Confirmed') ? 'status-paid' : 'status-pending';
             rsvpsHtml += '<div class="rsvp-history-item">';
             rsvpsHtml += '<div class="rsvp-event-name" onclick="window.open(\'' + (rsvp.eventLink || '') + '\', \'_blank\')">' + (rsvp.eventName || 'Event') + '</div>';
             rsvpsHtml += '<div class="rsvp-event-date">📅 ' + (rsvp.eventDate || rsvp.eventStartDate || '') + '</div>';
             rsvpsHtml += '<div class="order-details">RSVP\'d: ' + (rsvp.date ? rsvp.date.split(' ')[0] : '') + '</div>';
-            rsvpsHtml += '<div class="order-status ' + (rsvp.status === 'Confirmed' ? 'status-paid' : 'status-pending') + '">' + (rsvp.status || 'Pending') + '</div>';
+            rsvpsHtml += '<div class="order-status ' + statusClass + '">' + (rsvp.status || 'Pending') + '</div>';
             rsvpsHtml += '</div>';
         }
         rsvpsContainer.innerHTML = rsvpsHtml;
@@ -1225,19 +1250,35 @@ function displayCustomerHistory(orders, rsvps) {
 
 function showOrderDetail(order) {
     var itemsHtml = '';
-    if (order.items) {
-        if (typeof order.items === 'string') {
-            var itemsList = order.items.split(', ');
-            for (var i = 0; i < itemsList.length; i++) {
-                itemsHtml += '<div>• ' + itemsList[i] + '</div>';
+    if (order.items && order.items.length) {
+        for (var i = 0; i < order.items.length; i++) {
+            var item = order.items[i];
+            var huntType = item.huntType || '';
+            var pokemon = item.pokemon || '';
+            var quantity = item.quantity || '1';
+            var coins = item.coins || '';
+            var price = item.price || 0;
+            
+            if (huntType === 'Coins') {
+                itemsHtml += '<div>• ' + coins + ' Coins x' + quantity + ' - $' + price.toFixed(2) + '</div>';
+            } else if (huntType === 'Raid') {
+                var raidType = item.raidType || '';
+                itemsHtml += '<div>• ' + huntType + ': ' + pokemon + ' (' + raidType + ') x' + quantity + ' - $' + price.toFixed(2) + '</div>';
+            } else {
+                itemsHtml += '<div>• ' + huntType + ': ' + pokemon + ' x' + quantity + ' - $' + price.toFixed(2) + '</div>';
             }
+        }
+    } else if (typeof order.items === 'string') {
+        var itemsList = order.items.split(', ');
+        for (var i = 0; i < itemsList.length; i++) {
+            itemsHtml += '<div>• ' + itemsList[i] + '</div>';
         }
     }
     
     document.getElementById('modalTitle').textContent = 'Order ' + (order.orderId || 'Details');
     document.getElementById('modalBody').innerHTML = `
         <div class="order-stats">
-            <div><strong>Date:</strong> ${order.date || 'N/A'}</div>
+            <div><strong>Date:</strong> ${order.date ? order.date.split(' ')[0] : 'N/A'}</div>
             <div><strong>Customer:</strong> ${order.customer || 'N/A'}</div>
             <div><strong>Status:</strong> <span class="${order.status === 'Paid' ? 'status-paid' : 'status-pending'}">${order.status || 'Pending'}</span></div>
             <div><strong>Payment:</strong> ${order.paymentMethod || 'N/A'}</div>
