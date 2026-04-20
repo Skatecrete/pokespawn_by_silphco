@@ -4,7 +4,7 @@ let cartItems = [];
 let customerName = '';
 let customerIgn = '';
 let selectedAdmin = '';
-let filters = { shundo: false, shiny164: false, regional: false, pvp: false };
+let filters = { shundo: false, shiny164: false, regional: false, greatLeague: false, ultraLeague: false, masterLeague: false };
 let currentSearch = '';
 let currentDebutData = null;
 
@@ -117,7 +117,10 @@ async function loadSpawns() {
                 isShiny: isShiny,
                 shinyRate: isShiny ? (isPermaboosted ? '✨ 1/64' : '✨ 1/512') : '❌ Not available',
                 isRegional: isRegionalPokemon(name),
-                isTopPvP: isTopPvPPokemon(name)
+                isTopPvP: isTopPvPPokemon(name),
+                isTopGreatLeague: isTopGreatLeaguePokemon(name),
+                isTopUltraLeague: isTopUltraLeaguePokemon(name),
+                isTopMasterLeague: isTopMasterLeaguePokemon(name)
             });
         }
         
@@ -137,10 +140,26 @@ function isRegionalPokemon(name) {
     return false;
 }
 
-function isTopPvPPokemon(name) {
-    var pvpPokemon = ['Aegislash', 'Carbink', 'Giratina', 'Zygarde', 'Clodsire', 'Registeel', 'Azumarill', 'Lucario', 'Altaria', 'Cresselia', 'Forretress', 'Tentacruel', 'Moltres', 'Jellicent', 'Cobalion', 'Regidrago', 'Dialga', 'Metagross', 'Garchomp', 'Snorlax'];
-    for (var i = 0; i < pvpPokemon.length; i++) {
-        if (name.includes(pvpPokemon[i])) return true;
+function isTopGreatLeaguePokemon(name) {
+    var greatLeague = ['Aegislash', 'Carbink', 'Giratina', 'Zygarde', 'Clodsire', 'Registeel', 'Azumarill', 'Lucario', 'Altaria', 'Turtonator', 'Regidrago', 'Crustle', 'Skeledirge', 'Diggersby', 'Kommo-o', 'Torkoal', 'Clefable', 'Regirock', 'Genesect', 'Goodra', 'Latias', 'Machamp', 'Cetitan', 'Pangoro', 'Murkrow', 'Raikou', 'Rufflet'];
+    for (var i = 0; i < greatLeague.length; i++) {
+        if (name.includes(greatLeague[i])) return true;
+    }
+    return false;
+}
+
+function isTopUltraLeaguePokemon(name) {
+    var ultraLeague = ['Zygarde', 'Giratina', 'Cresselia', 'Forretress', 'Registeel', 'Skeledirge', 'Pecharunt', 'Tentacruel', 'Moltres', 'Jellicent', 'Cobalion', 'Regidrago', 'Tinkaton', 'Grumpig', 'Dusknoir', 'Crustle', 'Lapras', 'Turtonator', 'Steelix', 'Lucario', 'Clefable', 'Lickilicky', 'Florges', 'Genesect', 'Dialga', 'Latias', 'Regirock'];
+    for (var i = 0; i < ultraLeague.length; i++) {
+        if (name.includes(ultraLeague[i])) return true;
+    }
+    return false;
+}
+
+function isTopMasterLeaguePokemon(name) {
+    var masterLeague = ['Zygarde', 'Eternatus', 'Dialga', 'Giratina', 'Meloetta', 'Yveltal', 'Kyurem', 'Reshiram', 'Palkia', 'Zekrom', 'Zamazenta', 'Lugia', 'Ho-Oh', 'Metagross', 'Goodra', 'Lunala', 'Xerneas', 'Urshifu', 'Garchomp', 'Latias'];
+    for (var i = 0; i < masterLeague.length; i++) {
+        if (name.includes(masterLeague[i])) return true;
     }
     return false;
 }
@@ -183,6 +202,15 @@ function displaySpawns() {
     if (filters.pvp) {
         filtered = filtered.filter(function(p) { return p.isTopPvP; });
     }
+    if (filters.greatLeague) {
+        filtered = filtered.filter(function(p) { return p.isTopGreatLeague; });
+    }
+    if (filters.ultraLeague) {
+        filtered = filtered.filter(function(p) { return p.isTopUltraLeague; });
+    }
+    if (filters.masterLeague) {
+        filtered = filtered.filter(function(p) { return p.isTopMasterLeague; });
+    }
     
     if (filtered.length === 0) {
         container.innerHTML = '<div class="loading">No spawns found</div>';
@@ -198,15 +226,20 @@ function displaySpawns() {
         else if (p.spawnRate >= 0.30) { badgeClass = 'badge-low'; badgeText = 'LOW'; }
         else { badgeClass = 'badge-minimal'; badgeText = 'MINIMAL'; }
         
+        // Build tags HTML
+        var tagsHtml = '';
+        if (p.isRegional) tagsHtml += '<span class="pokemon-tag tag-regional">🌍 Regional</span>';
+        if (p.isTopGreatLeague) tagsHtml += '<span class="pokemon-tag tag-great">🏆 Great League</span>';
+        if (p.isTopUltraLeague) tagsHtml += '<span class="pokemon-tag tag-ultra">🏆 Ultra League</span>';
+        if (p.isTopMasterLeague) tagsHtml += '<span class="pokemon-tag tag-master">🏆 Master League</span>';
+        if (p.isTopPvP && !p.isTopGreatLeague && !p.isTopUltraLeague && !p.isTopMasterLeague) tagsHtml += '<span class="pokemon-tag tag-pvp">🏆 Top PvP</span>';
+        
         html += '<div class="pokemon-card" onclick=\'showSpawnOrderDialog(' + JSON.stringify(p).replace(/'/g, "&#39;") + ')\'>';
         html += '<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + p.id + '.png" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + p.id + '.png\'">';
         html += '<div class="pokemon-info">';
-        html += '<div class="pokemon-name">' + p.name;
-        html += '<span class="spawn-badge ' + badgeClass + '">' + badgeText + '</span>';
-        if (p.isRegional) html += '<span style="background:#2196F3;font-size:10px;padding:2px 6px;border-radius:12px;margin-left:4px;">🌍 Regional</span>';
-        if (p.isTopPvP) html += '<span style="background:#F44336;font-size:10px;padding:2px 6px;border-radius:12px;margin-left:4px;">🏆 PvP</span>';
-        html += '</div>';
-        html += '<div class="pokemon-details">Rate: ' + p.spawnRate.toFixed(2) + '% | <span class="shiny-rate">' + p.shinyRate + '</span></div>';
+        html += '<div class="pokemon-name">' + p.name + '<span class="spawn-badge ' + badgeClass + '">' + badgeText + '</span></div>';
+        html += '<div class="pokemon-tags">' + tagsHtml + '</div>';
+        html += '<div class="pokemon-details">Spawn Rate: ' + p.spawnRate.toFixed(2) + '% | <span class="shiny-rate">' + p.shinyRate + '</span></div>';
         html += '</div>';
         html += '<button class="order-btn" onclick="event.stopPropagation(); showSpawnOrderDialog(' + JSON.stringify(p).replace(/'/g, "&#39;") + ')">➕ Order</button>';
         html += '</div>';
