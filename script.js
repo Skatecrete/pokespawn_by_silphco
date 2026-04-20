@@ -821,7 +821,7 @@ function displayCurrentEvents(events) {
     for (var i = 0; i < events.length; i++) {
         var e = events[i];
         html += '<div class="event-card-with-img">';
-        html += '<img src="' + getEventPokemonImage(e.name) + '" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png\'">';
+        html += '<img src="' + getEventPokemonImage(e.name) + '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%237627C5\'/%3E%3Ctext x=\'50\' y=\'70\' text-anchor=\'middle\' fill=\'white\' font-size=\'50\'%3E😎%3C/text%3E%3C/svg%3E\'">';
         html += '<div class="event-info">';
         html += '<div class="event-name">' + e.name + '</div>';
         html += '<div class="event-heading">' + (e.heading || 'Event') + '</div>';
@@ -848,7 +848,7 @@ function displayUpcomingEvents(events) {
     for (var i = 0; i < events.length; i++) {
         var e = events[i];
         html += '<div class="event-card-with-img">';
-        html += '<img src="' + getEventPokemonImage(e.name) + '" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png\'">';
+        html += '<img src="' + getEventPokemonImage(e.name) + '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%237627C5\'/%3E%3Ctext x=\'50\' y=\'70\' text-anchor=\'middle\' fill=\'white\' font-size=\'50\'%3E😎%3C/text%3E%3C/svg%3E\'">';
         html += '<div class="event-info">';
         html += '<div class="event-name">' + e.name + '</div>';
         html += '<div class="event-heading">' + (e.heading || 'Event') + '</div>';
