@@ -1,7 +1,7 @@
 {
     "name": "PokeSpawn_by_SilphCo",
     "short_name": "PokeSpawn",
-    "description": "Pokémon GO spawn hunting and raid service",
+    "description": "View or order current spawns, raids, events, and more!",
     "start_url": "/",
     "display": "standalone",
     "theme_color": "#7627C5",
