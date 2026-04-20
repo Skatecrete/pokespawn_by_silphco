@@ -9,7 +9,7 @@ let currentSearch = '';
 let currentDebutData = null;
 
 // Apps Script URL
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx6i6Yn7ezXqwJKgZF3Mbq_MbgNeb4mQ8weT0Qipu0c9ASFRVK6l-HIdH83xFbJOeI4/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx9OcqWQQGFO2CT8UyWSiTGl5cyJ63p9BG1g1BXGf9eBlgiWZ1hcWQYt50E3dxX7KSx-A/exec';
 
 // Pricing cache
 let pricingCache = {};
