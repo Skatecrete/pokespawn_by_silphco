@@ -81,11 +81,22 @@
             </div>
 
             <!-- Upcoming Events Tab -->
-            <div id="upcoming" class="tab-content">
-                <div id="upcomingEventsList" class="list-container">
-                    <div class="loading">Loading events...</div>
-                </div>
+<div id="upcoming" class="tab-content">
+    <div id="debutBanner" class="debut-banner" style="display:none">
+        <div class="debut-content">
+            <div class="debut-title">🎉 NEW POKÉMON DEBUT 🎉</div>
+            <div class="debut-event-name" id="debutEventName"></div>
+            <div class="debut-countdown" id="debutCountdown"></div>
+            <div class="debut-buttons">
+                <button class="debut-btn view-debuts" onclick="showDebutDetails()">View Debut Mon</button>
+                <button class="debut-btn view-event" id="debutViewEventBtn">View Event</button>
             </div>
+        </div>
+    </div>
+    <div id="upcomingEventsList" class="list-container">
+        <div class="loading">Loading events...</div>
+    </div>
+</div></div>
 
             <!-- Orders Tab -->
             <div id="orders" class="tab-content">
