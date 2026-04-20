@@ -1109,6 +1109,147 @@ async function submitRSVP(eventName, eventLink, startDate, endDate, admin) {
     }
 }
 
+// ========== CUSTOMER HISTORY ==========
+async function loadCustomerHistory() {
+    var name = document.getElementById('historyName')?.value.trim();
+    var ign = document.getElementById('historyIgn')?.value.trim();
+    
+    if (!name || !ign) {
+        showToast('Enter both your name and in-game name');
+        return;
+    }
+    
+    showLoading('Loading your history...');
+    
+    try {
+        var fullCustomerName = name + ' (' + ign + ')';
+        
+        var orderResponse = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                type: 'getCustomerOrders', 
+                customerName: fullCustomerName 
+            })
+        });
+        var orderData = await orderResponse.json();
+        
+        var rsvpResponse = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                type: 'getCustomerRSVPs', 
+                customerName: name, 
+                ingameName: ign 
+            })
+        });
+        var rsvpData = await rsvpResponse.json();
+        
+        hideLoading();
+        
+        if (orderData.status === 'success' || rsvpData.status === 'success') {
+            displayCustomerHistory(orderData.orders || [], rsvpData.rsvps || []);
+        } else {
+            document.getElementById('historyEmpty').style.display = 'block';
+            document.getElementById('historyOrders').style.display = 'none';
+            document.getElementById('historyRSVPs').style.display = 'none';
+            if ((!orderData.orders || !orderData.orders.length) && (!rsvpData.rsvps || !rsvpData.rsvps.length)) {
+                showToast('No history found');
+            }
+        }
+    } catch (e) {
+        hideLoading();
+        console.error('History error:', e);
+        showToast('Failed to load history');
+    }
+}
+
+function displayCustomerHistory(orders, rsvps) {
+    var ordersContainer = document.getElementById('ordersHistoryList');
+    var rsvpsContainer = document.getElementById('rsvpsHistoryList');
+    var ordersSection = document.getElementById('historyOrders');
+    var rsvpsSection = document.getElementById('historyRSVPs');
+    var emptySection = document.getElementById('historyEmpty');
+    
+    var hasData = false;
+    
+    if (orders && orders.length) {
+        ordersSection.style.display = 'block';
+        var ordersHtml = '';
+        for (var i = 0; i < orders.length; i++) {
+            var order = orders[i];
+            var itemsDisplay = order.items || '';
+            if (typeof order.items === 'string') {
+                var itemsList = order.items.split(', ');
+                itemsDisplay = '';
+                for (var j = 0; j < itemsList.length; j++) {
+                    itemsDisplay += '• ' + itemsList[j] + '<br>';
+                }
+            }
+            ordersHtml += '<div class="order-history-item" onclick=\'showOrderDetail(' + JSON.stringify(order).replace(/'/g, "&#39;") + ')\'>';
+            ordersHtml += '<div class="order-history-header">';
+            ordersHtml += '<span class="order-id">' + (order.orderId || 'Order') + '</span>';
+            ordersHtml += '<span class="order-total">$' + (order.total || 0).toFixed(2) + '</span>';
+            ordersHtml += '</div>';
+            ordersHtml += '<div class="order-details">' + itemsDisplay + '</div>';
+            ordersHtml += '<div class="order-status ' + (order.status === 'Paid' ? 'status-paid' : 'status-pending') + '">' + (order.status || 'Pending') + '</div>';
+            ordersHtml += '<div class="order-details">' + (order.date ? order.date.split(' ')[0] : '') + '</div>';
+            ordersHtml += '</div>';
+        }
+        ordersContainer.innerHTML = ordersHtml;
+        hasData = true;
+    } else {
+        ordersSection.style.display = 'none';
+    }
+    
+    if (rsvps && rsvps.length) {
+        rsvpsSection.style.display = 'block';
+        var rsvpsHtml = '';
+        for (var i = 0; i < rsvps.length; i++) {
+            var rsvp = rsvps[i];
+            rsvpsHtml += '<div class="rsvp-history-item">';
+            rsvpsHtml += '<div class="rsvp-event-name" onclick="window.open(\'' + (rsvp.eventLink || '') + '\', \'_blank\')">' + (rsvp.eventName || 'Event') + '</div>';
+            rsvpsHtml += '<div class="rsvp-event-date">📅 ' + (rsvp.eventDate || rsvp.eventStartDate || '') + '</div>';
+            rsvpsHtml += '<div class="order-details">RSVP\'d: ' + (rsvp.date ? rsvp.date.split(' ')[0] : '') + '</div>';
+            rsvpsHtml += '<div class="order-status ' + (rsvp.status === 'Confirmed' ? 'status-paid' : 'status-pending') + '">' + (rsvp.status || 'Pending') + '</div>';
+            rsvpsHtml += '</div>';
+        }
+        rsvpsContainer.innerHTML = rsvpsHtml;
+        hasData = true;
+    } else {
+        rsvpsSection.style.display = 'none';
+    }
+    
+    emptySection.style.display = hasData ? 'none' : 'block';
+}
+
+function showOrderDetail(order) {
+    var itemsHtml = '';
+    if (order.items) {
+        if (typeof order.items === 'string') {
+            var itemsList = order.items.split(', ');
+            for (var i = 0; i < itemsList.length; i++) {
+                itemsHtml += '<div>• ' + itemsList[i] + '</div>';
+            }
+        }
+    }
+    
+    document.getElementById('modalTitle').textContent = 'Order ' + (order.orderId || 'Details');
+    document.getElementById('modalBody').innerHTML = `
+        <div class="order-stats">
+            <div><strong>Date:</strong> ${order.date || 'N/A'}</div>
+            <div><strong>Customer:</strong> ${order.customer || 'N/A'}</div>
+            <div><strong>Status:</strong> <span class="${order.status === 'Paid' ? 'status-paid' : 'status-pending'}">${order.status || 'Pending'}</span></div>
+            <div><strong>Payment:</strong> ${order.paymentMethod || 'N/A'}</div>
+            <div><strong>Total:</strong> <span class="status-paid">$${(order.total || 0).toFixed(2)}</span></div>
+        </div>
+        ${itemsHtml ? '<div class="order-section"><div class="section-title">📦 Items</div>' + itemsHtml + '</div>' : ''}
+        ${order.otherRequests ? '<div class="order-section"><div class="section-title">📝 Notes</div><div>' + order.otherRequests + '</div></div>' : ''}
+    `;
+    document.getElementById('modalFooter').innerHTML = '<button class="confirm-btn" onclick="closeModal()">Close</button>';
+    document.getElementById('orderModal').style.display = 'flex';
+}
+
 // ========== UTILITIES ==========
 function showLoading(message) {
     var modal = document.getElementById('loadingModal');
