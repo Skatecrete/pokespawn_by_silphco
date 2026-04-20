@@ -69,6 +69,104 @@ body {
     background: #2196F3;
 }
 
+/* History Tab */
+.history-section {
+    background: #0d0d1a;
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.history-search {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.history-search input {
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: #2a2a3e;
+    color: white;
+}
+
+.search-history-btn {
+    padding: 12px;
+    background: #2196F3;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.history-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 16px 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #333;
+}
+
+.order-history-item, .rsvp-history-item {
+    background: #1a1a2e;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.order-history-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.order-id {
+    color: #FFA500;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.order-total {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.order-details {
+    font-size: 11px;
+    color: #aaa;
+    margin-bottom: 4px;
+}
+
+.order-status {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.status-paid { color: #4CAF50; }
+.status-pending { color: #FFA500; }
+
+.rsvp-event-name {
+    font-weight: bold;
+    font-size: 13px;
+    color: #2196F3;
+    cursor: pointer;
+}
+
+.rsvp-event-date {
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 4px;
+}
+
+.empty-history {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+}
+
 /* Content */
 .content {
     padding: 12px;
