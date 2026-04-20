@@ -798,7 +798,6 @@ async function loadEvents() {
         displayCurrentEvents(currentEvents);
         displayUpcomingEvents(upcomingEvents);
         
-        // ONLY load debut data if we're on the Upcoming tab
         var activeTab = document.querySelector('.tab-content.active')?.id;
         if (activeTab === 'upcoming') {
             loadDebutData();
@@ -808,8 +807,24 @@ async function loadEvents() {
     }
 }
 
-function getEventPokemonImage(eventName) {
-    return '';
+function getEventImage(eventName) {
+    // Pokemon name to ID mapping
+    var pokemonMap = {
+        'Pikachu': 25, 'Slowbro': 80, 'Zamazenta': 889, 'Regieleki': 894,
+        'Houndoom': 229, 'Latias': 380, 'Regidrago': 895, 'Kyogre': 382,
+        'Groudon': 383, 'Tapu Koko': 785, 'Tapu Lele': 786, 'Manectric': 310,
+        'Aerodactyl': 142, 'Alakazam': 65, 'Sharpedo': 319, 'Banette': 354,
+        'Latios': 381, 'Tinkatink': 957, 'Woobat': 527, 'Trapinch': 328,
+        'Drilbur': 529, 'Regirock': 377, 'Shuckle': 213
+    };
+    
+    for (var pokemon in pokemonMap) {
+        if (eventName.includes(pokemon)) {
+            return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + pokemonMap[pokemon] + '.png';
+        }
+    }
+    // No Pokemon found - return emoji
+    return '😎';
 }
 
 function displayCurrentEvents(events) {
@@ -824,8 +839,15 @@ function displayCurrentEvents(events) {
     var html = '';
     for (var i = 0; i < events.length; i++) {
         var e = events[i];
+        var imageSrc = getEventImage(e.name);
+        var isEmoji = !imageSrc.startsWith('http');
+        
         html += '<div class="event-card-with-img">';
-        html += '<img src="' + getEventPokemonImage(e.name) + '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%237627C5\'/%3E%3Ctext x=\'50\' y=\'70\' text-anchor=\'middle\' fill=\'white\' font-size=\'50\'%3E😎%3C/text%3E%3C/svg%3E\'">';
+        if (isEmoji) {
+            html += '<div class="event-emoji">' + imageSrc + '</div>';
+        } else {
+            html += '<img src="' + imageSrc + '" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<div class=\\\'event-emoji\\\'😎</div>\'">';
+        }
         html += '<div class="event-info">';
         html += '<div class="event-name">' + e.name + '</div>';
         html += '<div class="event-heading">' + (e.heading || 'Event') + '</div>';
@@ -851,8 +873,15 @@ function displayUpcomingEvents(events) {
     var html = '';
     for (var i = 0; i < events.length; i++) {
         var e = events[i];
+        var imageSrc = getEventImage(e.name);
+        var isEmoji = !imageSrc.startsWith('http');
+        
         html += '<div class="event-card-with-img">';
-        html += '<img src="' + getEventPokemonImage(e.name) + '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%237627C5\'/%3E%3Ctext x=\'50\' y=\'70\' text-anchor=\'middle\' fill=\'white\' font-size=\'50\'%3E😎%3C/text%3E%3C/svg%3E\'">';
+        if (isEmoji) {
+            html += '<div class="event-emoji">' + imageSrc + '</div>';
+        } else {
+            html += '<img src="' + imageSrc + '" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<div class=\\\'event-emoji\\\'😎</div>\'">';
+        }
         html += '<div class="event-info">';
         html += '<div class="event-name">' + e.name + '</div>';
         html += '<div class="event-heading">' + (e.heading || 'Event') + '</div>';
@@ -865,24 +894,6 @@ function displayUpcomingEvents(events) {
         html += '</div></div>';
     }
     container.innerHTML = html;
-}
-
-function getEventPokemonImage(eventName) {
-    var pokemonMap = {
-        'Pikachu': 25, 'Slowbro': 80, 'Zamazenta': 889, 'Regieleki': 894,
-        'Houndoom': 229, 'Latias': 380, 'Regidrago': 895, 'Kyogre': 382,
-        'Groudon': 383, 'Tapu Koko': 785, 'Tapu Lele': 786, 'Manectric': 310,
-        'Aerodactyl': 142, 'Alakazam': 65, 'Sharpedo': 319, 'Banette': 354,
-        'Latios': 381, 'Tinkatink': 957, 'Woobat': 527, 'Trapinch': 328,
-        'Drilbur': 529, 'Regirock': 377, 'Shuckle': 213
-    };
-    
-    for (var pokemon in pokemonMap) {
-        if (eventName.includes(pokemon)) {
-            return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + pokemonMap[pokemon] + '.png';
-        }
-    }
-    return '';
 }
 
 // ========== DEBUT DATA (Only for Upcoming) ==========
