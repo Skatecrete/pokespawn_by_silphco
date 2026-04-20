@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="PokeSpawn">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
-    <title>PokeSpawn - Pokemon GO Hunting Service</title>
+    <title>PokeSpawn - Pokémon GO Hunting Service</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -22,7 +22,7 @@
             </div>
         </div>
 
-        <!-- Tab Buttons - 2 rows -->
+        <!-- Tab Buttons -->
         <div class="tabs">
             <div class="tab-row">
                 <button class="tab-btn active" data-tab="spawns">🔥 SPAWNS</button>
@@ -32,6 +32,7 @@
             <div class="tab-row">
                 <button class="tab-btn" data-tab="upcoming">🔮 UPCOMING</button>
                 <button class="tab-btn" data-tab="orders">📦 ORDERS</button>
+                <button class="tab-btn" data-tab="history">📜 HISTORY</button>
             </div>
         </div>
 
@@ -45,6 +46,8 @@
                 <div class="filter-bar">
                     <button class="filter-chip" onclick="toggleFilter('shundo')">✨ Shundo</button>
                     <button class="filter-chip" onclick="toggleFilter('shiny164')">⭐ 1/64 Shiny</button>
+                    <button class="filter-chip" onclick="toggleFilter('regional')">🌍 Regional</button>
+                    <button class="filter-chip" onclick="toggleFilter('pvp')">🏆 PvP</button>
                 </div>
                 <div id="spawnsList" class="list-container">
                     <div class="loading">Loading spawns...</div>
@@ -61,6 +64,18 @@
 
             <!-- Current Events Tab -->
             <div id="current" class="tab-content">
+                <div id="debutBanner" class="debut-banner" style="display:none">
+                    <div class="debut-content">
+                        <div class="debut-title">🎉 NEW POKÉMON DEBUT 🎉</div>
+                        <div class="debut-event-name" id="debutEventName"></div>
+                        <div class="debut-countdown" id="debutCountdown"></div>
+                        <div class="debut-buttons">
+                            <button class="debut-btn view-debuts" onclick="showDebutDetails()">View Debut Mon</button>
+                            <button class="debut-btn view-event" id="debutViewEventBtn">View Event</button>
+                        </div>
+                    </div>
+                    <div class="debut-loading" id="debutLoading">Loading debut Pokémon...</div>
+                </div>
                 <div id="currentEventsList" class="list-container">
                     <div class="loading">Loading events...</div>
                 </div>
@@ -75,7 +90,6 @@
 
             <!-- Orders Tab -->
             <div id="orders" class="tab-content">
-                <!-- Cart Section -->
                 <div class="cart-section">
                     <div class="cart-header">
                         <span>🛒 YOUR CART</span>
@@ -89,6 +103,16 @@
                     <button class="checkout-btn" onclick="showCustomerDialog()">PROCEED TO CHECKOUT</button>
                 </div>
 
+                <!-- Add Coins Section -->
+                <div class="coins-section">
+                    <div class="section-title">💰 ADD COINS TO ORDER</div>
+                    <div class="coin-buttons">
+                        <button class="coin-btn" onclick="addCoinToCart(5600)">5,600 Coins<br>$<span id="coinPrice5600">24</span></button>
+                        <button class="coin-btn" onclick="addCoinToCart(15500)">15,500 Coins<br>$<span id="coinPrice15500">45</span></button>
+                        <button class="coin-btn" onclick="addCoinToCart(31000)">31,000 Coins<br>$<span id="coinPrice31000">85</span></button>
+                    </div>
+                </div>
+
                 <!-- Contact Section -->
                 <div class="contact-section">
                     <h3>📱 Need Help?</h3>
@@ -97,6 +121,26 @@
                         <a href="mailto:pokespawn@gmail.com" class="contact-btn email">📧 Email</a>
                     </div>
                     <p class="facebook-info">💡 Reach out to your admin through the <strong>Members</strong> tab in the Facebook group!</p>
+                </div>
+            </div>
+
+            <!-- History Tab -->
+            <div id="history" class="tab-content">
+                <div class="history-section">
+                    <div class="history-search">
+                        <input type="text" id="historyName" placeholder="Your Name *">
+                        <input type="text" id="historyIgn" placeholder="In-Game Name *">
+                        <button class="search-history-btn" onclick="loadCustomerHistory()">🔍 View My History</button>
+                    </div>
+                    <div id="historyOrders" class="history-orders" style="display:none">
+                        <div class="history-title">📦 My Orders</div>
+                        <div id="ordersHistoryList"></div>
+                    </div>
+                    <div id="historyRSVPs" class="history-rsvps" style="display:none">
+                        <div class="history-title">📅 My RSVPs</div>
+                        <div id="rsvpsHistoryList"></div>
+                    </div>
+                    <div id="historyEmpty" class="empty-history" style="display:none">No orders or RSVPs found</div>
                 </div>
             </div>
         </div>
@@ -111,6 +155,14 @@
             </div>
             <div class="modal-body" id="modalBody"></div>
             <div class="modal-footer" id="modalFooter"></div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="modal" style="display:none">
+        <div class="modal-content loading-modal">
+            <div class="loading-spinner"></div>
+            <p id="loadingMessage">Processing...</p>
         </div>
     </div>
 
