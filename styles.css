@@ -63,6 +63,9 @@ body {
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s;
+    text-decoration: none;
+    text-align: center;
+    display: block;
 }
 
 .tab-btn.active {
