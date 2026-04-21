@@ -675,6 +675,7 @@ function addToCart(item) {
     } else {
         cartItems.push(item);
     }
+    saveCart();  // ← ADD THIS
     updateCartDisplay();
     showToast('Added ' + item.quantity + 'x ' + item.pokemonName + ' to cart');
 }
@@ -747,22 +748,38 @@ function updateCartQuantity(index, newQuantity) {
         cartItems[index].quantity = newQuantity;
         cartItems[index].price = calculateItemPrice(cartItems[index]);
     }
+    saveCart();  // ← ADD THIS
     updateCartDisplay();
 }
 
 function removeFromCart(index) {
     cartItems.splice(index, 1);
-    updateCartDisplay();
-}
-
-function clearCart() {
-    cartItems = [];
+    saveCart();  // ← ADD THIS
     updateCartDisplay();
 }
 
 function addCoinToCart(amount) {
     var price = coinPrices[amount];
     addToCart({ type: 'coins', pokemonName: amount + ' Coins', quantity: 1, price: price, coinAmount: amount });
+}
+
+// ========== PERSISTENT CART ==========
+function saveCart() {
+    localStorage.setItem('pokespawn_cart', JSON.stringify(cartItems));
+}
+
+function loadCart() {
+    var savedCart = localStorage.getItem('pokespawn_cart');
+    if (savedCart) {
+        cartItems = JSON.parse(savedCart);
+        updateCartDisplay();
+    }
+}
+
+function clearCart() {
+    cartItems = [];
+    saveCart();
+    updateCartDisplay();
 }
 
 // ========== CHECKOUT ==========
@@ -915,7 +932,6 @@ async function submitOrder() {
     var notes = document.getElementById('notesInput')?.value || '';
     var fullCustomerName = customerName + ' (' + customerIgn + ')';
     
-    // Add time preference to notes for the order
     var finalNotes = notes;
     if (currentTimePreference && currentTimePreference !== 'Whenever Possible') {
         finalNotes = finalNotes ? finalNotes + '\n\nTime Preference: ' + currentTimePreference : 'Time Preference: ' + currentTimePreference;
@@ -950,7 +966,8 @@ async function submitOrder() {
         hideLoading();
         if (data.status === 'success') {
             showToast('Order submitted! You gained Aura 😎');
-            clearCart();
+            clearCart();  // This now clears localStorage too
+            localStorage.removeItem('pokespawn_cart');  // ← ADD THIS
             document.getElementById('notesInput').value = '';
             closeModal();
         } else {
