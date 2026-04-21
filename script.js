@@ -16,14 +16,6 @@ let pricingCache = {};
 let coinPrices = { 5600: 24, 15500: 45, 31000: 85 };
 
 // ========== INITIALIZATION ==========
-document.addEventListener('DOMContentLoaded', function() {
-    loadSpawns();
-    loadRaids();
-    loadEvents();
-    loadPricing();
-    setupTabListeners();
-});
-
 function setupTabListeners() {
     var btns = document.querySelectorAll('.tab-btn');
     for (var i = 0; i < btns.length; i++) {
