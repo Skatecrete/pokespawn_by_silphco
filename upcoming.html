@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#7627C5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PokeSpawn">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>PokeSpawn - Upcoming Events</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="logo-area">
+                <span class="logo-text">⚡ PokeSpawn</span>
+                <span class="silph">Silph Co. Services</span>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab-row">
+                <a href="spawns.html" class="tab-btn">🔥 SPAWNS</a>
+                <a href="raids.html" class="tab-btn">🏆 RAIDS</a>
+                <a href="orders.html" class="tab-btn">📦 ORDERS CART</a>
+            </div>
+            <div class="tab-row">
+                <a href="current.html" class="tab-btn">📅 CURRENT EVENTS</a>
+                <a href="upcoming.html" class="tab-btn active">🔮 UPCOMING EVENTS</a>
+                <a href="history.html" class="tab-btn">📜 ORDER HISTORY</a>
+            </div>
+        </div>
+
+        <div class="content">
+            <div id="debutBanner" class="debut-banner" style="display:none">
+                <div class="debut-content">
+                    <div class="debut-title">🎉 NEW POKÉMON DEBUT 🎉</div>
+                    <div class="debut-event-name" id="debutEventName"></div>
+                    <div class="debut-countdown" id="debutCountdown"></div>
+                    <div class="debut-buttons">
+                        <button class="debut-btn view-debuts" onclick="showDebutDetails()">View Debut Mon</button>
+                        <button class="debut-btn view-event" id="debutViewEventBtn">View Event</button>
+                    </div>
+                </div>
+            </div>
+            <div id="upcomingEventsList" class="list-container">
+                <div class="loading">Loading events...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Order</h2>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer" id="modalFooter"></div>
+        </div>
+    </div>
+
+    <div id="loadingModal" class="modal" style="display:none">
+        <div class="modal-content loading-modal">
+            <div class="loading-spinner"></div>
+            <p id="loadingMessage">Processing...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Initialize upcoming events page
+        loadEvents();
+        loadDebutData();
+        
+        // Make functions global
+        window.showRSVPDialog = showRSVPDialog;
+        window.submitRSVP = submitRSVP;
+        window.showDebutDetails = showDebutDetails;
+        window.closeModal = closeModal;
+    </script>
+</body>
+</html>
