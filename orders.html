@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#7627C5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PokeSpawn">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>PokeSpawn - Orders</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="logo-area">
+                <span class="logo-text">⚡ PokeSpawn</span>
+                <span class="silph">Silph Co. Services</span>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab-row">
+                <a href="spawns.html" class="tab-btn">🔥 SPAWNS</a>
+                <a href="raids.html" class="tab-btn">🏆 RAIDS</a>
+                <a href="orders.html" class="tab-btn">📦 ORDERS CART</a>
+            </div>
+            <div class="tab-row">
+                <a href="current.html" class="tab-btn">📅 CURRENT EVENTS</a>
+                <a href="upcoming.html" class="tab-btn active">🔮 UPCOMING EVENTS</a>
+                <a href="history.html" class="tab-btn">📜 ORDER HISTORY</a>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="cart-section">
+                <div class="cart-header">
+                    <span>🛒 YOUR CART</span>
+                    <span id="cartCount">0 items</span>
+                </div>
+                <div id="cartItems"></div>
+                <div id="emptyCartMsg" class="empty-cart">Your Pokecart is empty</div>
+                <div class="cart-total">
+                    Total: $<span id="cartTotal">0.00</span>
+                </div>
+                <button class="checkout-btn" onclick="showCustomerDialog()">PROCEED TO CHECKOUT</button>
+            </div>
+
+            <div class="coins-section">
+                <div class="section-title">💰 ADD COINS TO ORDER</div>
+                <div class="coin-buttons">
+                    <button class="coin-btn" onclick="addCoinToCart(5600)">5,600 Coins<br>$<span id="coinPrice5600">24</span></button>
+                    <button class="coin-btn" onclick="addCoinToCart(15500)">15,500 Coins<br>$<span id="coinPrice15500">45</span></button>
+                    <button class="coin-btn" onclick="addCoinToCart(31000)">31,000 Coins<br>$<span id="coinPrice31000">85</span></button>
+                </div>
+            </div>
+
+            <div class="other-requests-section">
+                <div class="section-title">📝 Other Requests (Optional)</div>
+                <textarea id="notesInput" rows="3" placeholder="Any other service ideas or questions please ask here! For example, if you want the 31k Coin order split between 2 accounts or want details on upcoming Go Fests, etc..."></textarea>
+            </div>
+
+            <div class="contact-section">
+                <h3>📱 Need Help?</h3>
+                <div class="admin-buttons">
+                    <a href="https://m.me/danstudz.skatecrete" target="_blank" class="admin-btn dan">💬 Dan (Skatecrete)</a>
+                    <a href="https://m.me/thomas.keelan.733" target="_blank" class="admin-btn thomas">💬 Thomas (RampageGamer)</a>
+                    <div class="admin-btn kingi disabled" onclick="showKingiMessage()">💬 Kingi (zEViLvSTON4z)</div>
+                </div>
+                <p class="facebook-info">💡 Reach out to your admin through Facebook Messenger!</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Order</h2>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer" id="modalFooter"></div>
+        </div>
+    </div>
+
+    <div id="loadingModal" class="modal" style="display:none">
+        <div class="modal-content loading-modal">
+            <div class="loading-spinner"></div>
+            <p id="loadingMessage">Processing...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Initialize orders page
+        loadPricing();
+        updateCartDisplay();
+        
+        // Make functions global
+        window.addCoinToCart = addCoinToCart;
+        window.updateCartQuantity = updateCartQuantity;
+        window.removeFromCart = removeFromCart;
+        window.showCustomerDialog = showCustomerDialog;
+        window.saveCustomerInfo = saveCustomerInfo;
+        window.selectAdminAndPay = selectAdminAndPay;
+        window.submitOrder = submitOrder;
+        window.copyToClipboard = copyToClipboard;
+        window.closeModal = closeModal;
+        window.showKingiMessage = showKingiMessage;
+    </script>
+</body>
+</html>
