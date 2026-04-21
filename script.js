@@ -468,12 +468,61 @@ async function loadRaids() {
 
 async function getPokemonIdFromName(name) {
     var cleanName = name.replace('Shadow ', '').replace('Mega ', '').replace('D-Max ', '').trim().toLowerCase();
-    var simpleMap = { 'dratini': 147, 'gligar': 207, 'cacnea': 331, 'joltik': 595, 'lapras': 131, 'stantler': 234, 'latios': 381, 'latias': 380 };
-    if (simpleMap[cleanName]) return simpleMap[cleanName];
+    
+    // Special form mappings for PokeAPI
+    var formMap = {
+        'alolan marowak': 'marowak-alola',
+        'alolan vulpix': 'vulpix-alola',
+        'alolan sandshrew': 'sandshrew-alola',
+        'alolan sandslash': 'sandslash-alola',
+        'alolan diglett': 'diglett-alola',
+        'alolan dugtrio': 'dugtrio-alola',
+        'alolan meowth': 'meowth-alola',
+        'alolan persian': 'persian-alola',
+        'alolan geodude': 'geodude-alola',
+        'alolan graveler': 'graveler-alola',
+        'alolan golem': 'golem-alola',
+        'alolan grimer': 'grimer-alola',
+        'alolan muk': 'muk-alola',
+        'alolan exeggutor': 'exeggutor-alola',
+        'alolan raichu': 'raichu-alola',
+        'galarian meowth': 'meowth-galar',
+        'galarian ponyta': 'ponyta-galar',
+        'galarian rapidash': 'rapidash-galar',
+        'galarian slowpoke': 'slowpoke-galar',
+        'galarian farfetchd': 'farfetchd-galar',
+        'galarian zigzagoon': 'zigzagoon-galar',
+        'galarian linoone': 'linoone-galar',
+        'galarian darumaka': 'darumaka-galar',
+        'galarian yamask': 'yamask-galar',
+        'galarian stunfisk': 'stunfisk-galar',
+        'hisuian growlithe': 'growlithe-hisui',
+        'hisuian voltorb': 'voltorb-hisui',
+        'hisuian sneasel': 'sneasel-hisui',
+        'hisuian avalugg': 'avalugg-hisui'
+    };
+    
+    var apiName = formMap[cleanName] || cleanName;
+    
+    // Simple ID map for common shadow Pokémon (fallback)
+    var simpleMap = { 
+        'dratini': 147, 'gligar': 207, 'cacnea': 331, 'joltik': 595, 
+        'lapras': 131, 'stantler': 234, 'latios': 381, 'latias': 380,
+        'marowak-alola': 105, 'marowak': 105
+    };
+    
+    if (simpleMap[apiName]) return simpleMap[apiName];
+    
     try {
-        const response = await fetch('https://pokeapi.co/api/v2/pokemon/' + cleanName);
-        const data = await response.json();
-        return data.id;
+        const response = await fetch('https://pokeapi.co/api/v2/pokemon/' + apiName);
+        if (response.ok) {
+            const data = await response.json();
+            return data.id;
+        }
+        // If fails, try without form
+        var baseName = cleanName.split(' ')[0];
+        if (simpleMap[baseName]) return simpleMap[baseName];
+        return 25; // Pikachu as default
     } catch {
         return 25;
     }
