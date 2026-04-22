@@ -1320,7 +1320,7 @@ async function loadCustomerHistory() {
     try {
         var fullCustomerName = name + ' (' + ign + ')';
         
-        // Fetch from local JSON files (no CORS!)
+        // Fetch from local JSON files
         var ordersResponse = await fetch('data/orders.json');
         var rsvpsResponse = await fetch('data/rsvps.json');
         
@@ -1328,8 +1328,49 @@ async function loadCustomerHistory() {
         var allRSVPs = await rsvpsResponse.json();
         
         // Filter orders for this customer
-        var customerOrders = allOrders.filter(function(order) {
+        var customerOrderRows = allOrders.filter(function(order) {
             return order.customer === fullCustomerName;
+        });
+        
+        // GROUP items by orderId
+        var groupedOrders = {};
+        for (var i = 0; i < customerOrderRows.length; i++) {
+            var row = customerOrderRows[i];
+            var orderId = row.orderId;
+            
+            if (!groupedOrders[orderId]) {
+                groupedOrders[orderId] = {
+                    orderId: orderId,
+                    date: row.date,
+                    customer: row.customer,
+                    status: row.status,
+                    paymentMethod: row.paymentMethod,
+                    otherRequests: row.otherRequests,
+                    assignedAdmin: row.assignedAdmin,
+                    total: 0,
+                    items: []
+                };
+            }
+            
+            // Add item to this order
+            groupedOrders[orderId].items.push({
+                huntType: row.huntType,
+                raidType: row.raidType,
+                pokemon: row.pokemon,
+                quantity: row.quantity,
+                coins: row.coins,
+                price: row.itemPrice
+            });
+            
+            groupedOrders[orderId].total += row.itemPrice;
+        }
+        
+        // Convert grouped object back to array
+        var customerOrders = Object.values(groupedOrders);
+        
+        // Sort by date (newest first)
+        customerOrders.sort(function(a, b) {
+            return new Date(b.date) - new Date(a.date);
         });
         
         // Filter RSVPs for this customer
@@ -1370,67 +1411,34 @@ function displayCustomerHistory(orders, rsvps) {
         for (var i = 0; i < orders.length; i++) {
             var order = orders[i];
             
-            // Build items display from the order object
+            // Build items display from grouped items
             var itemsDisplay = '';
-            
-            // Check if order has the new structure (from JSON export)
-            if (order.huntType) {
-                // New structure from JSON export
-                var huntType = order.huntType || '';
-                var pokemon = order.pokemon || '';
-                var quantity = order.quantity || '1';
-                var coins = order.coins || '';
-                var itemPrice = order.itemPrice || 0;
+            for (var j = 0; j < order.items.length; j++) {
+                var item = order.items[j];
+                var huntType = item.huntType || '';
+                var pokemon = item.pokemon || '';
+                var quantity = item.quantity || '1';
+                var coins = item.coins || '';
+                var price = item.price || 0;
                 
                 if (huntType === 'Coins') {
-                    itemsDisplay = '• ' + coins + ' Coins x' + quantity + ' - $' + itemPrice.toFixed(2);
+                    itemsDisplay += '• ' + coins + ' Coins x' + quantity + ' - $' + price.toFixed(2) + '<br>';
                 } else if (huntType === 'Raid') {
-                    var raidType = order.raidType || '';
-                    itemsDisplay = '• ' + huntType + ': ' + pokemon + ' (' + raidType + ') x' + quantity + ' - $' + itemPrice.toFixed(2);
+                    var raidType = item.raidType || '';
+                    itemsDisplay += '• ' + huntType + ': ' + pokemon + ' (' + raidType + ') x' + quantity + ' - $' + price.toFixed(2) + '<br>';
                 } else {
-                    itemsDisplay = '• ' + huntType + ': ' + pokemon + ' x' + quantity + ' - $' + itemPrice.toFixed(2);
-                }
-            } else if (order.items && order.items.length) {
-                // Old structure with items array
-                for (var j = 0; j < order.items.length; j++) {
-                    var item = order.items[j];
-                    var huntType = item.huntType || '';
-                    var pokemon = item.pokemon || '';
-                    var quantity = item.quantity || '1';
-                    var coins = item.coins || '';
-                    var price = item.price || 0;
-                    
-                    if (huntType === 'Coins') {
-                        itemsDisplay += '• ' + coins + ' Coins x' + quantity + ' - $' + price.toFixed(2) + '<br>';
-                    } else if (huntType === 'Raid') {
-                        var raidType = item.raidType || '';
-                        itemsDisplay += '• ' + huntType + ': ' + pokemon + ' (' + raidType + ') x' + quantity + ' - $' + price.toFixed(2) + '<br>';
-                    } else {
-                        itemsDisplay += '• ' + huntType + ': ' + pokemon + ' x' + quantity + ' - $' + price.toFixed(2) + '<br>';
-                    }
-                }
-            } else if (typeof order.items === 'string') {
-                // Fallback for string format
-                var itemsList = order.items.split(', ');
-                for (var j = 0; j < itemsList.length; j++) {
-                    itemsDisplay += '• ' + itemsList[j] + '<br>';
+                    itemsDisplay += '• ' + huntType + ': ' + pokemon + ' x' + quantity + ' - $' + price.toFixed(2) + '<br>';
                 }
             }
             
             var statusClass = (order.status === 'Paid' || order.status === 'Completed') ? 'status-paid' : 'status-pending';
             var statusText = order.status || 'Pending';
-            var orderDate = order.date ? order.date.split(' ')[0] : '';
-            var totalAmount = order.total || order.itemPrice || 0;
-            
-            // If multiple items, sum them up
-            if (order.items && order.items.length > 1) {
-                totalAmount = order.items.reduce(function(sum, item) { return sum + (item.price || 0); }, 0);
-            }
+            var orderDate = order.date ? order.date.split('T')[0] : '';
             
             ordersHtml += '<div class="order-history-item" onclick=\'showOrderDetail(' + JSON.stringify(order).replace(/'/g, "&#39;") + ')\'>';
             ordersHtml += '<div class="order-history-header">';
             ordersHtml += '<span class="order-id">' + (order.orderId || 'Order') + '</span>';
-            ordersHtml += '<span class="order-total">$' + totalAmount.toFixed(2) + '</span>';
+            ordersHtml += '<span class="order-total">$' + order.total.toFixed(2) + '</span>';
             ordersHtml += '</div>';
             ordersHtml += '<div class="order-details">' + itemsDisplay + '</div>';
             ordersHtml += '<div class="order-status ' + statusClass + '">' + statusText + '</div>';
@@ -1452,7 +1460,7 @@ function displayCustomerHistory(orders, rsvps) {
             rsvpsHtml += '<div class="rsvp-history-item">';
             rsvpsHtml += '<div class="rsvp-event-name" onclick="window.open(\'' + (rsvp.eventLink || '') + '\', \'_blank\')">' + (rsvp.eventName || 'Event') + '</div>';
             rsvpsHtml += '<div class="rsvp-event-date">📅 ' + (rsvp.eventStartDate || rsvp.eventDate || '') + '</div>';
-            rsvpsHtml += '<div class="order-details">RSVP\'d: ' + (rsvp.date ? rsvp.date.split(' ')[0] : '') + '</div>';
+            rsvpsHtml += '<div class="order-details">RSVP\'d: ' + (rsvp.date ? rsvp.date.split('T')[0] : '') + '</div>';
             rsvpsHtml += '<div class="order-status ' + statusClass + '">' + (rsvp.status || 'Pending') + '</div>';
             rsvpsHtml += '</div>';
         }
