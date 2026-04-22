@@ -15,8 +15,8 @@ jobs:
       
     - name: Fetch orders from Google Sheets
       run: |
-        curl -s "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=exportOrders" > data/orders.json
-        curl -s "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=exportRSVPs" > data/rsvps.json
+        curl -s "https://script.google.com/macros/s/AKfycbx6i6Yn7ezXqwJKgZF3Mbq_MbgNeb4mQ8weT0Qipu0c9ASFRVK6l-HIdH83xFbJOeI4/exec/exec?action=exportOrders" > data/orders.json
+        curl -s "https://script.google.com/macros/s/AKfycbx6i6Yn7ezXqwJKgZF3Mbq_MbgNeb4mQ8weT0Qipu0c9ASFRVK6l-HIdH83xFbJOeI4/exec/exec?action=exportRSVPs" > data/rsvps.json
         
     - name: Commit and push if changed
       run: |
