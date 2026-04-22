@@ -80,10 +80,6 @@ body {
     transition: all 0.2s;
     text-decoration: none;
     text-align: center;
-    display: block;
-}
-
-.tab-btn {
     display: flex;
     align-items: center;
     justify-content: center;
