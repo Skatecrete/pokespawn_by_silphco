@@ -88,18 +88,19 @@ async function loadSpawns() {
     container.innerHTML = '<div class="loading">Loading spawns...</div>';
     
     try {
-        const response = await fetch('https://shungo.app/api/shungo/data/spawns');
+        // Fetch from your GitHub repo instead of Shungo API
+        const response = await fetch('https://raw.githubusercontent.com/Skatecrete/pogo-raid-data/main/spawns.json');
         const data = await response.json();
-        var spawnData = data.result || [];
+        var spawnData = data.spawns || [];
         
         var pokemonList = [];
-        for (var i = 0; i < spawnData.length; i++) {
+        for (var i = 0; i < Math.min(spawnData.length, 200); i++) {
             var item = spawnData[i];
-            var pokedexId = item[0];
-            var spawnRate = item[2];
-            var isShiny = item[3];
+            var pokedexId = item.id;
+            var spawnRate = item.rate;
+            var isShiny = item.shiny;
+            var name = item.name;
             
-            var name = await getPokemonName(pokedexId);
             var isPermaboosted = [144,145,146,150,243,244,245,249,250,251,380,381,382,383,384,480,481,482,483,484,485,486,487,488,785,786,787,788,888,889,894,895].includes(pokedexId);
             
             pokemonList.push({
@@ -121,7 +122,8 @@ async function loadSpawns() {
         allPokemon = pokemonList;
         displaySpawns();
     } catch (e) {
-        container.innerHTML = '<div class="loading">Failed to load spawns</div>';
+        console.error('Error loading spawns:', e);
+        container.innerHTML = '<div class="loading">Failed to load spawns: ' + e.message + '</div>';
     }
 }
 
