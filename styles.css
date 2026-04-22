@@ -83,6 +83,14 @@ body {
     display: block;
 }
 
+.tab-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.2;
+}
+
 .tab-btn.active {
     background: #2196F3;
 }
