@@ -61,17 +61,25 @@
 
     <script src="script.js"></script>
     <script>
-        // Initialize raids page
+        loadCart();
         loadRaids();
-        
-        // Make functions global
+    
         window.showRaidOrderDialog = showRaidOrderDialog;
         window.selectRaidPack = selectRaidPack;
         window.addRaidToCart = addRaidToCart;
         window.showDynamaxOrderDialog = showDynamaxOrderDialog;
         window.updateDynamaxQty = updateDynamaxQty;
         window.addDynamaxToCart = addDynamaxToCart;
+        window.updateCartQuantity = updateCartQuantity;
+        window.removeFromCart = removeFromCart;
+        window.addCoinToCart = addCoinToCart;
+        window.showCustomerDialog = showCustomerDialog;
+        window.saveCustomerInfo = saveCustomerInfo;
+        window.selectAdminAndPay = selectAdminAndPay;
+        window.submitOrder = submitOrder;
+        window.copyToClipboard = copyToClipboard;
         window.closeModal = closeModal;
+        window.showKingiMessage = showKingiMessage;
     </script>
 </body>
 </html>
