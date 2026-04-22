@@ -2,8 +2,8 @@ name: sync-sheets
 
 on:
   schedule:
-    - cron: '0 */1 * * *'  # Run every hour
-  workflow_dispatch:  # Manual trigger
+    - cron: '0 */1 * * *'
+  workflow_dispatch:
 
 jobs:
   sync:
@@ -18,8 +18,8 @@ jobs:
       
     - name: Fetch orders from Google Sheets
       run: |
-        curl -s "https://script.google.com/macros/s/AKfycbwDM7VQdfNc8ADsJEL81Z1bW1JWjZ_-8LFJa3AaZFuQf0rO4ojc5OMJ97GKjTnNPbI9ng/exec?action=exportOrders" > data/orders.json || echo '[]' > data/orders.json
-        curl -s "https://script.google.com/macros/s/AKfycbwDM7VQdfNc8ADsJEL81Z1bW1JWjZ_-8LFJa3AaZFuQf0rO4ojc5OMJ97GKjTnNPbI9ng/exec?action=exportRSVPs" > data/rsvps.json || echo '[]' > data/rsvps.json
+        curl -s "https://script.google.com/macros/s/AKfycbwDM7VQdfNc8ADsJEL81Z1bW1JWjZ_-8LFJa3AaZFuQf0rO4ojc5OMJ97GKjTnNPbI9ng/exec?action=exportOrders" > data/orders.json
+        curl -s "https://script.google.com/macros/s/AKfycbwDM7VQdfNc8ADsJEL81Z1bW1JWjZ_-8LFJa3AaZFuQf0rO4ojc5OMJ97GKjTnNPbI9ng/exec?action=exportRSVPs" > data/rsvps.json
         
     - name: Commit and push if changed
       run: |
