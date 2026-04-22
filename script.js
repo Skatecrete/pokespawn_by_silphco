@@ -9,8 +9,12 @@ let currentSearch = '';
 let currentDebutData = null;
 
 // Apps Script URL
-// Try this proxy instead
+// For submitting orders and RSVPs (POST) - still needs proxy
 const SCRIPT_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://script.google.com/macros/s/AKfycbx6i6Yn7ezXqwJKgZF3Mbq_MbgNeb4mQ8weT0Qipu0c9ASFRVK6l-HIdH83xFbJOeI4/exec');
+
+// For reading history (GET) - use local JSON files (no CORS)
+const ORDERS_JSON_URL = 'data/orders.json';
+const RSVPS_JSON_URL = 'data/rsvps.json';
 
 // ========== INITIALIZATION ==========
 function setupTabListeners() {
@@ -1291,39 +1295,34 @@ async function loadCustomerHistory() {
     try {
         var fullCustomerName = name + ' (' + ign + ')';
         
-        var orderResponse = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                type: 'getCustomerOrders', 
-                customerName: fullCustomerName 
-            })
-        });
-        var orderData = await orderResponse.json();
+        // Fetch from local JSON files (no CORS!)
+        var ordersResponse = await fetch('data/orders.json');
+        var rsvpsResponse = await fetch('data/rsvps.json');
         
-        var rsvpResponse = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                type: 'getCustomerRSVPs', 
-                customerName: name, 
-                ingameName: ign 
-            })
+        var allOrders = await ordersResponse.json();
+        var allRSVPs = await rsvpsResponse.json();
+        
+        // Filter orders for this customer
+        var customerOrders = allOrders.filter(function(order) {
+            return order.customer === fullCustomerName;
         });
-        var rsvpData = await rsvpResponse.json();
+        
+        // Filter RSVPs for this customer
+        var customerRSVPs = allRSVPs.filter(function(rsvp) {
+            return rsvp.customer === fullCustomerName;
+        });
         
         hideLoading();
         
-        if (orderData.status === 'success' || rsvpData.status === 'success') {
-            displayCustomerHistory(orderData.orders || [], rsvpData.rsvps || []);
+        if (customerOrders.length > 0 || customerRSVPs.length > 0) {
+            displayCustomerHistory(customerOrders, customerRSVPs);
         } else {
             document.getElementById('historyEmpty').style.display = 'block';
             document.getElementById('historyOrders').style.display = 'none';
             document.getElementById('historyRSVPs').style.display = 'none';
-            if ((!orderData.orders || !orderData.orders.length) && (!rsvpData.rsvps || !rsvpData.rsvps.length)) {
-                showToast('No history found');
-            }
+            showToast('No history found');
         }
+        
     } catch (e) {
         hideLoading();
         console.error('History error:', e);
