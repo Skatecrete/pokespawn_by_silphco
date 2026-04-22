@@ -10,7 +10,8 @@ let currentDebutData = null;
 
 // Apps Script URL
 // Try this proxy instead
-const SCRIPT_URL = 'https://cors.codetabs.com/?url=' + encodeURIComponent('https://script.google.com/macros/s/AKfycbx6i6Yn7ezXqwJKgZF3Mbq_MbgNeb4mQ8weT0Qipu0c9ASFRVK6l-HIdH83xFbJOeI4/exec');let coinPrices = { 5600: 24, 15500: 45, 31000: 85 };
+import { corsKiller } from "@onjmin/cors-killer";
+const SCRIPT_URL = corsKiller('https://script.google.com/macros/s/AKfycbx6i6Yn7ezXqwJKgZF3Mbq_MbgNeb4mQ8weT0Qipu0c9ASFRVK6l-HIdH83xFbJOeI4/exec');
 
 // ========== INITIALIZATION ==========
 function setupTabListeners() {
