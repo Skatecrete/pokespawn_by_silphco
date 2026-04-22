@@ -1,0 +1,27 @@
+name: sync-sheets
+
+on:
+  schedule:
+    - cron: '0 */1 * * *'  # Run every hour
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Fetch orders from Google Sheets
+      run: |
+        curl -s "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=exportOrders" > data/orders.json
+        curl -s "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=exportRSVPs" > data/rsvps.json
+        
+    - name: Commit and push if changed
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add data/orders.json data/rsvps.json
+        git diff --quiet && git diff --staged --quiet || git commit -m "Sync sheet data - $(date +'%Y-%m-%d %H:%M:%S')"
+        git push
