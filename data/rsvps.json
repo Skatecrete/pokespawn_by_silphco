@@ -119,5 +119,16 @@
     "eventLink": "https://leekduck.com/events/replay-go-bigger-2026/",
     "status": "Pending",
     "assignedAdmin": "Dan"
+  },
+  {
+    "id": 12,
+    "date": "2026-04-22T23:35:00.000Z",
+    "customer": "n (n)",
+    "eventName": "Replay: GO Bigger",
+    "eventStartDate": "2026-04-25T18:00:00.000Z",
+    "eventEndDate": "2026-04-25T21:00:00.000Z",
+    "eventLink": "https://leekduck.com/events/replay-go-bigger-2026/",
+    "status": "Pending",
+    "assignedAdmin": "Dan"
   }
 ]
