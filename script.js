@@ -8,6 +8,31 @@ let filters = { shundo: false, shiny164: false, regional: false, greatLeague: fa
 let currentSearch = '';
 let currentDebutData = null;
 
+// ========== PRICING CACHE (Default values, updated by loadPricing) ==========
+let pricingCache = {
+    'Spawn_Shundo': 5,
+    'Spawn_Hundo': 3,
+    'Spawn_Hundo_Regional': 10,
+    'Spawn_Shiny': 2,
+    'Spawn_Shiny_Regional': 8,
+    'Spawn_PvP': 5,
+    'Spawn_Normal_Regional': 5,
+    'Raid_Normal_10': 7,
+    'Raid_Normal_20': 12,
+    'Raid_Normal_50': 20,
+    'Raid_Dynamax_4': 10,
+    'Raid_Dynamax_Single': 2.5,
+    'Coins_5600': 24,
+    'Coins_15500': 45,
+    'Coins_31000': 85
+};
+
+let coinPrices = { 
+    5600: pricingCache['Coins_5600'], 
+    15500: pricingCache['Coins_15500'], 
+    31000: pricingCache['Coins_31000'] 
+};
+
 // Apps Script URL
 // For submitting orders and RSVPs (POST) - still needs proxy
 const SCRIPT_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://script.google.com/macros/s/AKfycbx6i6Yn7ezXqwJKgZF3Mbq_MbgNeb4mQ8weT0Qipu0c9ASFRVK6l-HIdH83xFbJOeI4/exec');
