@@ -1370,23 +1370,43 @@ function displayCustomerHistory(orders, rsvps) {
         for (var i = 0; i < orders.length; i++) {
             var order = orders[i];
             
-            // Build items display correctly
+            // Build items display from the order object
             var itemsDisplay = '';
-            if (order.items && order.items.length) {
+            
+            // Check if order has the new structure (from JSON export)
+            if (order.huntType) {
+                // New structure from JSON export
+                var huntType = order.huntType || '';
+                var pokemon = order.pokemon || '';
+                var quantity = order.quantity || '1';
+                var coins = order.coins || '';
+                var itemPrice = order.itemPrice || 0;
+                
+                if (huntType === 'Coins') {
+                    itemsDisplay = '• ' + coins + ' Coins x' + quantity + ' - $' + itemPrice.toFixed(2);
+                } else if (huntType === 'Raid') {
+                    var raidType = order.raidType || '';
+                    itemsDisplay = '• ' + huntType + ': ' + pokemon + ' (' + raidType + ') x' + quantity + ' - $' + itemPrice.toFixed(2);
+                } else {
+                    itemsDisplay = '• ' + huntType + ': ' + pokemon + ' x' + quantity + ' - $' + itemPrice.toFixed(2);
+                }
+            } else if (order.items && order.items.length) {
+                // Old structure with items array
                 for (var j = 0; j < order.items.length; j++) {
                     var item = order.items[j];
                     var huntType = item.huntType || '';
                     var pokemon = item.pokemon || '';
                     var quantity = item.quantity || '1';
                     var coins = item.coins || '';
+                    var price = item.price || 0;
                     
                     if (huntType === 'Coins') {
-                        itemsDisplay += '• ' + coins + ' Coins<br>';
+                        itemsDisplay += '• ' + coins + ' Coins x' + quantity + ' - $' + price.toFixed(2) + '<br>';
                     } else if (huntType === 'Raid') {
                         var raidType = item.raidType || '';
-                        itemsDisplay += '• ' + huntType + ': ' + pokemon + ' (' + raidType + ') x' + quantity + '<br>';
+                        itemsDisplay += '• ' + huntType + ': ' + pokemon + ' (' + raidType + ') x' + quantity + ' - $' + price.toFixed(2) + '<br>';
                     } else {
-                        itemsDisplay += '• ' + huntType + ': ' + pokemon + ' x' + quantity + '<br>';
+                        itemsDisplay += '• ' + huntType + ': ' + pokemon + ' x' + quantity + ' - $' + price.toFixed(2) + '<br>';
                     }
                 }
             } else if (typeof order.items === 'string') {
@@ -1400,11 +1420,17 @@ function displayCustomerHistory(orders, rsvps) {
             var statusClass = (order.status === 'Paid' || order.status === 'Completed') ? 'status-paid' : 'status-pending';
             var statusText = order.status || 'Pending';
             var orderDate = order.date ? order.date.split(' ')[0] : '';
+            var totalAmount = order.total || order.itemPrice || 0;
+            
+            // If multiple items, sum them up
+            if (order.items && order.items.length > 1) {
+                totalAmount = order.items.reduce(function(sum, item) { return sum + (item.price || 0); }, 0);
+            }
             
             ordersHtml += '<div class="order-history-item" onclick=\'showOrderDetail(' + JSON.stringify(order).replace(/'/g, "&#39;") + ')\'>';
             ordersHtml += '<div class="order-history-header">';
             ordersHtml += '<span class="order-id">' + (order.orderId || 'Order') + '</span>';
-            ordersHtml += '<span class="order-total">$' + (order.total || 0).toFixed(2) + '</span>';
+            ordersHtml += '<span class="order-total">$' + totalAmount.toFixed(2) + '</span>';
             ordersHtml += '</div>';
             ordersHtml += '<div class="order-details">' + itemsDisplay + '</div>';
             ordersHtml += '<div class="order-status ' + statusClass + '">' + statusText + '</div>';
@@ -1425,7 +1451,7 @@ function displayCustomerHistory(orders, rsvps) {
             var statusClass = (rsvp.status === 'Confirmed') ? 'status-paid' : 'status-pending';
             rsvpsHtml += '<div class="rsvp-history-item">';
             rsvpsHtml += '<div class="rsvp-event-name" onclick="window.open(\'' + (rsvp.eventLink || '') + '\', \'_blank\')">' + (rsvp.eventName || 'Event') + '</div>';
-            rsvpsHtml += '<div class="rsvp-event-date">📅 ' + (rsvp.eventDate || rsvp.eventStartDate || '') + '</div>';
+            rsvpsHtml += '<div class="rsvp-event-date">📅 ' + (rsvp.eventStartDate || rsvp.eventDate || '') + '</div>';
             rsvpsHtml += '<div class="order-details">RSVP\'d: ' + (rsvp.date ? rsvp.date.split(' ')[0] : '') + '</div>';
             rsvpsHtml += '<div class="order-status ' + statusClass + '">' + (rsvp.status || 'Pending') + '</div>';
             rsvpsHtml += '</div>';
