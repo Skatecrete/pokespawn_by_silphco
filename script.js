@@ -120,7 +120,7 @@ async function loadSpawns() {
         var spawnData = data.spawns || [];
         
         var pokemonList = [];
-        for (var i = 0; i < Math.min(spawnData.length, 200); i++) {
+        for (var i = 0; i < spawnData.length; i++) {
             var item = spawnData[i];
             var pokedexId = item.id;
             var spawnRate = item.rate;
