@@ -713,20 +713,54 @@ function addDynamaxToCart() {
 
 // ========== CART FUNCTIONS ==========
 function addToCart(item) {
+    // For regular raids, combine ALL raids together regardless of Pokémon
+    if (item.type === 'raid') {
+        var existingRaidIndex = -1;
+        for (var i = 0; i < cartItems.length; i++) {
+            if (cartItems[i].type === 'raid') {
+                existingRaidIndex = i;
+                break;
+            }
+        }
+        
+        if (existingRaidIndex >= 0) {
+            cartItems[existingRaidIndex].quantity += item.quantity;
+            cartItems[existingRaidIndex].price = calculateItemPrice(cartItems[existingRaidIndex]);
+            // Update the name to show combined
+            cartItems[existingRaidIndex].pokemonName = 'Combined Raids';
+        } else {
+            cartItems.push({
+                type: 'raid',
+                pokemonName: 'Combined Raids',
+                quantity: item.quantity,
+                price: calculateItemPrice({ type: 'raid', quantity: item.quantity })
+            });
+        }
+        saveCart();
+        updateCartDisplay();
+        showToast('Added ' + item.quantity + ' raids to cart');
+        return;
+    }
+    
+    // For other item types (shundo, hundo, shiny, coins, dynamax)
     var existingIndex = -1;
     for (var i = 0; i < cartItems.length; i++) {
-        if (cartItems[i].type === item.type && cartItems[i].pokemonName === item.pokemonName && cartItems[i].raidTier === item.raidTier) {
+        if (cartItems[i].type === item.type && 
+            cartItems[i].pokemonName === item.pokemonName && 
+            cartItems[i].raidTier === item.raidTier) {
             existingIndex = i;
             break;
         }
     }
+    
     if (existingIndex >= 0) {
         cartItems[existingIndex].quantity += item.quantity;
         cartItems[existingIndex].price = calculateItemPrice(cartItems[existingIndex]);
     } else {
         cartItems.push(item);
     }
-    saveCart();  // ← ADD THIS
+    
+    saveCart();
     updateCartDisplay();
     showToast('Added ' + item.quantity + 'x ' + item.pokemonName + ' to cart');
 }
@@ -738,34 +772,35 @@ function calculateItemPrice(item) {
     if (item.type === 'coins') return item.price; // Coins price is fixed per pack
     
     if (item.type === 'raid') {
-        var quantity = item.quantity;
-        var price = 0;
-        var remaining = quantity;
-        var raidPrice10 = pricingCache['Raid_Normal_10'] || 7;
-        var raidPrice20 = pricingCache['Raid_Normal_20'] || 12;
-        var raidPrice50 = pricingCache['Raid_Normal_50'] || 20;
-        var singleRaidPrice = raidPrice10 / 10;
-        
-        // Use 50-packs first (best value)
-        var fiftyPacks = Math.floor(remaining / 50);
-        price += fiftyPacks * raidPrice50;
-        remaining = remaining % 50;
-        
-        // Then use 20-packs
-        var twentyPacks = Math.floor(remaining / 20);
-        price += twentyPacks * raidPrice20;
-        remaining = remaining % 20;
-        
-        // Then use 10-packs
-        var tenPacks = Math.floor(remaining / 10);
-        price += tenPacks * raidPrice10;
-        remaining = remaining % 10;
-        
-        // Remaining individual raids
-        price += remaining * singleRaidPrice;
-        
-        return price;
+    var quantity = item.quantity;
+    var price = 0;
+    var remaining = quantity;
+    var raidPrice10 = pricingCache['Raid_Normal_10'] || 7;
+    var raidPrice20 = pricingCache['Raid_Normal_20'] || 12;
+    var raidPrice50 = pricingCache['Raid_Normal_50'] || 20;
+    
+    // Use 50-packs first
+    var fiftyPacks = Math.floor(remaining / 50);
+    price += fiftyPacks * raidPrice50;
+    remaining = remaining % 50;
+    
+    // Then use 20-packs
+    var twentyPacks = Math.floor(remaining / 20);
+    price += twentyPacks * raidPrice20;
+    remaining = remaining % 20;
+    
+    // Then use 10-packs
+    var tenPacks = Math.floor(remaining / 10);
+    price += tenPacks * raidPrice10;
+    remaining = remaining % 10;
+    
+    // Remaining (should be 0 since only 10/20/50 are allowed)
+    if (remaining > 0) {
+        price += remaining * (raidPrice10 / 10);
     }
+    
+    return price;
+}
     
     if (item.type === 'dynamax') {
         var quantity = item.quantity;
