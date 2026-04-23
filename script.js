@@ -1302,15 +1302,33 @@ function displayDebutBanner(debut, startDate) {
 
 function showDebutDetails() {
     if (!currentDebutData) return;
-    var allPokemon = (currentDebutData.new_pokemon || []).concat(currentDebutData.new_shiny || []);
-    var isShiny = currentDebutData.new_shiny || [];
+    
+    // Separate new Pokémon and new shinies
+    var newPokemon = currentDebutData.new_pokemon || [];
+    var newShiny = currentDebutData.new_shiny || [];
+    
+    // Create a combined list, but mark which ones are shiny
+    var allItems = [];
+    for (var i = 0; i < newPokemon.length; i++) {
+        allItems.push({ name: newPokemon[i], isShiny: false });
+    }
+    for (var i = 0; i < newShiny.length; i++) {
+        allItems.push({ name: newShiny[i], isShiny: true });
+    }
+    
+    if (allItems.length === 0) {
+        closeModal();
+        showToast('No debut details available');
+        return;
+    }
     
     var html = '<div class="order-stats"><div>New Pokémon Debuts</div></div>';
-    for (var i = 0; i < allPokemon.length; i++) {
-        var pokemon = allPokemon[i];
-        var isShinyPokemon = isShiny.includes(pokemon);
+    for (var i = 0; i < allItems.length; i++) {
+        var item = allItems[i];
+        var pokemon = item.name;
+        var isShinyPokemon = item.isShiny;
         
-        // Create filename from Pokémon name
+        // Create filename
         var filename = pokemon.toLowerCase().replace(/ /g, '').replace(/[\(\)]/g, '') + (isShinyPokemon ? 'shiny' : '') + '.webp';
         var imageUrl = 'debuts/' + filename;
         
