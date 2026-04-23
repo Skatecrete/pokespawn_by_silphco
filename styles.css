@@ -108,6 +108,16 @@ body {
     color: white;
 }
 
+.history-disclaimer {
+    font-size: 11px;
+    color: #FFA500;
+    text-align: center;
+    padding: 8px;
+    background: #0d0d1a;
+    border-radius: 8px;
+    margin: 5px 0;
+}
+
 .search-history-btn {
     padding: 12px;
     background: #2196F3;
