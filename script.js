@@ -324,7 +324,7 @@ function toggleFilter(filter) {
 
 // ========== SPAWN ORDER DIALOG ==========
 var currentSpawnPokemon = null;
-var spawnQuantities = { shundo: 0, hundo: 0, shiny: 0 };
+var spawnQuantities = { shundo: 0, hundo: 0, shiny: 0, normal: 0 };
 
 function showSpawnOrderDialog(pokemon) {
     currentSpawnPokemon = pokemon;
@@ -393,7 +393,7 @@ function updateSpawnQty(type, delta) {
     var newQty = Math.max(0, spawnQuantities[type] + delta);
     spawnQuantities[type] = newQty;
     
-    var priceMap = { shundo: pricingCache['Spawn_Shundo'] || 5, hundo: pricingCache['Spawn_Hundo'] || 3, shiny: pricingCache['Spawn_Shiny'] || 2 };
+var priceMap = { shundo: pricingCache['Spawn_Shundo'] || 5, hundo: pricingCache['Spawn_Hundo'] || 3, shiny: pricingCache['Spawn_Shiny'] || 2, normal: pricingCache['Spawn_Normal_Regional'] || 3 };
     
     var qtyElem = document.getElementById(type + 'Qty');
     var priceElem = document.getElementById(type + 'Price');
@@ -417,6 +417,9 @@ function addSpawnOrderToCart() {
     }
     if (shiny > 0) {
         addToCart({ type: 'shiny', pokemonName: currentSpawnPokemon.name, quantity: shiny, price: shiny * (pricingCache['Spawn_Shiny'] || 2) });
+    }
+    if (normal > 0) {
+        addToCart({ type: 'service', pokemonName: currentSpawnPokemon.name + ' (Normal Regional)', quantity: normal, price: normal * (pricingCache['Spawn_Normal_Regional'] || 3) });
     }
     
     closeModal();
