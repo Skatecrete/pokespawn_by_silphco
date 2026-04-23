@@ -713,36 +713,6 @@ function addDynamaxToCart() {
 
 // ========== CART FUNCTIONS ==========
 function addToCart(item) {
-    // For regular raids, combine ALL raids together regardless of Pokémon
-    if (item.type === 'raid') {
-        var existingRaidIndex = -1;
-        for (var i = 0; i < cartItems.length; i++) {
-            if (cartItems[i].type === 'raid') {
-                existingRaidIndex = i;
-                break;
-            }
-        }
-        
-        if (existingRaidIndex >= 0) {
-            cartItems[existingRaidIndex].quantity += item.quantity;
-            cartItems[existingRaidIndex].price = calculateItemPrice(cartItems[existingRaidIndex]);
-            // Update the name to show combined
-            cartItems[existingRaidIndex].pokemonName = 'Combined Raids';
-        } else {
-            cartItems.push({
-                type: 'raid',
-                pokemonName: 'Combined Raids',
-                quantity: item.quantity,
-                price: calculateItemPrice({ type: 'raid', quantity: item.quantity })
-            });
-        }
-        saveCart();
-        updateCartDisplay();
-        showToast('Added ' + item.quantity + ' raids to cart');
-        return;
-    }
-    
-    // For other item types (shundo, hundo, shiny, coins, dynamax)
     var existingIndex = -1;
     for (var i = 0; i < cartItems.length; i++) {
         if (cartItems[i].type === item.type && 
