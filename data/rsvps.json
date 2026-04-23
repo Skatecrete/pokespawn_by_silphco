@@ -1,83 +1,6 @@
 [
   {
     "id": 1,
-    "date": "2026-04-06T23:49:00.000Z",
-    "customer": "m (m)",
-    "eventName": "Kyogre in 5-star Raid Battles",
-    "eventStartDate": "Apr 08, 2026 • 6:00 AM",
-    "eventEndDate": "Apr 14, 2026 • 10:00 PM",
-    "eventLink": "https://leekduck.com/events/kyogre-in-5-star-raid-battles-april-2026/",
-    "status": "Confirmed",
-    "assignedAdmin": "Dan"
-  },
-  {
-    "id": 2,
-    "date": "2026-04-07T00:09:00.000Z",
-    "customer": "m (m)",
-    "eventName": "GO Pass: April",
-    "eventStartDate": "Apr 07, 2026 • 10:00 AM",
-    "eventEndDate": "May 05, 2026 • 10:00 AM",
-    "eventLink": "https://leekduck.com/events/go-pass-april-2026/",
-    "status": "Confirmed",
-    "assignedAdmin": "Dan"
-  },
-  {
-    "id": 3,
-    "date": "2026-04-07T00:41:00.000Z",
-    "customer": "m (k)",
-    "eventName": "GO Pass: April",
-    "eventStartDate": "Apr 07, 2026 • 10:00 AM",
-    "eventEndDate": "May 05, 2026 • 10:00 AM",
-    "eventLink": "https://leekduck.com/events/go-pass-april-2026/",
-    "status": "Confirmed",
-    "assignedAdmin": "Dan"
-  },
-  {
-    "id": 4,
-    "date": "2026-04-07T01:28:00.000Z",
-    "customer": "m (m)",
-    "eventName": "GO Pass: April",
-    "eventStartDate": "Apr 07, 2026 • 10:00 AM",
-    "eventEndDate": "May 05, 2026 • 10:00 AM",
-    "eventLink": "https://leekduck.com/events/go-pass-april-2026/",
-    "status": "Confirmed",
-    "assignedAdmin": "Dan"
-  },
-  {
-    "id": 5,
-    "date": "2026-04-20T16:50:00.000Z",
-    "customer": "test (test)",
-    "eventName": "Great League, Ultra League, and Master League | Memories in Motion",
-    "eventStartDate": "Apr 21, 2026 • 1:00 PM",
-    "eventEndDate": "Apr 28, 2026 • 1:00 PM",
-    "eventLink": "https://leekduck.com/events/gbl-memories-in-motion_great-league_ultra-league_master-league-split-2/",
-    "status": "Pending",
-    "assignedAdmin": "Dan"
-  },
-  {
-    "id": 6,
-    "date": "2026-04-20T16:55:00.000Z",
-    "customer": "t (t)",
-    "eventName": "Great League, Ultra League, and Master League | Memories in Motion",
-    "eventStartDate": "Apr 21, 2026 • 1:00 PM",
-    "eventEndDate": "Apr 28, 2026 • 1:00 PM",
-    "eventLink": "https://leekduck.com/events/gbl-memories-in-motion_great-league_ultra-league_master-league-split-2/",
-    "status": "Pending",
-    "assignedAdmin": "Dan"
-  },
-  {
-    "id": 7,
-    "date": "2026-04-20T16:56:00.000Z",
-    "customer": "test (test)",
-    "eventName": "Great League, Ultra League, and Master League | Memories in Motion",
-    "eventStartDate": "Apr 21, 2026 • 1:00 PM",
-    "eventEndDate": "Apr 28, 2026 • 1:00 PM",
-    "eventLink": "https://leekduck.com/events/gbl-memories-in-motion_great-league_ultra-league_master-league-split-2/",
-    "status": "Pending",
-    "assignedAdmin": "Dan"
-  },
-  {
-    "id": 8,
     "date": "2026-04-22T14:42:00.000Z",
     "customer": "Meagan (Sharkie1231)",
     "eventName": "Replay: GO Bigger",
@@ -88,7 +11,7 @@
     "assignedAdmin": "Dan"
   },
   {
-    "id": 9,
+    "id": 2,
     "date": "2026-04-22T14:43:00.000Z",
     "customer": "Meagan (Sharkie1231)",
     "eventName": "Steeled Resolve",
@@ -99,7 +22,7 @@
     "assignedAdmin": "Dan"
   },
   {
-    "id": 10,
+    "id": 3,
     "date": "2026-04-22T14:43:00.000Z",
     "customer": "Meagan (Sharkie1241)",
     "eventName": "Steeled Resolve: Taken Over",
@@ -107,28 +30,6 @@
     "eventEndDate": "2026-05-05T00:00:00.000Z",
     "eventLink": "https://leekduck.com/events/steeled-resolve-taken-over-2026/",
     "status": "Confirmed",
-    "assignedAdmin": "Dan"
-  },
-  {
-    "id": 11,
-    "date": "2026-04-22T22:42:00.000Z",
-    "customer": "m (m)",
-    "eventName": "Replay: GO Bigger",
-    "eventStartDate": "2026-04-25T18:00:00.000Z",
-    "eventEndDate": "2026-04-25T21:00:00.000Z",
-    "eventLink": "https://leekduck.com/events/replay-go-bigger-2026/",
-    "status": "Pending",
-    "assignedAdmin": "Dan"
-  },
-  {
-    "id": 12,
-    "date": "2026-04-22T23:35:00.000Z",
-    "customer": "n (n)",
-    "eventName": "Replay: GO Bigger",
-    "eventStartDate": "2026-04-25T18:00:00.000Z",
-    "eventEndDate": "2026-04-25T21:00:00.000Z",
-    "eventLink": "https://leekduck.com/events/replay-go-bigger-2026/",
-    "status": "Pending",
     "assignedAdmin": "Dan"
   }
 ]
