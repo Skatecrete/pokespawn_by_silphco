@@ -334,6 +334,18 @@ function showSpawnOrderDialog(pokemon) {
     var hundoPrice = pricingCache['Spawn_Hundo'] || 3;
     var shinyPrice = pricingCache['Spawn_Shiny'] || 2;
     
+        ${pokemon.isRegional ? `
+        <div class="order-section">
+            <div class="section-title">🎲 NORMAL (Any IV) - REGIONAL - $${pricingCache['Spawn_Normal_Regional'] || 3} EACH</div>
+            <div class="quantity-selector">
+                <button class="qty-btn" onclick="updateSpawnQty('normal', -1)">-</button>
+                <span id="normalQty" class="qty-num">0</span>
+                <button class="qty-btn" onclick="updateSpawnQty('normal', 1)">+</button>
+                <span id="normalPrice" class="item-price">$0.00</span>
+            </div>
+        </div>
+` : ''}
+    
     document.getElementById('modalTitle').textContent = 'Order ' + pokemon.name;
     document.getElementById('modalBody').innerHTML = `
         <div class="order-stats">
