@@ -1309,9 +1309,17 @@ function showDebutDetails() {
     for (var i = 0; i < allPokemon.length; i++) {
         var pokemon = allPokemon[i];
         var isShinyPokemon = isShiny.includes(pokemon);
+        
+        // Create filename from Pokémon name
+        var filename = pokemon.toLowerCase().replace(/ /g, '').replace(/[\(\)]/g, '') + (isShinyPokemon ? 'shiny' : '') + '.webp';
+        var imageUrl = 'debuts/' + filename;
+        
         html += '<div class="order-section">';
         html += '<div class="section-title">' + (isShinyPokemon ? '✨ NEW SHINY ✨' : '🌟 NEW POKÉMON 🌟') + '</div>';
+        html += '<div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">';
+        html += '<img src="' + imageUrl + '" onerror="this.style.display=\'none\'" style="width:80px; height:80px; object-fit:contain;">';
         html += '<div>' + pokemon + '</div>';
+        html += '</div>';
         html += '</div>';
     }
     
