@@ -712,23 +712,97 @@ function addDynamaxToCart() {
 }
 
 // ========== CART FUNCTIONS ==========
+function recalculateAllRaidPrices() {
+    // Get all raid items
+    var raidItems = [];
+    var nonRaidItems = [];
+    var otherRaidItems = []; // For dynamax (keep separate)
+    
+    for (var i = 0; i < cartItems.length; i++) {
+        if (cartItems[i].type === 'raid') {
+            raidItems.push(cartItems[i]);
+        } else {
+            nonRaidItems.push(cartItems[i]);
+        }
+    }
+    
+    if (raidItems.length === 0) return;
+    
+    // Calculate total quantity of all regular raids
+    var totalQuantity = 0;
+    for (var i = 0; i < raidItems.length; i++) {
+        totalQuantity += raidItems[i].quantity;
+    }
+    
+    // Calculate total price based on total quantity
+    var totalPrice = 0;
+    var remaining = totalQuantity;
+    var raidPrice10 = pricingCache['Raid_Normal_10'] || 7;
+    var raidPrice20 = pricingCache['Raid_Normal_20'] || 12;
+    var raidPrice50 = pricingCache['Raid_Normal_50'] || 20;
+    var singlePrice = raidPrice10 / 10;
+    
+    // Use 50-packs first
+    var fiftyPacks = Math.floor(remaining / 50);
+    totalPrice += fiftyPacks * raidPrice50;
+    remaining = remaining % 50;
+    
+    // Then use 20-packs
+    var twentyPacks = Math.floor(remaining / 20);
+    totalPrice += twentyPacks * raidPrice20;
+    remaining = remaining % 20;
+    
+    // Then use 10-packs
+    var tenPacks = Math.floor(remaining / 10);
+    totalPrice += tenPacks * raidPrice10;
+    remaining = remaining % 10;
+    
+    // Remaining individual raids
+    if (remaining > 0) {
+        totalPrice += remaining * singlePrice;
+    }
+    
+    // Distribute price proportionally by quantity
+    for (var i = 0; i < raidItems.length; i++) {
+        var proportion = raidItems[i].quantity / totalQuantity;
+        raidItems[i].price = totalPrice * proportion;
+    }
+    
+    // Rebuild cart items array
+    cartItems = nonRaidItems.concat(raidItems);
+}
+
 function addToCart(item) {
     var existingIndex = -1;
-    for (var i = 0; i < cartItems.length; i++) {
-        if (cartItems[i].type === item.type && 
-            cartItems[i].pokemonName === item.pokemonName && 
-            cartItems[i].raidTier === item.raidTier) {
-            existingIndex = i;
-            break;
+    
+    // For regular raids, find ANY existing raid item to combine
+    if (item.type === 'raid') {
+        for (var i = 0; i < cartItems.length; i++) {
+            if (cartItems[i].type === 'raid') {
+                existingIndex = i;
+                break;
+            }
+        }
+    } else {
+        // For non-raid items, match by type and name
+        for (var i = 0; i < cartItems.length; i++) {
+            if (cartItems[i].type === item.type && 
+                cartItems[i].pokemonName === item.pokemonName && 
+                cartItems[i].raidTier === item.raidTier) {
+                existingIndex = i;
+                break;
+            }
         }
     }
     
     if (existingIndex >= 0) {
         cartItems[existingIndex].quantity += item.quantity;
-        cartItems[existingIndex].price = calculateItemPrice(cartItems[existingIndex]);
     } else {
         cartItems.push(item);
     }
+    
+    // Recalculate all raid prices
+    recalculateAllRaidPrices();
     
     saveCart();
     updateCartDisplay();
@@ -739,45 +813,41 @@ function calculateItemPrice(item) {
     if (item.type === 'shundo') return item.quantity * (pricingCache['Spawn_Shundo'] || 5);
     if (item.type === 'hundo') return item.quantity * (pricingCache['Spawn_Hundo'] || 3);
     if (item.type === 'shiny') return item.quantity * (pricingCache['Spawn_Shiny'] || 2);
-    if (item.type === 'coins') return item.price; // Coins price is fixed per pack
+    if (item.type === 'coins') return item.price;
     
     if (item.type === 'raid') {
-    var quantity = item.quantity;
-    var price = 0;
-    var remaining = quantity;
-    var raidPrice10 = pricingCache['Raid_Normal_10'] || 7;
-    var raidPrice20 = pricingCache['Raid_Normal_20'] || 12;
-    var raidPrice50 = pricingCache['Raid_Normal_50'] || 20;
-    
-    // Use 50-packs first
-    var fiftyPacks = Math.floor(remaining / 50);
-    price += fiftyPacks * raidPrice50;
-    remaining = remaining % 50;
-    
-    // Then use 20-packs
-    var twentyPacks = Math.floor(remaining / 20);
-    price += twentyPacks * raidPrice20;
-    remaining = remaining % 20;
-    
-    // Then use 10-packs
-    var tenPacks = Math.floor(remaining / 10);
-    price += tenPacks * raidPrice10;
-    remaining = remaining % 10;
-    
-    // Remaining (should be 0 since only 10/20/50 are allowed)
-    if (remaining > 0) {
-        price += remaining * (raidPrice10 / 10);
+        // This is now handled by recalculateAllRaidPrices, but keep as fallback
+        var quantity = item.quantity;
+        var price = 0;
+        var remaining = quantity;
+        var raidPrice10 = pricingCache['Raid_Normal_10'] || 7;
+        var raidPrice20 = pricingCache['Raid_Normal_20'] || 12;
+        var raidPrice50 = pricingCache['Raid_Normal_50'] || 20;
+        var singlePrice = raidPrice10 / 10;
+        
+        var fiftyPacks = Math.floor(remaining / 50);
+        price += fiftyPacks * raidPrice50;
+        remaining = remaining % 50;
+        
+        var twentyPacks = Math.floor(remaining / 20);
+        price += twentyPacks * raidPrice20;
+        remaining = remaining % 20;
+        
+        var tenPacks = Math.floor(remaining / 10);
+        price += tenPacks * raidPrice10;
+        remaining = remaining % 10;
+        
+        if (remaining > 0) {
+            price += remaining * singlePrice;
+        }
+        return price;
     }
-    
-    return price;
-}
     
     if (item.type === 'dynamax') {
         var quantity = item.quantity;
         var dynamaxPricePer4 = pricingCache['Raid_Dynamax_4'] || 10;
         var dynamaxPriceSingle = pricingCache['Raid_Dynamax_Single'] || 2.5;
-        var price = Math.floor(quantity / 4) * dynamaxPricePer4 + (quantity % 4) * dynamaxPriceSingle;
-        return price;
+        return Math.floor(quantity / 4) * dynamaxPricePer4 + (quantity % 4) * dynamaxPriceSingle;
     }
     
     return 0;
@@ -796,6 +866,9 @@ function updateCartDisplay() {
     var cartTotalElem = document.getElementById('cartTotal');
     var cartCountElem = document.getElementById('cartCount');
     var emptyCartMsg = document.getElementById('emptyCartMsg');
+    
+    // Recalculate prices before displaying
+    recalculateAllRaidPrices();
     
     var total = getCartTotal();
     var itemCount = 0;
@@ -818,10 +891,11 @@ function updateCartDisplay() {
         var html = '';
         for (var j = 0; j < cartItems.length; j++) {
             var item = cartItems[j];
+            var displayPrice = item.price || calculateItemPrice(item);
             html += '<div class="cart-item">';
             html += '<div class="cart-item-info">';
             html += '<div class="cart-item-name">' + item.pokemonName + (item.raidTier ? ' (' + item.raidTier + ')' : '') + '</div>';
-            html += '<div class="cart-item-price">$' + (item.price || calculateItemPrice(item)).toFixed(2) + '</div>';
+            html += '<div class="cart-item-price">$' + displayPrice.toFixed(2) + '</div>';
             html += '</div>';
             html += '<div class="cart-item-controls">';
             html += '<button class="qty-btn" onclick="updateCartQuantity(' + j + ', ' + (item.quantity - 1) + ')">-</button>';
@@ -839,15 +913,17 @@ function updateCartQuantity(index, newQuantity) {
         cartItems.splice(index, 1);
     } else {
         cartItems[index].quantity = newQuantity;
-        cartItems[index].price = calculateItemPrice(cartItems[index]);
+        // Don't set price here - recalculate will handle it
     }
-    saveCart();  // ← ADD THIS
+    recalculateAllRaidPrices();
+    saveCart();
     updateCartDisplay();
 }
 
 function removeFromCart(index) {
     cartItems.splice(index, 1);
-    saveCart();  // ← ADD THIS
+    recalculateAllRaidPrices();
+    saveCart();
     updateCartDisplay();
 }
 
@@ -865,6 +941,7 @@ function loadCart() {
     var savedCart = localStorage.getItem('pokespawn_cart');
     if (savedCart) {
         cartItems = JSON.parse(savedCart);
+        recalculateAllRaidPrices();
         updateCartDisplay();
     }
 }
