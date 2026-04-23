@@ -328,23 +328,11 @@ var spawnQuantities = { shundo: 0, hundo: 0, shiny: 0, normal: 0 };
 
 function showSpawnOrderDialog(pokemon) {
     currentSpawnPokemon = pokemon;
-    spawnQuantities = { shundo: 0, hundo: 0, shiny: 0 };
+    spawnQuantities = { shundo: 0, hundo: 0, shiny: 0, normal: 0 };
     
     var shundoPrice = pricingCache['Spawn_Shundo'] || 5;
     var hundoPrice = pricingCache['Spawn_Hundo'] || 3;
     var shinyPrice = pricingCache['Spawn_Shiny'] || 2;
-    
-        ${pokemon.isRegional ? `
-        <div class="order-section">
-            <div class="section-title">🎲 NORMAL (Any IV) - REGIONAL - $${pricingCache['Spawn_Normal_Regional'] || 3} EACH</div>
-            <div class="quantity-selector">
-                <button class="qty-btn" onclick="updateSpawnQty('normal', -1)">-</button>
-                <span id="normalQty" class="qty-num">0</span>
-                <button class="qty-btn" onclick="updateSpawnQty('normal', 1)">+</button>
-                <span id="normalPrice" class="item-price">$0.00</span>
-            </div>
-        </div>
-` : ''}
     
     document.getElementById('modalTitle').textContent = 'Order ' + pokemon.name;
     document.getElementById('modalBody').innerHTML = `
@@ -384,6 +372,18 @@ function showSpawnOrderDialog(pokemon) {
                 <span id="shinyPrice" class="item-price">$0.00</span>
             </div>
         </div>
+        
+        ${pokemon.isRegional ? `
+        <div class="order-section">
+            <div class="section-title">🎲 NORMAL (Any IV) - REGIONAL - $${pricingCache['Spawn_Normal_Regional'] || 3} EACH</div>
+            <div class="quantity-selector">
+                <button class="qty-btn" onclick="updateSpawnQty('normal', -1)">-</button>
+                <span id="normalQty" class="qty-num">0</span>
+                <button class="qty-btn" onclick="updateSpawnQty('normal', 1)">+</button>
+                <span id="normalPrice" class="item-price">$0.00</span>
+            </div>
+        </div>
+        ` : ''}
     `;
     document.getElementById('modalFooter').innerHTML = '<button class="cancel-btn" onclick="closeModal()">Cancel</button><button class="confirm-btn" onclick="addSpawnOrderToCart()">Add to Cart</button>';
     document.getElementById('orderModal').style.display = 'flex';
@@ -408,6 +408,7 @@ function addSpawnOrderToCart() {
     var shundo = spawnQuantities.shundo;
     var hundo = spawnQuantities.hundo;
     var shiny = spawnQuantities.shiny;
+    var normal = spawnQuantities.normal;
     
     if (shundo > 0) {
         addToCart({ type: 'shundo', pokemonName: currentSpawnPokemon.name, quantity: shundo, price: shundo * (pricingCache['Spawn_Shundo'] || 5) });
