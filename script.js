@@ -330,9 +330,11 @@ function showSpawnOrderDialog(pokemon) {
     currentSpawnPokemon = pokemon;
     spawnQuantities = { shundo: 0, hundo: 0, shiny: 0, normal: 0 };
     
+    // Use regional pricing if applicable
     var shundoPrice = pricingCache['Spawn_Shundo'] || 5;
-    var hundoPrice = pricingCache['Spawn_Hundo'] || 3;
-    var shinyPrice = pricingCache['Spawn_Shiny'] || 2;
+    var hundoPrice = pokemon.isRegional ? (pricingCache['Spawn_Hundo_Regional'] || 8) : (pricingCache['Spawn_Hundo'] || 3);
+    var shinyPrice = pokemon.isRegional ? (pricingCache['Spawn_Shiny_Regional'] || 5) : (pricingCache['Spawn_Shiny'] || 2);
+    var normalRegionalPrice = pricingCache['Spawn_Normal_Regional'] || 3;
     
     document.getElementById('modalTitle').textContent = 'Order ' + pokemon.name;
     document.getElementById('modalBody').innerHTML = `
@@ -354,7 +356,7 @@ function showSpawnOrderDialog(pokemon) {
         ` : ''}
         
         <div class="order-section">
-            <div class="section-title">💯 HUNDO (100% IV) - $${hundoPrice} EACH</div>
+            <div class="section-title">💯 HUNDO (100% IV) - ${pokemon.isRegional ? 'REGIONAL - ' : ''}$${hundoPrice} EACH</div>
             <div class="quantity-selector">
                 <button class="qty-btn" onclick="updateSpawnQty('hundo', -1)">-</button>
                 <span id="hundoQty" class="qty-num">0</span>
@@ -364,7 +366,7 @@ function showSpawnOrderDialog(pokemon) {
         </div>
         
         <div class="order-section">
-            <div class="section-title">✨ SHINY (Random IVs) - $${shinyPrice} EACH</div>
+            <div class="section-title">✨ SHINY (Random IVs) - ${pokemon.isRegional ? 'REGIONAL - ' : ''}$${shinyPrice} EACH</div>
             <div class="quantity-selector">
                 <button class="qty-btn" onclick="updateSpawnQty('shiny', -1)">-</button>
                 <span id="shinyQty" class="qty-num">0</span>
@@ -375,7 +377,7 @@ function showSpawnOrderDialog(pokemon) {
         
         ${pokemon.isRegional ? `
         <div class="order-section">
-            <div class="section-title">🎲 NORMAL (Any IV) - REGIONAL - $${pricingCache['Spawn_Normal_Regional'] || 3} EACH</div>
+            <div class="section-title">🎲 NORMAL (Any IV) - REGIONAL - $${normalRegionalPrice} EACH</div>
             <div class="quantity-selector">
                 <button class="qty-btn" onclick="updateSpawnQty('normal', -1)">-</button>
                 <span id="normalQty" class="qty-num">0</span>
@@ -393,7 +395,12 @@ function updateSpawnQty(type, delta) {
     var newQty = Math.max(0, spawnQuantities[type] + delta);
     spawnQuantities[type] = newQty;
     
-var priceMap = { shundo: pricingCache['Spawn_Shundo'] || 5, hundo: pricingCache['Spawn_Hundo'] || 3, shiny: pricingCache['Spawn_Shiny'] || 2, normal: pricingCache['Spawn_Normal_Regional'] || 3 };
+    var priceMap = { 
+        shundo: pricingCache['Spawn_Shundo'] || 5, 
+        hundo: currentSpawnPokemon.isRegional ? (pricingCache['Spawn_Hundo_Regional'] || 8) : (pricingCache['Spawn_Hundo'] || 3),
+        shiny: currentSpawnPokemon.isRegional ? (pricingCache['Spawn_Shiny_Regional'] || 5) : (pricingCache['Spawn_Shiny'] || 2),
+        normal: pricingCache['Spawn_Normal_Regional'] || 3
+    };
     
     var qtyElem = document.getElementById(type + 'Qty');
     var priceElem = document.getElementById(type + 'Price');
