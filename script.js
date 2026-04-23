@@ -1303,14 +1303,20 @@ function displayDebutBanner(debut, startDate) {
 function showDebutDetails() {
     if (!currentDebutData) return;
     
-    // Separate new Pokémon and new shinies
     var newPokemon = currentDebutData.new_pokemon || [];
     var newShiny = currentDebutData.new_shiny || [];
     
-    // Create a combined list, but mark which ones are shiny
-    var allItems = [];
+    // Remove any Pokémon from newPokemon if they also appear in newShiny
+    var filteredNewPokemon = [];
     for (var i = 0; i < newPokemon.length; i++) {
-        allItems.push({ name: newPokemon[i], isShiny: false });
+        if (!newShiny.includes(newPokemon[i])) {
+            filteredNewPokemon.push(newPokemon[i]);
+        }
+    }
+    
+    var allItems = [];
+    for (var i = 0; i < filteredNewPokemon.length; i++) {
+        allItems.push({ name: filteredNewPokemon[i], isShiny: false });
     }
     for (var i = 0; i < newShiny.length; i++) {
         allItems.push({ name: newShiny[i], isShiny: true });
@@ -1322,21 +1328,19 @@ function showDebutDetails() {
         return;
     }
     
-    var html = '<div class="order-stats"><div>New Pokémon Debuts</div></div>';
+    var html = '<div class="order-stats"><div>🌟 DEBUTS 🌟</div></div>';
     for (var i = 0; i < allItems.length; i++) {
         var item = allItems[i];
         var pokemon = item.name;
         var isShinyPokemon = item.isShiny;
         
-        // Create filename
         var filename = pokemon.toLowerCase().replace(/ /g, '').replace(/[\(\)]/g, '') + (isShinyPokemon ? 'shiny' : '') + '.webp';
         var imageUrl = 'debuts/' + filename;
         
-        html += '<div class="order-section">';
-        html += '<div class="section-title">' + (isShinyPokemon ? '✨ NEW SHINY ✨' : '🌟 NEW POKÉMON 🌟') + '</div>';
-        html += '<div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">';
-        html += '<img src="' + imageUrl + '" onerror="this.style.display=\'none\'" style="width:80px; height:80px; object-fit:contain;">';
-        html += '<div>' + pokemon + '</div>';
+        html += '<div class="order-section" style="text-align:center;">';
+        html += '<div class="section-title">' + (isShinyPokemon ? '✨ SHINY ' + pokemon.toUpperCase() + ' ✨' : '🌟 ' + pokemon.toUpperCase() + ' 🌟') + '</div>';
+        html += '<div style="display:flex; justify-content:center; margin-top:12px;">';
+        html += '<img src="' + imageUrl + '" onerror="this.style.display=\'none\'" style="width:120px; height:120px; object-fit:contain;">';
         html += '</div>';
         html += '</div>';
     }
