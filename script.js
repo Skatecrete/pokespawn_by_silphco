@@ -712,23 +712,22 @@ function addDynamaxToCart() {
 }
 
 // ========== CART FUNCTIONS ==========
+
 function recalculateAllRaidPrices() {
     // Get all raid items
+    var raidIndices = [];
     var raidItems = [];
-    var nonRaidItems = [];
-    var otherRaidItems = []; // For dynamax (keep separate)
     
     for (var i = 0; i < cartItems.length; i++) {
         if (cartItems[i].type === 'raid') {
+            raidIndices.push(i);
             raidItems.push(cartItems[i]);
-        } else {
-            nonRaidItems.push(cartItems[i]);
         }
     }
     
     if (raidItems.length === 0) return;
     
-    // Calculate total quantity of all regular raids
+    // Calculate total quantity of all raids
     var totalQuantity = 0;
     for (var i = 0; i < raidItems.length; i++) {
         totalQuantity += raidItems[i].quantity;
@@ -742,56 +741,38 @@ function recalculateAllRaidPrices() {
     var raidPrice50 = pricingCache['Raid_Normal_50'] || 20;
     var singlePrice = raidPrice10 / 10;
     
-    // Use 50-packs first
     var fiftyPacks = Math.floor(remaining / 50);
     totalPrice += fiftyPacks * raidPrice50;
     remaining = remaining % 50;
     
-    // Then use 20-packs
     var twentyPacks = Math.floor(remaining / 20);
     totalPrice += twentyPacks * raidPrice20;
     remaining = remaining % 20;
     
-    // Then use 10-packs
     var tenPacks = Math.floor(remaining / 10);
     totalPrice += tenPacks * raidPrice10;
     remaining = remaining % 10;
     
-    // Remaining individual raids
     if (remaining > 0) {
         totalPrice += remaining * singlePrice;
     }
     
-    // Distribute price proportionally by quantity
+    // Distribute price proportionally back to each item
     for (var i = 0; i < raidItems.length; i++) {
         var proportion = raidItems[i].quantity / totalQuantity;
-        raidItems[i].price = totalPrice * proportion;
+        cartItems[raidIndices[i]].price = totalPrice * proportion;
     }
-    
-    // Rebuild cart items array
-    cartItems = nonRaidItems.concat(raidItems);
 }
 
 function addToCart(item) {
+    // For regular raids, find existing raid by Pokémon name and tier
     var existingIndex = -1;
-    
-    // For regular raids, find ANY existing raid item to combine
-    if (item.type === 'raid') {
-        for (var i = 0; i < cartItems.length; i++) {
-            if (cartItems[i].type === 'raid') {
-                existingIndex = i;
-                break;
-            }
-        }
-    } else {
-        // For non-raid items, match by type and name
-        for (var i = 0; i < cartItems.length; i++) {
-            if (cartItems[i].type === item.type && 
-                cartItems[i].pokemonName === item.pokemonName && 
-                cartItems[i].raidTier === item.raidTier) {
-                existingIndex = i;
-                break;
-            }
+    for (var i = 0; i < cartItems.length; i++) {
+        if (cartItems[i].type === item.type && 
+            cartItems[i].pokemonName === item.pokemonName && 
+            cartItems[i].raidTier === item.raidTier) {
+            existingIndex = i;
+            break;
         }
     }
     
@@ -801,9 +782,7 @@ function addToCart(item) {
         cartItems.push(item);
     }
     
-    // Recalculate all raid prices
     recalculateAllRaidPrices();
-    
     saveCart();
     updateCartDisplay();
     showToast('Added ' + item.quantity + 'x ' + item.pokemonName + ' to cart');
@@ -814,42 +793,16 @@ function calculateItemPrice(item) {
     if (item.type === 'hundo') return item.quantity * (pricingCache['Spawn_Hundo'] || 3);
     if (item.type === 'shiny') return item.quantity * (pricingCache['Spawn_Shiny'] || 2);
     if (item.type === 'coins') return item.price;
-    
-    if (item.type === 'raid') {
-        // This is now handled by recalculateAllRaidPrices, but keep as fallback
-        var quantity = item.quantity;
-        var price = 0;
-        var remaining = quantity;
-        var raidPrice10 = pricingCache['Raid_Normal_10'] || 7;
-        var raidPrice20 = pricingCache['Raid_Normal_20'] || 12;
-        var raidPrice50 = pricingCache['Raid_Normal_50'] || 20;
-        var singlePrice = raidPrice10 / 10;
-        
-        var fiftyPacks = Math.floor(remaining / 50);
-        price += fiftyPacks * raidPrice50;
-        remaining = remaining % 50;
-        
-        var twentyPacks = Math.floor(remaining / 20);
-        price += twentyPacks * raidPrice20;
-        remaining = remaining % 20;
-        
-        var tenPacks = Math.floor(remaining / 10);
-        price += tenPacks * raidPrice10;
-        remaining = remaining % 10;
-        
-        if (remaining > 0) {
-            price += remaining * singlePrice;
-        }
-        return price;
-    }
-    
     if (item.type === 'dynamax') {
         var quantity = item.quantity;
         var dynamaxPricePer4 = pricingCache['Raid_Dynamax_4'] || 10;
         var dynamaxPriceSingle = pricingCache['Raid_Dynamax_Single'] || 2.5;
         return Math.floor(quantity / 4) * dynamaxPricePer4 + (quantity % 4) * dynamaxPriceSingle;
     }
-    
+    if (item.type === 'raid') {
+        // This is a fallback - actual price comes from recalculateAllRaidPrices
+        return item.price || 0;
+    }
     return 0;
 }
 
@@ -867,7 +820,6 @@ function updateCartDisplay() {
     var cartCountElem = document.getElementById('cartCount');
     var emptyCartMsg = document.getElementById('emptyCartMsg');
     
-    // Recalculate prices before displaying
     recalculateAllRaidPrices();
     
     var total = getCartTotal();
@@ -913,7 +865,6 @@ function updateCartQuantity(index, newQuantity) {
         cartItems.splice(index, 1);
     } else {
         cartItems[index].quantity = newQuantity;
-        // Don't set price here - recalculate will handle it
     }
     recalculateAllRaidPrices();
     saveCart();
