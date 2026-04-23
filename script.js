@@ -712,9 +712,46 @@ function calculateItemPrice(item) {
     if (item.type === 'shundo') return item.quantity * (pricingCache['Spawn_Shundo'] || 5);
     if (item.type === 'hundo') return item.quantity * (pricingCache['Spawn_Hundo'] || 3);
     if (item.type === 'shiny') return item.quantity * (pricingCache['Spawn_Shiny'] || 2);
-    if (item.type === 'raid') return item.price;
-    if (item.type === 'dynamax') return item.price;
-    if (item.type === 'coins') return item.price;
+    if (item.type === 'coins') return item.price; // Coins price is fixed per pack
+    
+    if (item.type === 'raid') {
+        var quantity = item.quantity;
+        var price = 0;
+        var remaining = quantity;
+        var raidPrice10 = pricingCache['Raid_Normal_10'] || 7;
+        var raidPrice20 = pricingCache['Raid_Normal_20'] || 12;
+        var raidPrice50 = pricingCache['Raid_Normal_50'] || 20;
+        var singleRaidPrice = raidPrice10 / 10;
+        
+        // Use 50-packs first (best value)
+        var fiftyPacks = Math.floor(remaining / 50);
+        price += fiftyPacks * raidPrice50;
+        remaining = remaining % 50;
+        
+        // Then use 20-packs
+        var twentyPacks = Math.floor(remaining / 20);
+        price += twentyPacks * raidPrice20;
+        remaining = remaining % 20;
+        
+        // Then use 10-packs
+        var tenPacks = Math.floor(remaining / 10);
+        price += tenPacks * raidPrice10;
+        remaining = remaining % 10;
+        
+        // Remaining individual raids
+        price += remaining * singleRaidPrice;
+        
+        return price;
+    }
+    
+    if (item.type === 'dynamax') {
+        var quantity = item.quantity;
+        var dynamaxPricePer4 = pricingCache['Raid_Dynamax_4'] || 10;
+        var dynamaxPriceSingle = pricingCache['Raid_Dynamax_Single'] || 2.5;
+        var price = Math.floor(quantity / 4) * dynamaxPricePer4 + (quantity % 4) * dynamaxPriceSingle;
+        return price;
+    }
+    
     return 0;
 }
 
