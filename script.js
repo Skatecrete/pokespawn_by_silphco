@@ -679,10 +679,12 @@ function displayRaids(regularRaids, dynamaxRaids) {
             html += '<div class="raid-header"><h4>' + cat.title + '</h4></div><div class="raids-grid">';
             for (var r = 0; r < regularRaids[cat.key].length; r++) {
                 var raid = regularRaids[cat.key][r];
+                // Skip adding dynamax-underlay for Gigantamax
+                var isGigantamax = raid.tier === 'Gigantamax' || raid.tier === '💥 GIGANTAMAX';
                 html += '<div class="raid-card" onclick=\'showRaidOrderDialog(' + JSON.stringify(raid).replace(/'/g, "&#39;") + ')\'>';
                 html += '<div class="raid-image-container">';
                 if (raid.name.includes('Shadow')) html += '<div class="shadow-underlay"></div>';
-                if (raid.tier.includes('Dynamax') || raid.tier.includes('Gigantamax')) html += '<div class="dynamax-underlay"></div>';
+                if (!isGigantamax && (raid.tier.includes('Dynamax') || raid.tier.includes('Gigantamax'))) html += '<div class="dynamax-underlay"></div>';
                 html += '<img src="' + raid.image + '" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png\'">';
                 html += '</div>';
                 html += '<span>' + raid.name + (raid.isShiny ? ' ✨' : '') + '</span>';
@@ -705,8 +707,12 @@ function displayRaids(regularRaids, dynamaxRaids) {
             html += '<div class="raid-header"><h4>' + dyna.title + '</h4></div><div class="raids-grid">';
             for (var dr = 0; dr < dynaByTier[dyna.title].length; dr++) {
                 var raid = dynaByTier[dyna.title][dr];
+                var isGigantamax = (dyna.title === '💥 GIGANTAMAX');
                 html += '<div class="raid-card" onclick=\'showDynamaxOrderDialog(' + JSON.stringify(raid).replace(/'/g, "&#39;") + ')\'>';
-                html += '<div class="raid-image-container"><div class="dynamax-underlay"></div><img src="' + raid.image + '" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png\'"></div>';
+                html += '<div class="raid-image-container">';
+                if (!isGigantamax) html += '<div class="dynamax-underlay"></div>';
+                html += '<img src="' + raid.image + '" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png\'">';
+                html += '</div>';
                 html += '<span>' + raid.name + '</span>';
                 html += '</div>';
             }
