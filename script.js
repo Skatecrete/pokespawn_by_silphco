@@ -623,7 +623,7 @@ async function getPokemonIdFromName(name) {
     var simpleMap = { 
         'dratini': 147, 'gligar': 207, 'cacnea': 331, 'joltik': 595, 
         'lapras': 131, 'stantler': 234, 'latios': 381, 'latias': 380,
-        'marowak-alola': 105, 'marowak': 105, 'hisuian qwilfish': 211, 'qwilfish': 211 
+        'marowak-alola': 105, 'marowak': 105
     };
     
     if (simpleMap[apiName]) return simpleMap[apiName];
