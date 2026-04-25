@@ -1354,7 +1354,7 @@ function showDebutDetails() {
         var isShinyPokemon = item.isShiny;
         
         var filename = pokemon.toLowerCase().replace(/ /g, '').replace(/[\(\)]/g, '') + (isShinyPokemon ? 'shiny' : '') + '.webp';
-        var imageUrl = 'debuts/' + filename;
+        var imageUrl = 'https://raw.githubusercontent.com/Skatecrete/infographics/main/debuts/' + filename;
         
         html += '<div class="order-section" style="text-align:center;">';
         html += '<div class="section-title">' + (isShinyPokemon ? '✨ SHINY ' + pokemon.toUpperCase() + ' ✨' : '🌟 ' + pokemon.toUpperCase() + ' 🌟') + '</div>';
