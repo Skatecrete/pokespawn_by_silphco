@@ -1325,17 +1325,10 @@ function showDebutDetails() {
     var newPokemon = currentDebutData.new_pokemon || [];
     var newShiny = currentDebutData.new_shiny || [];
     
-    // Remove any Pokémon from newPokemon if they also appear in newShiny
-    var filteredNewPokemon = [];
-    for (var i = 0; i < newPokemon.length; i++) {
-        if (!newShiny.includes(newPokemon[i])) {
-            filteredNewPokemon.push(newPokemon[i]);
-        }
-    }
-    
+    // Build arrays - keep both normal and shiny (don't filter)
     var allItems = [];
-    for (var i = 0; i < filteredNewPokemon.length; i++) {
-        allItems.push({ name: filteredNewPokemon[i], isShiny: false });
+    for (var i = 0; i < newPokemon.length; i++) {
+        allItems.push({ name: newPokemon[i], isShiny: false });
     }
     for (var i = 0; i < newShiny.length; i++) {
         allItems.push({ name: newShiny[i], isShiny: true });
@@ -1353,7 +1346,12 @@ function showDebutDetails() {
         var pokemon = item.name;
         var isShinyPokemon = item.isShiny;
         
-        var filename = pokemon.toLowerCase().replace(/ /g, '').replace(/[\(\)]/g, '') + (isShinyPokemon ? 'shiny' : '') + '.webp';
+        var cleanName = pokemon.toLowerCase()
+            .replace(/ /g, '')
+            .replace(/[\(\)]/g, '')
+            .replace(/-/g, '')
+            .replace(/'/g, '');
+        var filename = cleanName + (isShinyPokemon ? 'shiny' : '') + '.webp';
         var imageUrl = 'https://raw.githubusercontent.com/Skatecrete/infographics/main/debuts/' + filename;
         
         html += '<div class="order-section" style="text-align:center;">';
