@@ -758,9 +758,24 @@ function showDynamaxOrderDialog(raid) {
     currentRaid = raid;
     dynamaxQuantity = 0;
     
+    var isGigantamax = raid.tier === '💥 GIGANTAMAX';
+    var imageUrl;
+    
+    if (isGigantamax) {
+        var slug = raid.name.toLowerCase();
+        if (slug === 'toxtricity') slug = 'toxtricity';
+        if (slug === 'flapple' || slug === 'appletun') slug = 'appletun';
+        imageUrl = 'https://raw.githubusercontent.com/Skatecrete/infographics/main/gigantamax/gigantamax_' + slug + '.png';
+    } else {
+        imageUrl = raid.image;
+    }
+    
     document.getElementById('modalTitle').textContent = 'Order ' + raid.name;
     document.getElementById('modalBody').innerHTML = `
         <div class="order-stats"><div>Tier: ${raid.tier}</div></div>
+        <div class="order-section" style="text-align:center;">
+            <img src="${imageUrl}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'" style="width:120px; height:120px; object-fit:contain; margin:0 auto; display:block;">
+        </div>
         <div class="order-section">
             <div class="section-title">⚡ SELECT QUANTITY (4 for $${pricingCache['Raid_Dynamax_4'] || 10} or $${pricingCache['Raid_Dynamax_Single'] || 2.50} each)</div>
             <div class="quantity-selector">
