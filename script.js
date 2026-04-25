@@ -441,25 +441,111 @@ async function loadRaids() {
     container.innerHTML = '<div class="loading">Loading raids...</div>';
     
     try {
-        // Fetch from your GitHub JSON (primary source)
+        // Fetch from both sources
+        var scrapedResponse = await fetch('https://raw.githubusercontent.com/bigfoott/ScrapedDuck/data/raids.min.json');
         var dynaResponse = await fetch('https://raw.githubusercontent.com/Skatecrete/pogo-raid-data/main/current_raids.json');
         
-        if (!dynaResponse.ok) {
+        if (!scrapedResponse.ok || !dynaResponse.ok) {
             throw new Error('Failed to load raid data');
         }
         
+        var scrapedRaids = await scrapedResponse.json();
         var dynaRaids = await dynaResponse.json();
         
         // Initialize regular raids object
         var regularRaids = { 
-            tier6: [], tier5: [], tier4: [], tier3: [], tier2: [], tier1: [], 
-            mega: [], shadow5: [], shadow3: [], shadow1: [] 
+            tier5: [], shadow5: [], shadow3: [], shadow1: []
         };
         
-        // ScrapedDuck API is dead (404), so skip it and only use SnackNap data
-        // The shadow raids will come from SnackNap's dynamax_tier fields if needed
+        // Process ScrapedDuck raids (5-Star and Shadow only)
+        for (var i = 0; i < scrapedRaids.length; i++) {
+            var raid = scrapedRaids[i];
+            var tier = raid.tier;
+            var name = raid.name;
+            var id = await getPokemonIdFromName(name);
+            var raidObj = { 
+                name: name, 
+                tier: tier, 
+                id: id, 
+                isShiny: raid.canBeShiny, 
+                image: raid.image || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + id + '.png' 
+            };
+            
+            var tierLower = tier.toLowerCase();
+            var nameLower = name.toLowerCase();
+            
+            if (nameLower.includes('shadow') || tierLower.includes('shadow')) {
+                if (tierLower.includes('5-star') || tierLower.includes('legendary')) {
+                    regularRaids.shadow5.push(raidObj);
+                } else if (tierLower.includes('3-star')) {
+                    regularRaids.shadow3.push(raidObj);
+                } else {
+                    regularRaids.shadow1.push(raidObj);
+                }
+            } else if (tierLower.includes('5-star')) {
+                regularRaids.tier5.push(raidObj);
+            }
+            // Ignore other tiers from ScrapedDuck (1-Star, 3-Star, Mega)
+        }
         
-        // Process Dynamax raids from your GitHub JSON
+        // Process SnackNap raids (1-Star, 3-Star, Mega, Dynamax, Gigantamax)
+        var invalidNames = ['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'flying', 'ghost', 'grass', 'ground', 'ice', 'normal', 'poison', 'psychic', 'rock', 'steel', 'water', 'Search...'];
+        
+        // 1-Star from SnackNap
+        if (dynaRaids['tier1']) {
+            for (var j = 0; j < dynaRaids['tier1'].length; j++) {
+                var raidName = dynaRaids['tier1'][j];
+                if (raidName && raidName.length > 2 && !invalidNames.includes(raidName)) {
+                    var raidId = await getPokemonIdFromName(raidName);
+                    if (!regularRaids.tier1) regularRaids.tier1 = [];
+                    regularRaids.tier1.push({ 
+                        name: raidName, 
+                        tier: '1-Star', 
+                        id: raidId, 
+                        isShiny: true, 
+                        image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png' 
+                    });
+                }
+            }
+        }
+        
+        // 3-Star from SnackNap
+        if (dynaRaids['tier3']) {
+            for (var j = 0; j < dynaRaids['tier3'].length; j++) {
+                var raidName = dynaRaids['tier3'][j];
+                if (raidName && raidName.length > 2 && !invalidNames.includes(raidName)) {
+                    var raidId = await getPokemonIdFromName(raidName);
+                    if (!regularRaids.tier3) regularRaids.tier3 = [];
+                    regularRaids.tier3.push({ 
+                        name: raidName, 
+                        tier: '3-Star', 
+                        id: raidId, 
+                        isShiny: true, 
+                        image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png' 
+                    });
+                }
+            }
+        }
+        
+        // Mega from SnackNap
+        if (dynaRaids['mega']) {
+            for (var j = 0; j < dynaRaids['mega'].length; j++) {
+                var raidName = dynaRaids['mega'][j];
+                if (raidName && raidName.length > 2 && !invalidNames.includes(raidName)) {
+                    var raidId = await getPokemonIdFromName(raidName);
+                    if (!regularRaids.mega) regularRaids.mega = [];
+                    regularRaids.mega.push({ 
+                        name: raidName, 
+                        tier: 'Mega', 
+                        id: raidId, 
+                        isShiny: true, 
+                        image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png' 
+                    });
+                }
+            }
+        }
+        
+        // Dynamax and Gigantamax
         var dynamaxRaids = [];
         var tierMapping = {
             'dynamax_tier1': '⚡ DYNAMAX TIER 1',
@@ -470,30 +556,6 @@ async function loadRaids() {
             'gigantamax': '💥 GIGANTAMAX'
         };
         
-        var invalidNames = ['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'flying', 'ghost', 'grass', 'ground', 'ice', 'normal', 'poison', 'psychic', 'rock', 'steel', 'water', 'Search...'];
-        
-        // Process regular raids from SnackNap (tier1, tier3, tier5, mega)
-        var regularTiers = ['tier1', 'tier3', 'tier5', 'mega'];
-        for (var t = 0; t < regularTiers.length; t++) {
-            var tierKey = regularTiers[t];
-            if (dynaRaids[tierKey] && dynaRaids[tierKey].length) {
-                for (var j = 0; j < dynaRaids[tierKey].length; j++) {
-                    var raidName = dynaRaids[tierKey][j];
-                    if (!raidName || raidName.length < 2 || invalidNames.includes(raidName) || invalidNames.includes(raidName.toLowerCase())) continue;
-                    var raidId = await getPokemonIdFromName(raidName);
-                    var displayTier = tierKey === 'tier1' ? '1-Star' : (tierKey === 'tier3' ? '3-Star' : (tierKey === 'tier5' ? '5-Star' : 'Mega'));
-                    regularRaids[tierKey].push({ 
-                        name: raidName, 
-                        tier: displayTier, 
-                        id: raidId, 
-                        isShiny: true, 
-                        image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png' 
-                    });
-                }
-            }
-        }
-        
-        // Process Dynamax raids
         for (var key in tierMapping) {
             if (dynaRaids[key] && dynaRaids[key].length) {
                 for (var j = 0; j < dynaRaids[key].length; j++) {
