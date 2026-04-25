@@ -1365,6 +1365,8 @@ function displayDebutBanner(debut, startDate) {
     
     // Calculate time until event starts
     var now = new Date();
+    // Apply 10 hour offset
+    now.setHours(now.getHours() + 6);
     
     var millisLeft = startDate - now;
     var totalHoursLeft = Math.floor(millisLeft / (1000 * 60 * 60));
