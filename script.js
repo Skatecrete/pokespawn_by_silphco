@@ -217,6 +217,73 @@ async function getPokemonName(id) {
     }
 }
 
+function getFormSlug(name) {
+    var nameLower = name.toLowerCase();
+    
+    var specials = {
+        // Castform
+        'castform rainy': 'castform-rainy',
+        'castform snowy': 'castform-snowy',
+        'castform sunny': 'castform-sunny',
+        // Alolan
+        'vulpix alola': 'vulpix-alolan',
+        'ninetales alola': 'ninetales-alolan',
+        'sandshrew alola': 'sandshrew-alolan',
+        'sandslash alola': 'sandslash-alolan',
+        'diglett alola': 'diglett-alolan',
+        'dugtrio alola': 'dugtrio-alolan',
+        'meowth alola': 'meowth-alolan',
+        'persian alola': 'persian-alolan',
+        'geodude alola': 'geodude-alolan',
+        'graveler alola': 'graveler-alolan',
+        'golem alola': 'golem-alolan',
+        'grimer alola': 'grimer-alolan',
+        'muk alola': 'muk-alolan',
+        'exeggutor alola': 'exeggutor-alolan',
+        'marowak alola': 'marowak-alolan',
+        'raichu alola': 'raichu-alolan',
+        // Galarian
+        'meowth galarian': 'meowth-galarian',
+        'ponyta galarian': 'ponyta-galarian',
+        'rapidash galarian': 'rapidash-galarian',
+        'slowpoke galarian': 'slowpoke-galarian',
+        'slowbro galarian': 'slowbro-galarian',
+        'slowking galarian': 'slowking-galarian',
+        'zigzagoon galarian': 'zigzagoon-galarian',
+        'linoone galarian': 'linoone-galarian',
+        'darumaka galarian': 'darumaka-galarian',
+        'darmanitan galarian': 'darmanitan-galarian',
+        'yamask galarian': 'yamask-galarian',
+        'stunfisk galarian': 'stunfisk-galarian',
+        'corsola galarian': 'corsola-galarian',
+        // Hisuian
+        'growlithe hisuian': 'growlithe-hisuian',
+        'arcanine hisuian': 'arcanine-hisuian',
+        'voltorb hisuian': 'voltorb-hisuian',
+        'electrode hisuian': 'electrode-hisuian',
+        'typhlosion hisuian': 'typhlosion-hisuian',
+        'qwilfish hisuian': 'qwilfish-hisuian',
+        'sneasel hisuian': 'sneasel-hisuian',
+        'samurott hisuian': 'samurott-hisuian',
+        'lilligant hisuian': 'lilligant-hisuian',
+        'zorua hisuian': 'zorua-hisuian',
+        'zoroark hisuian': 'zoroark-hisuian',
+        'braviary hisuian': 'braviary-hisuian',
+        'sliggoo hisuian': 'sliggoo-hisuian',
+        'goodra hisuian': 'goodra-hisuian',
+        'avalugg hisuian': 'avalugg-hisuian',
+        'decidueye hisuian': 'decidueye-hisuian',
+        // Paldean
+        'wooper paldean': 'wooper-paldean',
+        'clodsire paldean': 'clodsire-paldean'
+    };
+    
+    if (specials[nameLower]) return specials[nameLower];
+    
+    // Default: replace spaces with hyphens
+    return nameLower.replace(/ /g, '-').replace(/[^a-z0-9-]/g, '');
+}
+
 function displaySpawns() {
     var container = document.getElementById('spawnsList');
     if (!container) return;
@@ -282,7 +349,9 @@ function displaySpawns() {
         if (p.isTopUltraPremier) tagsHtml += '<span class="pokemon-tag tag-ultra-premier">🏆 Ultra Premier</span>';
         
         html += '<div class="pokemon-card" onclick=\'showSpawnOrderDialog(' + JSON.stringify(p).replace(/'/g, "&#39;") + ')\'>';
-        html += '<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + p.id + '.png" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + p.id + '.png\'">';
+        
+        var customImageUrl = 'https://raw.githubusercontent.com/Skatecrete/pogo-raid-data/main/images/' + p.id + '_' + getFormSlug(p.name) + '.webp';
+        html += '<img src="' + customImageUrl + '" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + p.id + '.png\'">';
         html += '<div class="pokemon-info">';
         
         // Pokemon name with NOPE badge or spawn badge
