@@ -613,8 +613,8 @@ async function getPokemonIdFromName(name) {
         'hisuian growlithe': 'growlithe-hisui',
         'hisuian voltorb': 'voltorb-hisui',
         'hisuian sneasel': 'sneasel-hisui',
-        'hisuian avalugg': 'avalugg-hisui'
-        'hisuian qwilfish': 'qwilfish',
+        'hisuian avalugg': 'avalugg-hisui',
+        'hisuian qwilfish': 'qwilfish-hisui'
     };
     
     var apiName = formMap[cleanName] || cleanName;
