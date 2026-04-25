@@ -1363,20 +1363,25 @@ function displayDebutBanner(debut, startDate) {
     viewEventBtn.onclick = function() { findAndOpenLeekDuckEvent(debut.event_name); };
     currentDebutData = debut;
     
-    // Calculate days until event starts
+    // Calculate time until event starts
     var now = new Date();
-    var daysUntil = Math.ceil((startDate - now) / (1000 * 60 * 60 * 24));
     
-    if (daysUntil > 0) {
-        countdownElem.textContent = '⏰ Starts in ' + daysUntil + ' days';
-        countdownElem.style.color = '#4CAF50';
-    } else if (daysUntil === 0) {
-        countdownElem.textContent = '⏰ Starts today!';
-        countdownElem.style.color = '#FFA500';
+    var millisLeft = startDate - now;
+    var totalHoursLeft = Math.floor(millisLeft / (1000 * 60 * 60));
+    var daysLeft = Math.floor(totalHoursLeft / 24);
+    var hoursLeft = totalHoursLeft % 24;
+    var minutesLeft = Math.floor((millisLeft % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (daysLeft >= 1) {
+        // Show days and hours
+        countdownElem.textContent = '⏰ Starts in ' + daysLeft + (daysLeft === 1 ? ' day' : ' days') + ' ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours');
+    } else if (hoursLeft > 0) {
+        // Show hours and minutes
+        countdownElem.textContent = '⏰ Starts in ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours') + ' ' + minutesLeft + (minutesLeft === 1 ? ' minute' : ' minutes');
+    } else if (minutesLeft > 0) {
+        countdownElem.textContent = '⏰ Starts in ' + minutesLeft + (minutesLeft === 1 ? ' minute' : ' minutes');
     } else {
-        // Event already started - don't show in upcoming
-        banner.style.display = 'none';
-        return;
+        countdownElem.textContent = '⏰ Starts in less than a minute';
     }
     
     banner.style.display = 'block';
