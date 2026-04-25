@@ -663,12 +663,12 @@ function displayRaids(regularRaids, dynamaxRaids) {
     
     // Updated dynamax order - added dynamax_tier5
     var dynaOrder = [
+        { key: 'gigantamax', title: '💥 GIGANTAMAX' },
         { key: 'dynamax_tier5', title: '⚡⚡⚡⚡⚡ DYNAMAX TIER 5' },
         { key: 'dynamax_tier4', title: '⚡⚡⚡⚡ DYNAMAX TIER 4' },
         { key: 'dynamax_tier3', title: '⚡⚡⚡ DYNAMAX TIER 3' },
         { key: 'dynamax_tier2', title: '⚡⚡ DYNAMAX TIER 2' },
-        { key: 'dynamax_tier1', title: '⚡ DYNAMAX TIER 1' },
-        { key: 'gigantamax', title: '💥 GIGANTAMAX' }
+        { key: 'dynamax_tier1', title: '⚡ DYNAMAX TIER 1' }  
     ];
     
     var html = '';
