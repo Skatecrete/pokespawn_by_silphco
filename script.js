@@ -547,31 +547,46 @@ async function loadRaids() {
         
         // Dynamax and Gigantamax
         var dynamaxRaids = [];
-        var tierMapping = {
-            'dynamax_tier1': '⚡ DYNAMAX TIER 1',
-            'dynamax_tier2': '⚡⚡ DYNAMAX TIER 2',
-            'dynamax_tier3': '⚡⚡⚡ DYNAMAX TIER 3',
-            'dynamax_tier4': '⚡⚡⚡⚡ DYNAMAX TIER 4',
-            'dynamax_tier5': '⚡⚡⚡⚡⚡ DYNAMAX TIER 5',
-            'gigantamax': '💥 GIGANTAMAX'
-        };
-        
-        for (var key in tierMapping) {
-            if (dynaRaids[key] && dynaRaids[key].length) {
-                for (var j = 0; j < dynaRaids[key].length; j++) {
-                    var raidName = dynaRaids[key][j];
-                    if (!raidName || raidName.length < 2 || invalidNames.includes(raidName) || invalidNames.includes(raidName.toLowerCase())) continue;
-                    var raidId = await getPokemonIdFromName(raidName);
-                    dynamaxRaids.push({ 
-                        name: raidName, 
-                        tier: tierMapping[key], 
-                        id: raidId, 
-                        isShiny: true, 
-                        image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png' 
-                    });
-                }
+var tierMapping = {
+    'gigantamax': '💥 GIGANTAMAX',
+    'dynamax_tier5': '⚡⚡⚡⚡⚡ DYNAMAX TIER 5',
+    'dynamax_tier4': '⚡⚡⚡⚡ DYNAMAX TIER 4',
+    'dynamax_tier3': '⚡⚡⚡ DYNAMAX TIER 3',
+    'dynamax_tier2': '⚡⚡ DYNAMAX TIER 2',
+    'dynamax_tier1': '⚡ DYNAMAX TIER 1'
+};
+
+var invalidNames = ['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'flying', 'ghost', 'grass', 'ground', 'ice', 'normal', 'poison', 'psychic', 'rock', 'steel', 'water', 'Search...'];
+
+for (var key in tierMapping) {
+    if (dynaRaids[key] && dynaRaids[key].length) {
+        for (var j = 0; j < dynaRaids[key].length; j++) {
+            var raidName = dynaRaids[key][j];
+            if (!raidName || raidName.length < 2 || invalidNames.includes(raidName) || invalidNames.includes(raidName.toLowerCase())) continue;
+            var raidId = await getPokemonIdFromName(raidName);
+            
+            // Build image URL - special handling for Gigantamax
+            var imageUrl;
+            if (key === 'gigantamax') {
+                var slug = raidName.toLowerCase();
+                // Special cases for shared images
+                if (slug === 'toxtricity') slug = 'toxtricity';
+                if (slug === 'flapple' || slug === 'appletun') slug = 'appletun';
+                imageUrl = 'https://raw.githubusercontent.com/Skatecrete/infographics/main/gigantamax/gigantamax_' + slug + '.png';
+            } else {
+                imageUrl = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png';
             }
+            
+            dynamaxRaids.push({ 
+                name: raidName, 
+                tier: tierMapping[key], 
+                id: raidId, 
+                isShiny: true, 
+                image: imageUrl
+            });
         }
+    }
+}
         
         displayRaids(regularRaids, dynamaxRaids);
     } catch (e) {
