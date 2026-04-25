@@ -441,71 +441,80 @@ async function loadRaids() {
     container.innerHTML = '<div class="loading">Loading raids...</div>';
     
     try {
-        var scrapedResponse = await fetch('https://raw.githubusercontent.com/bigfoott/ScrapedDuck/data/raids.min.json');
+        // Fetch from your GitHub JSON (primary source)
         var dynaResponse = await fetch('https://raw.githubusercontent.com/Skatecrete/pogo-raid-data/main/current_raids.json');
         
-        var scrapedRaids = await scrapedResponse.json();
-        var dynaRaids = await dynaResponse.json();
-        
-        var regularRaids = { tier6: [], tier5: [], tier4: [], tier3: [], tier2: [], tier1: [], mega: [], shadow5: [], shadow3: [], shadow1: [] };
-        
-        for (var i = 0; i < scrapedRaids.length; i++) {
-            var raid = scrapedRaids[i];
-            var tier = raid.tier;
-            var name = raid.name;
-            var id = await getPokemonIdFromName(name);
-            var raidObj = { name: name, tier: tier, id: id, isShiny: raid.canBeShiny, image: raid.image || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + id + '.png' };
-            
-            var tierLower = tier.toLowerCase();
-            var nameLower = name.toLowerCase();
-            
-            if (nameLower.includes('shadow') || tierLower.includes('shadow')) {
-                if (tierLower.includes('5-star') || tierLower.includes('legendary') || nameLower.includes('latias') || nameLower.includes('latios')) {
-                    regularRaids.shadow5.push(raidObj);
-                } else if (tierLower.includes('3-star')) {
-                    regularRaids.shadow3.push(raidObj);
-                } else {
-                    regularRaids.shadow1.push(raidObj);
-                }
-            } else if (tierLower.includes('mega')) {
-                regularRaids.mega.push(raidObj);
-            } else if (tierLower.includes('6-star')) {
-                regularRaids.tier6.push(raidObj);
-            } else if (tierLower.includes('5-star')) {
-                regularRaids.tier5.push(raidObj);
-            } else if (tierLower.includes('4-star')) {
-                regularRaids.tier4.push(raidObj);
-            } else if (tierLower.includes('3-star')) {
-                regularRaids.tier3.push(raidObj);
-            } else if (tierLower.includes('2-star')) {
-                regularRaids.tier2.push(raidObj);
-            } else if (tierLower.includes('1-star')) {
-                regularRaids.tier1.push(raidObj);
-            }
+        if (!dynaResponse.ok) {
+            throw new Error('Failed to load raid data');
         }
         
+        var dynaRaids = await dynaResponse.json();
+        
+        // Initialize regular raids object
+        var regularRaids = { 
+            tier6: [], tier5: [], tier4: [], tier3: [], tier2: [], tier1: [], 
+            mega: [], shadow5: [], shadow3: [], shadow1: [] 
+        };
+        
+        // ScrapedDuck API is dead (404), so skip it and only use SnackNap data
+        // The shadow raids will come from SnackNap's dynamax_tier fields if needed
+        
+        // Process Dynamax raids from your GitHub JSON
         var dynamaxRaids = [];
         var tierMapping = {
-            'dynamax_tier1': '⚡ DYNAMAX TIER 1', 'dynamax_tier2': '⚡⚡ DYNAMAX TIER 2', 'dynamax_tier3': '⚡⚡⚡ DYNAMAX TIER 3',
-            'dynamax_tier4': '⚡⚡⚡⚡ DYNAMAX TIER 4', 'dynamax_tier5': '⚡⚡⚡⚡⚡ DYNAMAX TIER 5', 'gigantamax': '💥 GIGANTAMAX'
+            'dynamax_tier1': '⚡ DYNAMAX TIER 1',
+            'dynamax_tier2': '⚡⚡ DYNAMAX TIER 2',
+            'dynamax_tier3': '⚡⚡⚡ DYNAMAX TIER 3',
+            'dynamax_tier4': '⚡⚡⚡⚡ DYNAMAX TIER 4',
+            'dynamax_tier5': '⚡⚡⚡⚡⚡ DYNAMAX TIER 5',
+            'gigantamax': '💥 GIGANTAMAX'
         };
         
         var invalidNames = ['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'flying', 'ghost', 'grass', 'ground', 'ice', 'normal', 'poison', 'psychic', 'rock', 'steel', 'water', 'Search...'];
         
+        // Process regular raids from SnackNap (tier1, tier3, tier5, mega)
+        var regularTiers = ['tier1', 'tier3', 'tier5', 'mega'];
+        for (var t = 0; t < regularTiers.length; t++) {
+            var tierKey = regularTiers[t];
+            if (dynaRaids[tierKey] && dynaRaids[tierKey].length) {
+                for (var j = 0; j < dynaRaids[tierKey].length; j++) {
+                    var raidName = dynaRaids[tierKey][j];
+                    if (!raidName || raidName.length < 2 || invalidNames.includes(raidName) || invalidNames.includes(raidName.toLowerCase())) continue;
+                    var raidId = await getPokemonIdFromName(raidName);
+                    var displayTier = tierKey === 'tier1' ? '1-Star' : (tierKey === 'tier3' ? '3-Star' : (tierKey === 'tier5' ? '5-Star' : 'Mega'));
+                    regularRaids[tierKey].push({ 
+                        name: raidName, 
+                        tier: displayTier, 
+                        id: raidId, 
+                        isShiny: true, 
+                        image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png' 
+                    });
+                }
+            }
+        }
+        
+        // Process Dynamax raids
         for (var key in tierMapping) {
             if (dynaRaids[key] && dynaRaids[key].length) {
                 for (var j = 0; j < dynaRaids[key].length; j++) {
                     var raidName = dynaRaids[key][j];
                     if (!raidName || raidName.length < 2 || invalidNames.includes(raidName) || invalidNames.includes(raidName.toLowerCase())) continue;
                     var raidId = await getPokemonIdFromName(raidName);
-                    dynamaxRaids.push({ name: raidName, tier: tierMapping[key], id: raidId, isShiny: true, image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png' });
+                    dynamaxRaids.push({ 
+                        name: raidName, 
+                        tier: tierMapping[key], 
+                        id: raidId, 
+                        isShiny: true, 
+                        image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png' 
+                    });
                 }
             }
         }
         
         displayRaids(regularRaids, dynamaxRaids);
     } catch (e) {
-        container.innerHTML = '<div class="loading">Failed to load raids</div>';
+        console.error('Raids error:', e);
+        container.innerHTML = '<div class="loading">Failed to load raids: ' + e.message + '</div>';
     }
 }
 
@@ -575,18 +584,28 @@ function displayRaids(regularRaids, dynamaxRaids) {
     var container = document.getElementById('raidsList');
     if (!container) return;
     
+    // Updated category order - added tier5 and mega
     var categoryOrder = [
-        { key: 'tier6', title: '⭐⭐⭐⭐⭐⭐ 6-STAR RAIDS' }, { key: 'tier5', title: '⭐⭐⭐⭐⭐ 5-STAR RAIDS' },
-        { key: 'tier4', title: '⭐⭐⭐⭐ 4-STAR RAIDS' }, { key: 'tier3', title: '⭐⭐⭐ 3-STAR RAIDS' },
-        { key: 'tier2', title: '⭐⭐ 2-STAR RAIDS' }, { key: 'tier1', title: '⭐ 1-STAR RAIDS' },
-        { key: 'mega', title: '🔴 MEGA RAIDS' }, { key: 'shadow5', title: '🌑 SHADOW LEGENDARY (5-STAR)' },
-        { key: 'shadow3', title: '🌑 SHADOW 3-STAR RAIDS' }, { key: 'shadow1', title: '🌑 SHADOW 1-STAR RAIDS' }
+        { key: 'tier6', title: '⭐⭐⭐⭐⭐⭐ 6-STAR RAIDS' }, 
+        { key: 'tier5', title: '⭐⭐⭐⭐⭐ 5-STAR RAIDS' },
+        { key: 'tier4', title: '⭐⭐⭐⭐ 4-STAR RAIDS' }, 
+        { key: 'tier3', title: '⭐⭐⭐ 3-STAR RAIDS' },
+        { key: 'tier2', title: '⭐⭐ 2-STAR RAIDS' }, 
+        { key: 'tier1', title: '⭐ 1-STAR RAIDS' },
+        { key: 'mega', title: '🔴 MEGA RAIDS' }, 
+        { key: 'shadow5', title: '🌑 SHADOW LEGENDARY (5-STAR)' },
+        { key: 'shadow3', title: '🌑 SHADOW 3-STAR RAIDS' }, 
+        { key: 'shadow1', title: '🌑 SHADOW 1-STAR RAIDS' }
     ];
     
+    // Updated dynamax order - added dynamax_tier5
     var dynaOrder = [
-        { key: 'dynamax_tier5', title: '⚡⚡⚡⚡⚡ DYNAMAX TIER 5' }, { key: 'dynamax_tier4', title: '⚡⚡⚡⚡ DYNAMAX TIER 4' },
-        { key: 'dynamax_tier3', title: '⚡⚡⚡ DYNAMAX TIER 3' }, { key: 'dynamax_tier2', title: '⚡⚡ DYNAMAX TIER 2' },
-        { key: 'dynamax_tier1', title: '⚡ DYNAMAX TIER 1' }, { key: 'gigantamax', title: '💥 GIGANTAMAX' }
+        { key: 'dynamax_tier5', title: '⚡⚡⚡⚡⚡ DYNAMAX TIER 5' },
+        { key: 'dynamax_tier4', title: '⚡⚡⚡⚡ DYNAMAX TIER 4' },
+        { key: 'dynamax_tier3', title: '⚡⚡⚡ DYNAMAX TIER 3' },
+        { key: 'dynamax_tier2', title: '⚡⚡ DYNAMAX TIER 2' },
+        { key: 'dynamax_tier1', title: '⚡ DYNAMAX TIER 1' },
+        { key: 'gigantamax', title: '💥 GIGANTAMAX' }
     ];
     
     var html = '';
