@@ -614,6 +614,7 @@ async function getPokemonIdFromName(name) {
         'hisuian voltorb': 'voltorb-hisui',
         'hisuian sneasel': 'sneasel-hisui',
         'hisuian avalugg': 'avalugg-hisui'
+        'hisuian qwilfish': 'qwilfish',
     };
     
     var apiName = formMap[cleanName] || cleanName;
@@ -622,7 +623,7 @@ async function getPokemonIdFromName(name) {
     var simpleMap = { 
         'dratini': 147, 'gligar': 207, 'cacnea': 331, 'joltik': 595, 
         'lapras': 131, 'stantler': 234, 'latios': 381, 'latias': 380,
-        'marowak-alola': 105, 'marowak': 105
+        'marowak-alola': 105, 'marowak': 105, 'hisuian qwilfish': 211, 'qwilfish': 211 
     };
     
     if (simpleMap[apiName]) return simpleMap[apiName];
