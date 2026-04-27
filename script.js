@@ -1481,14 +1481,14 @@ function displayDebutBanner(debut, startDate) {
     
     if (daysLeft >= 1) {
         // Show days and hours
-        countdownElem.textContent = '⏰ Starts in ' + daysLeft + (daysLeft === 1 ? ' day' : ' days') + ' ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours');
+        countdownElem.textContent = '⏰ Starts in NZ in ' + daysLeft + (daysLeft === 1 ? ' day' : ' days') + ' ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours');
     } else if (hoursLeft > 0) {
         // Show hours and minutes
-        countdownElem.textContent = '⏰ Starts in ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours') + ' ' + minutesLeft + (minutesLeft === 1 ? ' minute' : ' minutes');
+        countdownElem.textContent = '⏰ Starts in NZ in ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours') + ' ' + minutesLeft + (minutesLeft === 1 ? ' minute' : ' minutes');
     } else if (minutesLeft > 0) {
-        countdownElem.textContent = '⏰ Starts in ' + minutesLeft + (minutesLeft === 1 ? ' minute' : ' minutes');
+        countdownElem.textContent = '⏰ Starts in NZ in ' + minutesLeft + (minutesLeft === 1 ? ' minute' : ' minutes');
     } else {
-        countdownElem.textContent = '⏰ Starts in less than a minute';
+        countdownElem.textContent = '⏰ Starts in NZ in less than a minute';
     }
     
     banner.style.display = 'block';
