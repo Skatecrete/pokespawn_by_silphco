@@ -1305,10 +1305,13 @@ async function loadEvents() {
             if (startDate <= now && endDate >= now) {
                 currentEvents.push(event);
             } else if (startDate > now) {
-                upcomingEvents.push(event);
-            }
-        }
-        
+                var daysUntil = (startDate - now) / (1000 * 60 * 60 * 24);
+                // Show if within 45 days OR contains "Go Fest"
+                if (daysUntil <= 45 || event.name.toLowerCase().includes('go fest')) {
+            upcomingEvents.push(event);
+                }
+             }
+           
         displayCurrentEvents(currentEvents);
         displayUpcomingEvents(upcomingEvents);
         
