@@ -1613,7 +1613,6 @@ function showInfographicsGallery(images, startIndex) {
             <div class="modal-content infographics-modal-content">
                 <div class="modal-header">
                     <h2 id="infographicsTitle">Infographics</h2>
-                    <button class="modal-close" onclick="closeInfographicsModal()">✕</button>
                 </div>
                 <div class="infographics-viewer">
                     <div class="infographics-image-container">
