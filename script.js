@@ -1304,14 +1304,16 @@ async function loadEvents() {
             
             if (startDate <= now && endDate >= now) {
                 currentEvents.push(event);
-            } else if (startDate > now) {
+            }
+            else if (startDate > now) {
                 var daysUntil = (startDate - now) / (1000 * 60 * 60 * 24);
                 // Show if within 45 days OR contains "Go Fest"
                 if (daysUntil <= 45 || event.name.toLowerCase().includes('go fest')) {
-            upcomingEvents.push(event);
+                    upcomingEvents.push(event);
                 }
-             }
-           
+            }
+        }
+        
         displayCurrentEvents(currentEvents);
         displayUpcomingEvents(upcomingEvents);
         
@@ -1871,14 +1873,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (weeklyBtn) weeklyBtn.onclick = loadWeeklyView;
     if (monthlyBtn) monthlyBtn.onclick = loadMonthlyView;
 });
-
-document.addEventListener('DOMContentLoaded', function() {
-    setupTabListeners();
-    loadPricing();
-    loadCart();
-    loadSpawns();       // Load initial spawns
-    loadEvents();       // 👈 ADD THIS - load events for default tab
-    loadDebutData();
 
 // ========== DEBUT DATA (Only for Upcoming) ==========
 async function loadDebutData() {
