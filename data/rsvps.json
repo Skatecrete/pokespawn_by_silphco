@@ -1,17 +1,6 @@
 [
   {
     "id": 1,
-    "date": "2026-04-22T14:42:00.000Z",
-    "customer": "Meagan (Sharkie1231)",
-    "eventName": "Replay: GO Bigger",
-    "eventStartDate": "2026-04-25T18:00:00.000Z",
-    "eventEndDate": "2026-04-25T21:00:00.000Z",
-    "eventLink": "https://leekduck.com/events/replay-go-bigger-2026/",
-    "status": "Confirmed",
-    "assignedAdmin": "Dan"
-  },
-  {
-    "id": 2,
     "date": "2026-04-22T14:43:00.000Z",
     "customer": "Meagan (Sharkie1231)",
     "eventName": "Steeled Resolve",
@@ -22,7 +11,7 @@
     "assignedAdmin": "Dan"
   },
   {
-    "id": 3,
+    "id": 2,
     "date": "2026-04-22T14:43:00.000Z",
     "customer": "Meagan (Sharkie1241)",
     "eventName": "Steeled Resolve: Taken Over",
