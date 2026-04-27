@@ -1928,12 +1928,18 @@ async function loadDebutData() {
                 
                 // Check if event is active (started and not ended)
                 if (todayStr >= startDateStr && todayStr <= endDateStr) {
-                    // Current/active event
                     if (!activeDebut) {
                         activeDebut = debut;
                     }
+                    // Also add to upcoming if it started today (so it shows in both tabs for the first day)
+                    if (todayStr === startDateStr) {
+                        if (!upcomingDebut || startDate < closestDate) {
+                            upcomingDebut = debut;
+                            closestDate = startDate;
+                        }
+                    }
                 }
-                // Check if event is upcoming (starts in 7 days or less)
+                // Check if event is upcoming (starts in 7 days or less, but not started yet)
                 else if (daysUntilStart > 0 && daysUntilStart <= 7) {
                     if (!upcomingDebut || startDate < closestDate) {
                         upcomingDebut = debut;
