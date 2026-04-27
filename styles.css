@@ -291,44 +291,93 @@ body {
     margin: 8px 0 4px 0;
 }
 
-/* Infographics Modal */
+/* Infographics Modal - Full Window */
 .infographics-modal {
     background: rgba(0,0,0,0.95);
 }
 
 .infographics-modal-content {
-    max-width: 90vw;
-    width: auto;
-    max-height: 90vh;
-    background: #1a1a2e;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    background: #000;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.infographics-modal-content .modal-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background: rgba(0,0,0,0.7);
+    border-bottom: none;
+    padding: 12px 20px;
+}
+
+.infographics-modal-content .modal-header h2 {
+    color: white;
+    font-size: 16px;
+    margin: 0;
+}
+
+.infographics-modal-content .modal-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background: rgba(0,0,0,0.7);
+    border-top: none;
+    padding: 16px;
+    justify-content: center;
 }
 
 .infographics-viewer {
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 60vh;
+    overflow: hidden;
 }
 
 .infographics-image-container {
-    position: relative;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
 .infographics-image {
-    max-width: 85vw;
-    max-height: 70vh;
+    max-width: 95vw;
+    max-height: 85vh;
     object-fit: contain;
     cursor: pointer;
 }
 
 .infographics-nav {
+    position: absolute;
+    bottom: 80px;
+    left: 0;
+    right: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 30px;
-    margin-top: 20px;
     padding: 10px;
+    background: rgba(0,0,0,0.5);
+    z-index: 10;
 }
 
 .infographics-nav-btn {
@@ -340,6 +389,7 @@ body {
     border-radius: 30px;
     cursor: pointer;
     transition: all 0.2s;
+    min-width: 60px;
 }
 
 .infographics-nav-btn:hover:not(:disabled) {
@@ -347,6 +397,7 @@ body {
 }
 
 .infographics-nav-btn:disabled {
+    opacity: 0.3;
     cursor: not-allowed;
 }
 
