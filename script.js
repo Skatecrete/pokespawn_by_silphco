@@ -1322,9 +1322,8 @@ async function loadEvents() {
 }
 
 function getEventImage(eventName) {
-    // Full Pokémon name to ID mapping
     const pokemonMap = {
-        // Gen 1
+        // ========== GEN 1 (1-151) ==========
         'Bulbasaur': 1, 'Ivysaur': 2, 'Venusaur': 3, 'Charmander': 4, 'Charmeleon': 5, 'Charizard': 6,
         'Squirtle': 7, 'Wartortle': 8, 'Blastoise': 9, 'Caterpie': 10, 'Metapod': 11, 'Butterfree': 12,
         'Weedle': 13, 'Kakuna': 14, 'Beedrill': 15, 'Pidgey': 16, 'Pidgeotto': 17, 'Pidgeot': 18,
@@ -1350,8 +1349,8 @@ function getEventImage(eventName) {
         'Omanyte': 138, 'Omastar': 139, 'Kabuto': 140, 'Kabutops': 141, 'Aerodactyl': 142, 'Snorlax': 143,
         'Articuno': 144, 'Zapdos': 145, 'Moltres': 146, 'Dratini': 147, 'Dragonair': 148, 'Dragonite': 149,
         'Mewtwo': 150, 'Mew': 151,
-        
-        // Gen 2
+
+        // ========== GEN 2 (152-251) ==========
         'Chikorita': 152, 'Bayleef': 153, 'Meganium': 154, 'Cyndaquil': 155, 'Quilava': 156, 'Typhlosion': 157,
         'Totodile': 158, 'Croconaw': 159, 'Feraligatr': 160, 'Sentret': 161, 'Furret': 162, 'Hoothoot': 163,
         'Noctowl': 164, 'Ledyba': 165, 'Ledian': 166, 'Spinarak': 167, 'Ariados': 168, 'Crobat': 169,
@@ -1369,8 +1368,8 @@ function getEventImage(eventName) {
         'Tyrogue': 236, 'Hitmontop': 237, 'Smoochum': 238, 'Elekid': 239, 'Magby': 240, 'Miltank': 241,
         'Blissey': 242, 'Raikou': 243, 'Entei': 244, 'Suicune': 245, 'Larvitar': 246, 'Pupitar': 247,
         'Tyranitar': 248, 'Lugia': 249, 'Ho-Oh': 250, 'Celebi': 251,
-        
-        // Gen 3
+
+        // ========== GEN 3 (252-386) ==========
         'Treecko': 252, 'Grovyle': 253, 'Sceptile': 254, 'Torchic': 255, 'Combusken': 256, 'Blaziken': 257,
         'Mudkip': 258, 'Marshtomp': 259, 'Swampert': 260, 'Poochyena': 261, 'Mightyena': 262, 'Zigzagoon': 263,
         'Linoone': 264, 'Wurmple': 265, 'Silcoon': 266, 'Beautifly': 267, 'Cascoon': 268, 'Dustox': 269,
@@ -1394,8 +1393,8 @@ function getEventImage(eventName) {
         'Salamence': 373, 'Beldum': 374, 'Metang': 375, 'Metagross': 376, 'Regirock': 377, 'Regice': 378,
         'Registeel': 379, 'Latias': 380, 'Latios': 381, 'Kyogre': 382, 'Groudon': 383, 'Rayquaza': 384,
         'Jirachi': 385, 'Deoxys': 386,
-        
-        // Gen 4
+
+        // ========== GEN 4 (387-493) ==========
         'Turtwig': 387, 'Grotle': 388, 'Torterra': 389, 'Chimchar': 390, 'Monferno': 391, 'Infernape': 392,
         'Piplup': 393, 'Prinplup': 394, 'Empoleon': 395, 'Starly': 396, 'Staravia': 397, 'Staraptor': 398,
         'Bidoof': 399, 'Bibarel': 400, 'Kricketot': 401, 'Kricketune': 402, 'Shinx': 403, 'Luxio': 404,
@@ -1413,10 +1412,10 @@ function getEventImage(eventName) {
         'Gliscor': 471, 'Mamoswine': 472, 'Porygon-Z': 473, 'Gallade': 474, 'Probopass': 475, 'Dusknoir': 476,
         'Froslass': 477, 'Rotom': 478, 'Uxie': 479, 'Mesprit': 480, 'Azelf': 481, 'Dialga': 482, 'Palkia': 483,
         'Heatran': 484, 'Regigigas': 485, 'Giratina': 486, 'Cresselia': 487, 'Phione': 488, 'Manaphy': 489,
-        'Darkrai': 490, 'Shaymin': 491, 'Arceus': 492,
-        
-        // Gen 5
-        'Victini': 494, 'Snivy': 495, 'Servine': 496, 'Serperior': 497, 'Tepig': 498, 'Pignite': 499, 'Emboar': 500,
+        'Darkrai': 490, 'Shaymin': 491, 'Arceus': 492, 'Victini': 494,
+
+        // ========== GEN 5 (494-649) ==========
+        'Snivy': 495, 'Servine': 496, 'Serperior': 497, 'Tepig': 498, 'Pignite': 499, 'Emboar': 500,
         'Oshawott': 501, 'Dewott': 502, 'Samurott': 503, 'Patrat': 504, 'Watchog': 505, 'Lillipup': 506,
         'Herdier': 507, 'Stoutland': 508, 'Purrloin': 509, 'Liepard': 510, 'Pansage': 511, 'Simisage': 512,
         'Pansear': 513, 'Simisear': 514, 'Panpour': 515, 'Simipour': 516, 'Munna': 517, 'Musharna': 518,
@@ -1442,64 +1441,126 @@ function getEventImage(eventName) {
         'Deino': 633, 'Zweilous': 634, 'Hydreigon': 635, 'Larvesta': 636, 'Volcarona': 637, 'Cobalion': 638,
         'Terrakion': 639, 'Virizion': 640, 'Tornadus': 641, 'Thundurus': 642, 'Reshiram': 643, 'Zekrom': 644,
         'Landorus': 645, 'Kyurem': 646, 'Keldeo': 647, 'Meloetta': 648, 'Genesect': 649,
-        
-        // Gen 6-9 (simplified - add as needed)
+
+        // ========== GEN 6 (650-721) ==========
         'Chespin': 650, 'Quilladin': 651, 'Chesnaught': 652, 'Fennekin': 653, 'Braixen': 654, 'Delphox': 655,
-        'Froakie': 656, 'Frogadier': 657, 'Greninja': 658, 'Xerneas': 716, 'Yveltal': 717, 'Zygarde': 718,
+        'Froakie': 656, 'Frogadier': 657, 'Greninja': 658, 'Bunnelby': 659, 'Diggersby': 660, 'Fletchling': 661,
+        'Fletchinder': 662, 'Talonflame': 663, 'Scatterbug': 664, 'Spewpa': 665, 'Vivillon': 666, 'Litleo': 667,
+        'Pyroar': 668, 'Flabébé': 669, 'Floette': 670, 'Florges': 671, 'Skiddo': 672, 'Gogoat': 673,
+        'Pancham': 674, 'Pangoro': 675, 'Furfrou': 676, 'Espurr': 677, 'Meowstic': 678, 'Honedge': 679,
+        'Doublade': 680, 'Aegislash': 681, 'Spritzee': 682, 'Aromatisse': 683, 'Swirlix': 684, 'Slurpuff': 685,
+        'Inkay': 686, 'Malamar': 687, 'Binacle': 688, 'Barbaracle': 689, 'Skrelp': 690, 'Dragalge': 691,
+        'Clauncher': 692, 'Clawitzer': 693, 'Helioptile': 694, 'Heliolisk': 695, 'Tyrunt': 696, 'Tyrantrum': 697,
+        'Amaura': 698, 'Aurorus': 699, 'Sylveon': 700, 'Hawlucha': 701, 'Dedenne': 702, 'Carbink': 703,
+        'Goomy': 704, 'Sliggoo': 705, 'Goodra': 706, 'Klefki': 707, 'Phantump': 708, 'Trevenant': 709,
+        'Pumpkaboo': 710, 'Gourgeist': 711, 'Bergmite': 712, 'Avalugg': 713, 'Noibat': 714, 'Noivern': 715,
+        'Xerneas': 716, 'Yveltal': 717, 'Zygarde': 718, 'Diancie': 719, 'Hoopa': 720, 'Volcanion': 721,
+
+        // ========== GEN 7 (722-809) ==========
         'Rowlet': 722, 'Dartrix': 723, 'Decidueye': 724, 'Litten': 725, 'Torracat': 726, 'Incineroar': 727,
-        'Popplio': 728, 'Brionne': 729, 'Primarina': 730, 'Tapu Koko': 785, 'Tapu Lele': 786, 'Tapu Bulu': 787,
-        'Tapu Fini': 788, 'Solgaleo': 791, 'Lunala': 792, 'Necrozma': 800, 'Magearna': 801, 'Marshadow': 802,
-        'Zeraora': 807, 'Grookey': 810, 'Thwackey': 811, 'Rillaboom': 812, 'Scorbunny': 813, 'Raboot': 814,
-        'Cinderace': 815, 'Sobble': 816, 'Drizzile': 817, 'Inteleon': 818, 'Zacian': 888, 'Zamazenta': 889,
-        'Eternatus': 890, 'Urshifu': 892, 'Zarude': 893, 'Regieleki': 894, 'Regidrago': 895, 'Calyrex': 898,
-        'Sprigatito': 906, 'Floragato': 907, 'Meowscarada': 908, 'Fuecoco': 909, 'Crocalor': 910, 'Skeledirge': 911,
-        'Quaxly': 912, 'Quaxwell': 913, 'Quaquaval': 914, 'Koraidon': 1007, 'Miraidon': 1008, 'Ogerpon': 1017,
-        'Terapagos': 1024, 'Pecharunt': 1025
+        'Popplio': 728, 'Brionne': 729, 'Primarina': 730, 'Pikipek': 731, 'Trumbeak': 732, 'Toucannon': 733,
+        'Yungoos': 734, 'Gumshoos': 735, 'Grubbin': 736, 'Charjabug': 737, 'Vikavolt': 738, 'Crabrawler': 739,
+        'Crabominable': 740, 'Oricorio': 741, 'Cutiefly': 742, 'Ribombee': 743, 'Rockruff': 744, 'Lycanroc': 745,
+        'Wishiwashi': 746, 'Mareanie': 747, 'Toxapex': 748, 'Mudbray': 749, 'Mudsdale': 750, 'Dewpider': 751,
+        'Araquanid': 752, 'Fomantis': 753, 'Lurantis': 754, 'Morelull': 755, 'Shiinotic': 756, 'Salandit': 757,
+        'Salazzle': 758, 'Stufful': 759, 'Bewear': 760, 'Bounsweet': 761, 'Steenee': 762, 'Tsareena': 763,
+        'Comfey': 764, 'Oranguru': 765, 'Passimian': 766, 'Wimpod': 767, 'Golisopod': 768, 'Sandygast': 769,
+        'Palossand': 770, 'Pyukumuku': 771, 'Type: Null': 772, 'Silvally': 773, 'Minior': 774, 'Komala': 775,
+        'Turtonator': 776, 'Togedemaru': 777, 'Mimikyu': 778, 'Bruxish': 779, 'Drampa': 780, 'Dhelmise': 781,
+        'Jangmo-o': 782, 'Hakamo-o': 783, 'Kommo-o': 784, 'Tapu Koko': 785, 'Tapu Lele': 786, 'Tapu Bulu': 787,
+        'Tapu Fini': 788, 'Cosmog': 789, 'Cosmoem': 790, 'Solgaleo': 791, 'Lunala': 792, 'Nihilego': 793,
+        'Buzzwole': 794, 'Pheromosa': 795, 'Xurkitree': 796, 'Celesteela': 797, 'Kartana': 798, 'Guzzlord': 799,
+        'Necrozma': 800, 'Magearna': 801, 'Marshadow': 802, 'Poipole': 803, 'Naganadel': 804, 'Stakataka': 805,
+        'Blacephalon': 806, 'Zeraora': 807, 'Meltan': 808, 'Melmetal': 809,
+
+        // ========== GEN 8 (810-898) ==========
+        'Grookey': 810, 'Thwackey': 811, 'Rillaboom': 812, 'Scorbunny': 813, 'Raboot': 814, 'Cinderace': 815,
+        'Sobble': 816, 'Drizzile': 817, 'Inteleon': 818, 'Skwovet': 819, 'Greedent': 820, 'Rookidee': 821,
+        'Corvisquire': 822, 'Corviknight': 823, 'Blipbug': 824, 'Dottler': 825, 'Orbeetle': 826, 'Nickit': 827,
+        'Thievul': 828, 'Gossifleur': 829, 'Eldegoss': 830, 'Wooloo': 831, 'Dubwool': 832, 'Chewtle': 833,
+        'Drednaw': 834, 'Yamper': 835, 'Boltund': 836, 'Rolycoly': 837, 'Carkol': 838, 'Coalossal': 839,
+        'Applin': 840, 'Flapple': 841, 'Appletun': 842, 'Silicobra': 843, 'Sandaconda': 844, 'Cramorant': 845,
+        'Arrokuda': 846, 'Barraskewda': 847, 'Toxel': 848, 'Toxtricity': 849, 'Sizzlipede': 850, 'Centiskorch': 851,
+        'Clobbopus': 852, 'Grapploct': 853, 'Sinistea': 854, 'Polteageist': 855, 'Hatenna': 856, 'Hattrem': 857,
+        'Hatterene': 858, 'Impidimp': 859, 'Morgrem': 860, 'Grimmsnarl': 861, 'Obstagoon': 862, 'Perrserker': 863,
+        'Cursola': 864, 'Sirfetch\'d': 865, 'Mr. Rime': 866, 'Runerigus': 867, 'Milcery': 868, 'Alcremie': 869,
+        'Falinks': 870, 'Pincurchin': 871, 'Snom': 872, 'Frosmoth': 873, 'Stonjourner': 874, 'Eiscue': 875,
+        'Indeedee': 876, 'Morpeko': 877, 'Cufant': 878, 'Copperajah': 879, 'Dracozolt': 880, 'Arctozolt': 881,
+        'Dracovish': 882, 'Arctovish': 883, 'Duraludon': 884, 'Dreepy': 885, 'Drakloak': 886, 'Dragapult': 887,
+        'Zacian': 888, 'Zamazenta': 889, 'Eternatus': 890, 'Kubfu': 891, 'Urshifu': 892, 'Zarude': 893,
+        'Regieleki': 894, 'Regidrago': 895, 'Glastrier': 896, 'Spectrier': 897, 'Calyrex': 898,
+
+        // ========== GEN 9 (899-1025) ==========
+        'Wyrdeer': 899, 'Kleavor': 900, 'Ursaluna': 901, 'Basculegion': 902, 'Sneasler': 903, 'Overqwil': 904,
+        'Enamorus': 905, 'Sprigatito': 906, 'Floragato': 907, 'Meowscarada': 908, 'Fuecoco': 909, 'Crocalor': 910,
+        'Skeledirge': 911, 'Quaxly': 912, 'Quaxwell': 913, 'Quaquaval': 914, 'Lechonk': 915, 'Oinkologne': 916,
+        'Tarountula': 917, 'Spidops': 918, 'Nymble': 919, 'Lokix': 920, 'Pawmi': 921, 'Pawmo': 922, 'Pawmot': 923,
+        'Tandemaus': 924, 'Maushold': 925, 'Fidough': 926, 'Dachsbun': 927, 'Smoliv': 928, 'Dolliv': 929,
+        'Arboliva': 930, 'Squawkabilly': 931, 'Nacli': 932, 'Naclstack': 933, 'Garganacl': 934, 'Charcadet': 935,
+        'Armarouge': 936, 'Ceruledge': 937, 'Tadbulb': 938, 'Bellibolt': 939, 'Wattrel': 940, 'Kilowattrel': 941,
+        'Maschiff': 942, 'Mabosstiff': 943, 'Shroodle': 944, 'Grafaiai': 945, 'Bramblin': 946, 'Brambleghast': 947,
+        'Toedscool': 948, 'Toedscruel': 949, 'Klawf': 950, 'Capsakid': 951, 'Scovillain': 952, 'Rellor': 953,
+        'Rabsca': 954, 'Flittle': 955, 'Espathra': 956, 'Tinkatink': 957, 'Tinkatuff': 958, 'Tinkaton': 959,
+        'Wiglett': 960, 'Wugtrio': 961, 'Bombirdier': 962, 'Finizen': 963, 'Palafin': 964, 'Varoom': 965,
+        'Revavroom': 966, 'Cyclizar': 967, 'Orthworm': 968, 'Glimmet': 969, 'Glimmora': 970, 'Greavard': 971,
+        'Houndstone': 972, 'Flamigo': 973, 'Cetoddle': 974, 'Cetitan': 975, 'Veluza': 976, 'Dondozo': 977,
+        'Tatsugiri': 978, 'Annihilape': 979, 'Clodsire': 980, 'Farigiraf': 981, 'Dudunsparce': 982, 'Kingambit': 983,
+        'Great Tusk': 984, 'Scream Tail': 985, 'Brute Bonnet': 986, 'Flutter Mane': 987, 'Slither Wing': 988,
+        'Sandy Shocks': 989, 'Iron Treads': 990, 'Iron Bundle': 991, 'Iron Hands': 992, 'Iron Jugulis': 993,
+        'Iron Moth': 994, 'Iron Thorns': 995, 'Frigibax': 996, 'Arctibax': 997, 'Baxcalibur': 998,
+        'Gimmighoul': 999, 'Gholdengo': 1000, 'Wo-Chien': 1001, 'Chien-Pao': 1002, 'Ting-Lu': 1003, 'Chi-Yu': 1004,
+        'Roaring Moon': 1005, 'Iron Valiant': 1006, 'Koraidon': 1007, 'Miraidon': 1008, 'Walking Wake': 1009,
+        'Iron Leaves': 1010, 'Dipplin': 1011, 'Poltchageist': 1012, 'Sinistcha': 1013, 'Okidogi': 1014,
+        'Munkidori': 1015, 'Fezandipiti': 1016, 'Ogerpon': 1017, 'Archaludon': 1018, 'Hydrapple': 1019,
+        'Gouging Fire': 1020, 'Raging Bolt': 1021, 'Iron Boulder': 1022, 'Iron Crown': 1023, 'Terapagos': 1024,
+        'Pecharunt': 1025
     };
-    
-    // Convert event name to lowercase once
+
     var eventLower = eventName.toLowerCase();
-    
-    // Try to find exact match first (longest match wins)
-    var matchedPokemon = null;
     var matchedId = null;
     var matchLength = 0;
-    
+
     for (var pokemon in pokemonMap) {
         var pokemonLower = pokemon.toLowerCase();
         if (eventLower.includes(pokemonLower)) {
-            // Prefer longer matches (e.g., "Tapu Koko" over "Koko")
             if (pokemonLower.length > matchLength) {
                 matchLength = pokemonLower.length;
-                matchedPokemon = pokemon;
                 matchedId = pokemonMap[pokemon];
             }
         }
     }
-    
-    // Also check for standalone words
-    var words = eventName.split(/[\s\-:]+/);
-    for (var i = 0; i < words.length; i++) {
-        var word = words[i];
-        if (word.length < 3) continue;
-        
-        for (var pokemon in pokemonMap) {
-            if (pokemon.toLowerCase() === word.toLowerCase()) {
-                matchedId = pokemonMap[pokemon];
+
+    // Partial matches for common event patterns
+    if (!matchedId) {
+        var partialMatches = {
+            'nihilego': 793, 'buzzwole': 794, 'pheromosa': 795, 'xurkitree': 796,
+            'celesteela': 797, 'kartana': 798, 'guzzlord': 799, 'poipole': 803,
+            'naganadel': 804, 'stakataka': 805, 'blacephalon': 806, 'lechonk': 915,
+            'oinkologne': 916, 'tinkatink': 957, 'tinkatuff': 958, 'tinkaton': 959,
+            'clodsire': 980, 'farigiraf': 981, 'dudunsparce': 982, 'kingambit': 983,
+            'gimmighoul': 999, 'gholdengo': 1000, 'ogerpon': 1017, 'terapagos': 1024,
+            'pecharunt': 1025, 'walking wake': 1009, 'iron leaves': 1010, 'iron bundle': 991,
+            'iron hands': 992, 'iron jugulis': 993, 'iron moth': 994, 'iron thorns': 995,
+            'iron treads': 990, 'iron valiant': 1006, 'roaring moon': 1005, 'sandy shocks': 989,
+            'slither wing': 988, 'flutter mane': 987, 'brute bonnet': 986, 'scream tail': 985,
+            'great tusk': 984, 'gouging fire': 1020, 'raging bolt': 1021, 'iron boulder': 1022,
+            'iron crown': 1023, 'archaludon': 1018, 'hydrapple': 1019, 'sinistcha': 1013,
+            'poltchageist': 1012, 'dipplin': 1011, 'okidogi': 1014, 'munkidori': 1015,
+            'fezandipiti': 1016, 'basculegion': 902, 'sneasler': 903, 'overqwil': 904,
+            'enamorus': 905, 'ursaluna': 901, 'wyrdeer': 899, 'kleavor': 900
+        };
+        for (var partial in partialMatches) {
+            if (eventLower.includes(partial)) {
+                matchedId = partialMatches[partial];
                 break;
             }
         }
-        if (matchedId) break;
     }
-    
+
     if (matchedId) {
-        // Debug log to see what matched
-        console.log('Event:', eventName, '→ Matched Pokémon ID:', matchedId);
         return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + matchedId + '.png';
     }
-    
-    // No match - return emoji fallback
-    console.log('Event:', eventName, '→ No match, using 😎 fallback');
+
     return '😎';
 }
 
