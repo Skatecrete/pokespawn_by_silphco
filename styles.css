@@ -291,12 +291,61 @@ body {
     margin: 8px 0 4px 0;
 }
 
-/* Infographics Modal - Full Window */
-.infographics-modal {
+/* Gallery View (All Infographics) */
+.gallery-modal {
+    background: #1a1a2e;
+}
+
+.gallery-modal .modal-content {
+    max-width: 95vw;
+    width: 95vw;
+    height: 90vh;
+    max-height: 90vh;
+    background: #1a1a2e;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(90vh - 80px);
+}
+
+.gallery-item {
+    background: #2a2a3e;
+    border-radius: 12px;
+    padding: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    text-align: center;
+}
+
+.gallery-item:hover {
+    transform: scale(1.02);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.gallery-item-name {
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 6px;
+    word-break: break-all;
+}
+
+/* Fullscreen Viewer (Single Image) */
+.viewer-modal {
     background: rgba(0,0,0,0.95);
 }
 
-.infographics-modal-content {
+.viewer-modal .modal-content {
     position: fixed;
     top: 0;
     left: 0;
@@ -313,36 +362,34 @@ body {
     flex-direction: column;
 }
 
-.infographics-modal-content .modal-header {
+.viewer-modal .modal-header {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     z-index: 10;
     background: rgba(0,0,0,0.7);
-    border-bottom: none;
     padding: 12px 20px;
 }
 
-.infographics-modal-content .modal-header h2 {
+.viewer-modal .modal-header h2 {
     color: white;
     font-size: 16px;
     margin: 0;
 }
 
-.infographics-modal-content .modal-footer {
+.viewer-modal .modal-footer {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 10;
     background: rgba(0,0,0,0.7);
-    border-top: none;
     padding: 16px;
     justify-content: center;
 }
 
-.infographics-viewer {
+.viewer-container {
     flex: 1;
     display: flex;
     justify-content: center;
@@ -350,23 +397,13 @@ body {
     overflow: hidden;
 }
 
-.infographics-image-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-}
-
-.infographics-image {
+.viewer-image {
     max-width: 95vw;
     max-height: 85vh;
     object-fit: contain;
-    cursor: pointer;
 }
 
-.infographics-nav {
+.viewer-nav {
     position: absolute;
     bottom: 80px;
     left: 0;
@@ -380,7 +417,7 @@ body {
     z-index: 10;
 }
 
-.infographics-nav-btn {
+.viewer-nav-btn {
     background: #7627C5;
     border: none;
     color: white;
@@ -392,20 +429,31 @@ body {
     min-width: 60px;
 }
 
-.infographics-nav-btn:hover:not(:disabled) {
+.viewer-nav-btn:hover:not(:disabled) {
     background: #FF9800;
 }
 
-.infographics-nav-btn:disabled {
+.viewer-nav-btn:disabled {
     opacity: 0.3;
     cursor: not-allowed;
 }
 
-.infographics-counter {
+.viewer-counter {
     color: white;
     font-size: 14px;
     min-width: 80px;
     text-align: center;
+}
+
+.back-btn {
+    background: #FF9800;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 /* Debut Banner */
