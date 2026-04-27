@@ -240,6 +240,123 @@ body {
     background: #7627C5;
 }
 
+/* Infographics Header */
+.infographics-header {
+    margin: 12px 12px 8px 12px;
+}
+
+.infographics-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.infographics-btn.view-all {
+    background: #FF9800;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.infographics-btn.weekly {
+    background: #2196F3;
+    color: white;
+}
+
+.infographics-btn.monthly {
+    background: #4CAF50;
+    color: white;
+}
+
+.infographics-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.infographics-row .infographics-btn {
+    width: 50%;
+    margin-bottom: 0;
+}
+
+.separator-line {
+    height: 2px;
+    background: linear-gradient(90deg, #FF9800, #7627C5, #FF9800);
+    border-radius: 2px;
+    margin: 8px 0 4px 0;
+}
+
+/* Infographics Modal */
+.infographics-modal {
+    background: rgba(0,0,0,0.95);
+}
+
+.infographics-modal-content {
+    max-width: 90vw;
+    width: auto;
+    max-height: 90vh;
+    background: #1a1a2e;
+}
+
+.infographics-viewer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+}
+
+.infographics-image-container {
+    position: relative;
+    text-align: center;
+}
+
+.infographics-image {
+    max-width: 85vw;
+    max-height: 70vh;
+    object-fit: contain;
+    cursor: pointer;
+}
+
+.infographics-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin-top: 20px;
+    padding: 10px;
+}
+
+.infographics-nav-btn {
+    background: #7627C5;
+    border: none;
+    color: white;
+    font-size: 24px;
+    padding: 10px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.infographics-nav-btn:hover:not(:disabled) {
+    background: #FF9800;
+}
+
+.infographics-nav-btn:disabled {
+    cursor: not-allowed;
+}
+
+.infographics-counter {
+    color: white;
+    font-size: 14px;
+    min-width: 80px;
+    text-align: center;
+}
+
 /* Debut Banner */
 .debut-banner {
     background: linear-gradient(135deg, #2a1a3e, #1a1a2e);
