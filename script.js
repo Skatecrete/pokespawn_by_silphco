@@ -1538,6 +1538,173 @@ function displayUpcomingEvents(events) {
     container.innerHTML = html;
 }
 
+// ========== INFOGRAPHICS FUNCTIONS ==========
+
+async function loadAllInfographics() {
+    showLoading('Loading infographics...');
+    
+    try {
+        const response = await fetch('https://api.github.com/repos/Skatecrete/infographics/contents/images');
+        const data = await response.json();
+        
+        const infographics = [];
+        for (var i = 0; i < data.length; i++) {
+            var name = data[i].name;
+            var downloadUrl = data[i].download_url;
+            if (name !== 'placeholder.png' && (name.endsWith('.png') || name.endsWith('.webp'))) {
+                infographics.push({ name: name, url: downloadUrl });
+            }
+        }
+        
+        hideLoading();
+        
+        if (infographics.length === 0) {
+            showToast('No infographics found');
+            return;
+        }
+        
+        showInfographicsGallery(infographics, 0);
+        
+    } catch (e) {
+        hideLoading();
+        showToast('Failed to load infographics');
+    }
+}
+
+async function loadWeeklyView() {
+    showLoading('Loading Weekly View...');
+    await loadSpecificInfographic('weekly.png');
+}
+
+async function loadMonthlyView() {
+    showLoading('Loading Monthly View...');
+    await loadSpecificInfographic('monthly.png');
+}
+
+async function loadSpecificInfographic(filename) {
+    try {
+        const url = 'https://raw.githubusercontent.com/Skatecrete/infographics/main/images/' + filename;
+        
+        // Check if file exists
+        const response = await fetch(url, { method: 'HEAD' });
+        if (!response.ok) {
+            hideLoading();
+            showToast('No ' + filename.replace('.png', '').toUpperCase() + ' graphic uploaded yet');
+            return;
+        }
+        
+        hideLoading();
+        showInfographicsGallery([{ name: filename, url: url }], 0);
+        
+    } catch (e) {
+        hideLoading();
+        showToast('Failed to load graphic');
+    }
+}
+
+function showInfographicsGallery(images, startIndex) {
+    var modal = document.getElementById('infographicsModal');
+    if (!modal) {
+        // Create modal if it doesn't exist
+        modal = document.createElement('div');
+        modal.id = 'infographicsModal';
+        modal.className = 'modal infographics-modal';
+        modal.innerHTML = `
+            <div class="modal-content infographics-modal-content">
+                <div class="modal-header">
+                    <h2 id="infographicsTitle">Infographics</h2>
+                    <button class="modal-close" onclick="closeInfographicsModal()">✕</button>
+                </div>
+                <div class="infographics-viewer">
+                    <div class="infographics-image-container">
+                        <img id="infographicsImage" class="infographics-image" src="" alt="Infographic">
+                        <div class="infographics-nav">
+                            <button id="infographicsPrevBtn" class="infographics-nav-btn" onclick="navigateInfographics(-1)">◀</button>
+                            <span id="infographicsCounter" class="infographics-counter">1 / 1</span>
+                            <button id="infographicsNextBtn" class="infographics-nav-btn" onclick="navigateInfographics(1)">▶</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="confirm-btn" onclick="closeInfographicsModal()">Close</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    window.infographicsData = images;
+    window.currentInfographicIndex = startIndex;
+    
+    updateInfographicDisplay();
+    modal.style.display = 'flex';
+}
+
+function updateInfographicDisplay() {
+    var images = window.infographicsData;
+    var index = window.currentInfographicIndex;
+    
+    if (!images || images.length === 0) return;
+    
+    var imgElement = document.getElementById('infographicsImage');
+    var counterElement = document.getElementById('infographicsCounter');
+    var prevBtn = document.getElementById('infographicsPrevBtn');
+    var nextBtn = document.getElementById('infographicsNextBtn');
+    var titleElement = document.getElementById('infographicsTitle');
+    
+    if (imgElement) {
+        imgElement.src = images[index].url;
+        imgElement.alt = images[index].name;
+    }
+    
+    if (counterElement) {
+        counterElement.textContent = (index + 1) + ' / ' + images.length;
+    }
+    
+    if (titleElement) {
+        titleElement.textContent = images[index].name === 'weekly.png' ? 'Weekly View' : 
+                                   (images[index].name === 'monthly.png' ? 'Monthly View' : 'Infographics');
+    }
+    
+    if (prevBtn) {
+        prevBtn.style.opacity = index === 0 ? '0.3' : '1';
+        prevBtn.disabled = index === 0;
+    }
+    
+    if (nextBtn) {
+        nextBtn.style.opacity = index === images.length - 1 ? '0.3' : '1';
+        nextBtn.disabled = index === images.length - 1;
+    }
+}
+
+function navigateInfographics(direction) {
+    var images = window.infographicsData;
+    var newIndex = window.currentInfographicIndex + direction;
+    
+    if (newIndex >= 0 && newIndex < images.length) {
+        window.currentInfographicIndex = newIndex;
+        updateInfographicDisplay();
+    }
+}
+
+function closeInfographicsModal() {
+    var modal = document.getElementById('infographicsModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Add click handlers when DOM loads
+document.addEventListener('DOMContentLoaded', function() {
+    var viewAllBtn = document.getElementById('viewAllInfographicsBtn');
+    var weeklyBtn = document.getElementById('weeklyViewBtn');
+    var monthlyBtn = document.getElementById('monthlyViewBtn');
+    
+    if (viewAllBtn) viewAllBtn.onclick = loadAllInfographics;
+    if (weeklyBtn) weeklyBtn.onclick = loadWeeklyView;
+    if (monthlyBtn) monthlyBtn.onclick = loadMonthlyView;
+});
+
 // ========== DEBUT DATA (Only for Upcoming) ==========
 async function loadDebutData() {
     try {
