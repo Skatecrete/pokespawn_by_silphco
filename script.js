@@ -62,10 +62,8 @@ function setupTabListeners() {
             if (tabId === 'raids') loadRaids();
             if (tabId === 'current' || tabId === 'upcoming') {
                 loadEvents();
-                // Load debut data only when switching to Upcoming tab
-                if (tabId === 'upcoming') {
-                    loadDebutData();
-                }
+                // Load debut data for BOTH current and upcoming tabs
+                loadDebutData();
             }
         });
     }
@@ -1324,22 +1322,150 @@ async function loadEvents() {
 }
 
 function getEventImage(eventName) {
-    // Pokemon name to ID mapping
-    var pokemonMap = {
-        'Pikachu': 25, 'Slowbro': 80, 'Zamazenta': 889, 'Regieleki': 894,
-        'Houndoom': 229, 'Latias': 380, 'Regidrago': 895, 'Kyogre': 382,
-        'Groudon': 383, 'Tapu Koko': 785, 'Tapu Lele': 786, 'Manectric': 310,
-        'Aerodactyl': 142, 'Alakazam': 65, 'Sharpedo': 319, 'Banette': 354,
-        'Latios': 381, 'Tinkatink': 957, 'Woobat': 527, 'Trapinch': 328,
-        'Drilbur': 529, 'Regirock': 377, 'Shuckle': 213
+    // Full Pokémon name to ID mapping
+    const pokemonMap = {
+        // Gen 1
+        'Bulbasaur': 1, 'Ivysaur': 2, 'Venusaur': 3, 'Charmander': 4, 'Charmeleon': 5, 'Charizard': 6,
+        'Squirtle': 7, 'Wartortle': 8, 'Blastoise': 9, 'Caterpie': 10, 'Metapod': 11, 'Butterfree': 12,
+        'Weedle': 13, 'Kakuna': 14, 'Beedrill': 15, 'Pidgey': 16, 'Pidgeotto': 17, 'Pidgeot': 18,
+        'Rattata': 19, 'Raticate': 20, 'Spearow': 21, 'Fearow': 22, 'Ekans': 23, 'Arbok': 24,
+        'Pikachu': 25, 'Raichu': 26, 'Sandshrew': 27, 'Sandslash': 28, 'Nidoran♀': 29, 'Nidorina': 30,
+        'Nidoqueen': 31, 'Nidoran♂': 32, 'Nidorino': 33, 'Nidoking': 34, 'Clefairy': 35, 'Clefable': 36,
+        'Vulpix': 37, 'Ninetales': 38, 'Jigglypuff': 39, 'Wigglytuff': 40, 'Zubat': 41, 'Golbat': 42,
+        'Oddish': 43, 'Gloom': 44, 'Vileplume': 45, 'Paras': 46, 'Parasect': 47, 'Venonat': 48, 'Venomoth': 49,
+        'Diglett': 50, 'Dugtrio': 51, 'Meowth': 52, 'Persian': 53, 'Psyduck': 54, 'Golduck': 55,
+        'Mankey': 56, 'Primeape': 57, 'Growlithe': 58, 'Arcanine': 59, 'Poliwag': 60, 'Poliwhirl': 61,
+        'Poliwrath': 62, 'Abra': 63, 'Kadabra': 64, 'Alakazam': 65, 'Machop': 66, 'Machoke': 67, 'Machamp': 68,
+        'Bellsprout': 69, 'Weepinbell': 70, 'Victreebel': 71, 'Tentacool': 72, 'Tentacruel': 73,
+        'Geodude': 74, 'Graveler': 75, 'Golem': 76, 'Ponyta': 77, 'Rapidash': 78, 'Slowpoke': 79, 'Slowbro': 80,
+        'Magnemite': 81, 'Magneton': 82, 'Farfetch\'d': 83, 'Doduo': 84, 'Dodrio': 85, 'Seel': 86, 'Dewgong': 87,
+        'Grimer': 88, 'Muk': 89, 'Shellder': 90, 'Cloyster': 91, 'Gastly': 92, 'Haunter': 93, 'Gengar': 94,
+        'Onix': 95, 'Drowzee': 96, 'Hypno': 97, 'Krabby': 98, 'Kingler': 99, 'Voltorb': 100, 'Electrode': 101,
+        'Exeggcute': 102, 'Exeggutor': 103, 'Cubone': 104, 'Marowak': 105, 'Hitmonlee': 106, 'Hitmonchan': 107,
+        'Lickitung': 108, 'Koffing': 109, 'Weezing': 110, 'Rhyhorn': 111, 'Rhydon': 112, 'Chansey': 113,
+        'Tangela': 114, 'Kangaskhan': 115, 'Horsea': 116, 'Seadra': 117, 'Goldeen': 118, 'Seaking': 119,
+        'Staryu': 120, 'Starmie': 121, 'Mr. Mime': 122, 'Scyther': 123, 'Jynx': 124, 'Electabuzz': 125,
+        'Magmar': 126, 'Pinsir': 127, 'Tauros': 128, 'Magikarp': 129, 'Gyarados': 130, 'Lapras': 131,
+        'Ditto': 132, 'Eevee': 133, 'Vaporeon': 134, 'Jolteon': 135, 'Flareon': 136, 'Porygon': 137,
+        'Omanyte': 138, 'Omastar': 139, 'Kabuto': 140, 'Kabutops': 141, 'Aerodactyl': 142, 'Snorlax': 143,
+        'Articuno': 144, 'Zapdos': 145, 'Moltres': 146, 'Dratini': 147, 'Dragonair': 148, 'Dragonite': 149,
+        'Mewtwo': 150, 'Mew': 151,
+        
+        // Gen 2
+        'Chikorita': 152, 'Bayleef': 153, 'Meganium': 154, 'Cyndaquil': 155, 'Quilava': 156, 'Typhlosion': 157,
+        'Totodile': 158, 'Croconaw': 159, 'Feraligatr': 160, 'Sentret': 161, 'Furret': 162, 'Hoothoot': 163,
+        'Noctowl': 164, 'Ledyba': 165, 'Ledian': 166, 'Spinarak': 167, 'Ariados': 168, 'Crobat': 169,
+        'Chinchou': 170, 'Lanturn': 171, 'Pichu': 172, 'Cleffa': 173, 'Igglybuff': 174, 'Togepi': 175,
+        'Togetic': 176, 'Natu': 177, 'Xatu': 178, 'Mareep': 179, 'Flaaffy': 180, 'Ampharos': 181,
+        'Bellossom': 182, 'Marill': 183, 'Azumarill': 184, 'Sudowoodo': 185, 'Politoed': 186, 'Hoppip': 187,
+        'Skiploom': 188, 'Jumpluff': 189, 'Aipom': 190, 'Sunkern': 191, 'Sunflora': 192, 'Yanma': 193,
+        'Wooper': 194, 'Quagsire': 195, 'Espeon': 196, 'Umbreon': 197, 'Murkrow': 198, 'Slowking': 199,
+        'Misdreavus': 200, 'Unown': 201, 'Wobbuffet': 202, 'Girafarig': 203, 'Pineco': 204, 'Forretress': 205,
+        'Dunsparce': 206, 'Gligar': 207, 'Steelix': 208, 'Snubbull': 209, 'Granbull': 210, 'Qwilfish': 211,
+        'Scizor': 212, 'Shuckle': 213, 'Heracross': 214, 'Sneasel': 215, 'Teddiursa': 216, 'Ursaring': 217,
+        'Slugma': 218, 'Magcargo': 219, 'Swinub': 220, 'Piloswine': 221, 'Corsola': 222, 'Remoraid': 223,
+        'Octillery': 224, 'Delibird': 225, 'Mantine': 226, 'Skarmory': 227, 'Houndour': 228, 'Houndoom': 229,
+        'Kingdra': 230, 'Phanpy': 231, 'Donphan': 232, 'Porygon2': 233, 'Stantler': 234, 'Smeargle': 235,
+        'Tyrogue': 236, 'Hitmontop': 237, 'Smoochum': 238, 'Elekid': 239, 'Magby': 240, 'Miltank': 241,
+        'Blissey': 242, 'Raikou': 243, 'Entei': 244, 'Suicune': 245, 'Larvitar': 246, 'Pupitar': 247,
+        'Tyranitar': 248, 'Lugia': 249, 'Ho-Oh': 250, 'Celebi': 251,
+        
+        // Gen 3
+        'Treecko': 252, 'Grovyle': 253, 'Sceptile': 254, 'Torchic': 255, 'Combusken': 256, 'Blaziken': 257,
+        'Mudkip': 258, 'Marshtomp': 259, 'Swampert': 260, 'Poochyena': 261, 'Mightyena': 262, 'Zigzagoon': 263,
+        'Linoone': 264, 'Wurmple': 265, 'Silcoon': 266, 'Beautifly': 267, 'Cascoon': 268, 'Dustox': 269,
+        'Lotad': 270, 'Lombre': 271, 'Ludicolo': 272, 'Seedot': 273, 'Nuzleaf': 274, 'Shiftry': 275,
+        'Taillow': 276, 'Swellow': 277, 'Wingull': 278, 'Pelipper': 279, 'Ralts': 280, 'Kirlia': 281,
+        'Gardevoir': 282, 'Surskit': 283, 'Masquerain': 284, 'Shroomish': 285, 'Breloom': 286, 'Slakoth': 287,
+        'Vigoroth': 288, 'Slaking': 289, 'Nincada': 290, 'Ninjask': 291, 'Shedinja': 292, 'Whismur': 293,
+        'Loudred': 294, 'Exploud': 295, 'Makuhita': 296, 'Hariyama': 297, 'Azurill': 298, 'Nosepass': 299,
+        'Skitty': 300, 'Delcatty': 301, 'Sableye': 302, 'Mawile': 303, 'Aron': 304, 'Lairon': 305, 'Aggron': 306,
+        'Meditite': 307, 'Medicham': 308, 'Electrike': 309, 'Manectric': 310, 'Plusle': 311, 'Minun': 312,
+        'Volbeat': 313, 'Illumise': 314, 'Roselia': 315, 'Gulpin': 316, 'Swalot': 317, 'Carvanha': 318,
+        'Sharpedo': 319, 'Wailmer': 320, 'Wailord': 321, 'Numel': 322, 'Camerupt': 323, 'Torkoal': 324,
+        'Spoink': 325, 'Grumpig': 326, 'Spinda': 327, 'Trapinch': 328, 'Vibrava': 329, 'Flygon': 330,
+        'Cacnea': 331, 'Cacturne': 332, 'Swablu': 333, 'Altaria': 334, 'Zangoose': 335, 'Seviper': 336,
+        'Lunatone': 337, 'Solrock': 338, 'Barboach': 339, 'Whiscash': 340, 'Corphish': 341, 'Crawdaunt': 342,
+        'Baltoy': 343, 'Claydol': 344, 'Lileep': 345, 'Cradily': 346, 'Anorith': 347, 'Armaldo': 348,
+        'Feebas': 349, 'Milotic': 350, 'Castform': 351, 'Kecleon': 352, 'Shuppet': 353, 'Banette': 354,
+        'Duskull': 355, 'Dusclops': 356, 'Tropius': 357, 'Chimecho': 358, 'Absol': 359, 'Wynaut': 360,
+        'Snorunt': 361, 'Glalie': 362, 'Spheal': 363, 'Sealeo': 364, 'Walrein': 365, 'Clamperl': 366,
+        'Huntail': 367, 'Gorebyss': 368, 'Relicanth': 369, 'Luvdisc': 370, 'Bagon': 371, 'Shelgon': 372,
+        'Salamence': 373, 'Beldum': 374, 'Metang': 375, 'Metagross': 376, 'Regirock': 377, 'Regice': 378,
+        'Registeel': 379, 'Latias': 380, 'Latios': 381, 'Kyogre': 382, 'Groudon': 383, 'Rayquaza': 384,
+        'Jirachi': 385, 'Deoxys': 386,
+        
+        // Gen 4
+        'Turtwig': 387, 'Grotle': 388, 'Torterra': 389, 'Chimchar': 390, 'Monferno': 391, 'Infernape': 392,
+        'Piplup': 393, 'Prinplup': 394, 'Empoleon': 395, 'Starly': 396, 'Staravia': 397, 'Staraptor': 398,
+        'Bidoof': 399, 'Bibarel': 400, 'Kricketot': 401, 'Kricketune': 402, 'Shinx': 403, 'Luxio': 404,
+        'Luxray': 405, 'Budew': 406, 'Roserade': 407, 'Cranidos': 408, 'Rampardos': 409, 'Shieldon': 410,
+        'Bastiodon': 411, 'Burmy': 412, 'Wormadam': 413, 'Mothim': 414, 'Combee': 415, 'Vespiquen': 416,
+        'Pachirisu': 417, 'Buizel': 418, 'Floatzel': 419, 'Cherubi': 420, 'Cherrim': 421, 'Shellos': 422,
+        'Gastrodon': 423, 'Ambipom': 424, 'Drifloon': 425, 'Drifblim': 426, 'Buneary': 427, 'Lopunny': 428,
+        'Mismagius': 429, 'Honchkrow': 430, 'Glameow': 431, 'Purugly': 432, 'Chingling': 433, 'Stunky': 434,
+        'Skuntank': 435, 'Bronzor': 436, 'Bronzong': 437, 'Mime Jr.': 438, 'Happiny': 439, 'Chatot': 440,
+        'Spiritomb': 441, 'Gible': 442, 'Gabite': 443, 'Garchomp': 444, 'Munchlax': 445, 'Riolu': 446,
+        'Lucario': 447, 'Hippopotas': 448, 'Hippowdon': 449, 'Skorupi': 450, 'Drapion': 451, 'Croagunk': 452,
+        'Toxicroak': 453, 'Carnivine': 454, 'Finneon': 455, 'Lumineon': 456, 'Mantyke': 457, 'Snover': 458,
+        'Abomasnow': 459, 'Weavile': 460, 'Magnezone': 461, 'Lickilicky': 462, 'Rhyperior': 463, 'Tangrowth': 464,
+        'Electivire': 465, 'Magmortar': 466, 'Togekiss': 467, 'Yanmega': 468, 'Leafeon': 469, 'Glaceon': 470,
+        'Gliscor': 471, 'Mamoswine': 472, 'Porygon-Z': 473, 'Gallade': 474, 'Probopass': 475, 'Dusknoir': 476,
+        'Froslass': 477, 'Rotom': 478, 'Uxie': 479, 'Mesprit': 480, 'Azelf': 481, 'Dialga': 482, 'Palkia': 483,
+        'Heatran': 484, 'Regigigas': 485, 'Giratina': 486, 'Cresselia': 487, 'Phione': 488, 'Manaphy': 489,
+        'Darkrai': 490, 'Shaymin': 491, 'Arceus': 492,
+        
+        // Gen 5
+        'Victini': 494, 'Snivy': 495, 'Servine': 496, 'Serperior': 497, 'Tepig': 498, 'Pignite': 499, 'Emboar': 500,
+        'Oshawott': 501, 'Dewott': 502, 'Samurott': 503, 'Patrat': 504, 'Watchog': 505, 'Lillipup': 506,
+        'Herdier': 507, 'Stoutland': 508, 'Purrloin': 509, 'Liepard': 510, 'Pansage': 511, 'Simisage': 512,
+        'Pansear': 513, 'Simisear': 514, 'Panpour': 515, 'Simipour': 516, 'Munna': 517, 'Musharna': 518,
+        'Pidove': 519, 'Tranquill': 520, 'Unfezant': 521, 'Blitzle': 522, 'Zebstrika': 523, 'Roggenrola': 524,
+        'Boldore': 525, 'Gigalith': 526, 'Woobat': 527, 'Swoobat': 528, 'Drilbur': 529, 'Excadrill': 530,
+        'Audino': 531, 'Timburr': 532, 'Gurdurr': 533, 'Conkeldurr': 534, 'Tympole': 535, 'Palpitoad': 536,
+        'Seismitoad': 537, 'Throh': 538, 'Sawk': 539, 'Sewaddle': 540, 'Swadloon': 541, 'Leavanny': 542,
+        'Venipede': 543, 'Whirlipede': 544, 'Scolipede': 545, 'Cottonee': 546, 'Whimsicott': 547, 'Petilil': 548,
+        'Lilligant': 549, 'Basculin': 550, 'Sandile': 551, 'Krokorok': 552, 'Krookodile': 553, 'Darumaka': 554,
+        'Darmanitan': 555, 'Maractus': 556, 'Dwebble': 557, 'Crustle': 558, 'Scraggy': 559, 'Scrafty': 560,
+        'Sigilyph': 561, 'Yamask': 562, 'Cofagrigus': 563, 'Tirtouga': 564, 'Carracosta': 565, 'Archen': 566,
+        'Archeops': 567, 'Trubbish': 568, 'Garbodor': 569, 'Zorua': 570, 'Zoroark': 571, 'Minccino': 572,
+        'Cinccino': 573, 'Gothita': 574, 'Gothorita': 575, 'Gothitelle': 576, 'Solosis': 577, 'Duosion': 578,
+        'Reuniclus': 579, 'Ducklett': 580, 'Swanna': 581, 'Vanillite': 582, 'Vanillish': 583, 'Vanilluxe': 584,
+        'Deerling': 585, 'Sawsbuck': 586, 'Emolga': 587, 'Karrablast': 588, 'Escavalier': 589, 'Foongus': 590,
+        'Amoonguss': 591, 'Frillish': 592, 'Jellicent': 593, 'Alomomola': 594, 'Joltik': 595, 'Galvantula': 596,
+        'Ferroseed': 597, 'Ferrothorn': 598, 'Klink': 599, 'Klang': 600, 'Klinklang': 601, 'Tynamo': 602,
+        'Eelektrik': 603, 'Eelektross': 604, 'Elgyem': 605, 'Beheeyem': 606, 'Litwick': 607, 'Lampent': 608,
+        'Chandelure': 609, 'Axew': 610, 'Fraxure': 611, 'Haxorus': 612, 'Cubchoo': 613, 'Beartic': 614,
+        'Cryogonal': 615, 'Shelmet': 616, 'Accelgor': 617, 'Stunfisk': 618, 'Mienfoo': 619, 'Mienshao': 620,
+        'Druddigon': 621, 'Golett': 622, 'Golurk': 623, 'Pawniard': 624, 'Bisharp': 625, 'Bouffalant': 626,
+        'Rufflet': 627, 'Braviary': 628, 'Vullaby': 629, 'Mandibuzz': 630, 'Heatmor': 631, 'Durant': 632,
+        'Deino': 633, 'Zweilous': 634, 'Hydreigon': 635, 'Larvesta': 636, 'Volcarona': 637, 'Cobalion': 638,
+        'Terrakion': 639, 'Virizion': 640, 'Tornadus': 641, 'Thundurus': 642, 'Reshiram': 643, 'Zekrom': 644,
+        'Landorus': 645, 'Kyurem': 646, 'Keldeo': 647, 'Meloetta': 648, 'Genesect': 649,
+        
+        // Gen 6-9 (simplified - add as needed)
+        'Chespin': 650, 'Quilladin': 651, 'Chesnaught': 652, 'Fennekin': 653, 'Braixen': 654, 'Delphox': 655,
+        'Froakie': 656, 'Frogadier': 657, 'Greninja': 658, 'Xerneas': 716, 'Yveltal': 717, 'Zygarde': 718,
+        'Rowlet': 722, 'Dartrix': 723, 'Decidueye': 724, 'Litten': 725, 'Torracat': 726, 'Incineroar': 727,
+        'Popplio': 728, 'Brionne': 729, 'Primarina': 730, 'Tapu Koko': 785, 'Tapu Lele': 786, 'Tapu Bulu': 787,
+        'Tapu Fini': 788, 'Solgaleo': 791, 'Lunala': 792, 'Necrozma': 800, 'Magearna': 801, 'Marshadow': 802,
+        'Zeraora': 807, 'Grookey': 810, 'Thwackey': 811, 'Rillaboom': 812, 'Scorbunny': 813, 'Raboot': 814,
+        'Cinderace': 815, 'Sobble': 816, 'Drizzile': 817, 'Inteleon': 818, 'Zacian': 888, 'Zamazenta': 889,
+        'Eternatus': 890, 'Urshifu': 892, 'Zarude': 893, 'Regieleki': 894, 'Regidrago': 895, 'Calyrex': 898,
+        'Sprigatito': 906, 'Floragato': 907, 'Meowscarada': 908, 'Fuecoco': 909, 'Crocalor': 910, 'Skeledirge': 911,
+        'Quaxly': 912, 'Quaxwell': 913, 'Quaquaval': 914, 'Koraidon': 1007, 'Miraidon': 1008, 'Ogerpon': 1017,
+        'Terapagos': 1024, 'Pecharunt': 1025
     };
     
+    // Search for any Pokémon name in the event title
     for (var pokemon in pokemonMap) {
-        if (eventName.includes(pokemon)) {
-            return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + pokemonMap[pokemon] + '.png';
+        if (eventName.toLowerCase().includes(pokemon.toLowerCase())) {
+            var id = pokemonMap[pokemon];
+            return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + id + '.png';
         }
     }
-    // No Pokemon found - return emoji
+    
+    // No match - return the emoji fallback
     return '😎';
 }
 
@@ -1419,13 +1545,15 @@ async function loadDebutData() {
         const data = await response.json();
         var debuts = data.debuts || [];
         
-        // Use NZ time
-        var nzTime = new Date().toLocaleString('en-US', { timeZone: 'Pacific/Auckland' });
-        var todayNz = new Date(nzTime);
-        todayNz.setHours(0, 0, 0, 0);
+        // Use UTC-11 (American Samoa) for consistent date handling
+        var now = new Date();
+        var utc11Offset = -11;
+        var utc11Now = new Date(now.getTime() + (utc11Offset * 60 * 60 * 1000));
+        var today = new Date(utc11Now.toISOString().split('T')[0]);
         
         var upcomingDebut = null;
-        var closestStartDate = null;
+        var activeDebut = null;
+        var closestDate = null;
         
         for (var i = 0; i < debuts.length; i++) {
             var debut = debuts[i];
@@ -1435,28 +1563,67 @@ async function loadDebutData() {
                 var day = parseInt(dateMatch[2]);
                 var year = new Date().getFullYear();
                 var monthMap = { January: 0, February: 1, March: 2, April: 3, May: 4, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 };
-                var startDate = new Date(year, monthMap[month], day);
                 
-                // Only show if start date is IN THE FUTURE (not today or past)
-                if (startDate > todayNz) {
-                    // Find the closest upcoming debut
-                    if (closestStartDate === null || startDate < closestStartDate) {
-                        closestStartDate = startDate;
+                // Try to get year from end date if available
+                var endMatch = debut.event_date.match(/-\s*\w+\s+\d+(?:st|nd|rd|th)?\s+(\d{4})/);
+                if (endMatch) {
+                    year = parseInt(endMatch[1]);
+                }
+                
+                var startDate = new Date(year, monthMap[month], day);
+                var endDate = new Date(startDate);
+                endDate.setDate(endDate.getDate() + 7); // Assume events last 7 days if not specified
+                
+                // Parse end date if available
+                var endDateMatch = debut.event_date.match(/-\s*(\w+)\s+(\d+)(?:st|nd|rd|th)?\s+(\d{4})/);
+                if (endDateMatch) {
+                    var endMonth = endDateMatch[1];
+                    var endDay = parseInt(endDateMatch[2]);
+                    var endYear = parseInt(endDateMatch[3]);
+                    endDate = new Date(endYear, monthMap[endMonth], endDay);
+                }
+                
+                var startDateStr = startDate.toISOString().split('T')[0];
+                var endDateStr = endDate.toISOString().split('T')[0];
+                var todayStr = today.toISOString().split('T')[0];
+                
+                // Calculate days until start
+                var daysUntilStart = Math.ceil((startDate - new Date(now.getTime() + (utc11Offset * 60 * 60 * 1000))) / (1000 * 60 * 60 * 24));
+                
+                // Check if event is active (started and not ended)
+                if (todayStr >= startDateStr && todayStr <= endDateStr) {
+                    // Current/active event
+                    if (!activeDebut) {
+                        activeDebut = debut;
+                    }
+                }
+                // Check if event is upcoming (starts in 7 days or less)
+                else if (daysUntilStart > 0 && daysUntilStart <= 7) {
+                    if (!upcomingDebut || startDate < closestDate) {
                         upcomingDebut = debut;
+                        closestDate = startDate;
                     }
                 }
             }
         }
         
-        if (upcomingDebut) {
-            displayDebutBanner(upcomingDebut, closestStartDate);
+        // Determine which banner to show based on active tab
+        var activeTab = document.querySelector('.tab-content.active')?.id;
+        
+        if (activeTab === 'current' && activeDebut) {
+            displayDebutBanner(activeDebut, null, true);
+        } else if (activeTab === 'upcoming' && upcomingDebut) {
+            displayDebutBanner(upcomingDebut, closestDate, false);
+        } else {
+            document.getElementById('debutBanner').style.display = 'none';
         }
+        
     } catch (e) {
         console.error('Error loading debut data:', e);
     }
 }
 
-function displayDebutBanner(debut, startDate) {
+function displayDebutBanner(debut, startDate, isActive) {
     var banner = document.getElementById('debutBanner');
     var eventNameElem = document.getElementById('debutEventName');
     var countdownElem = document.getElementById('debutCountdown');
@@ -1468,27 +1635,55 @@ function displayDebutBanner(debut, startDate) {
     viewEventBtn.onclick = function() { findAndOpenLeekDuckEvent(debut.event_name); };
     currentDebutData = debut;
     
-    // Calculate time until event starts
-    var now = new Date();
-    // Apply 10 hour offset
-    now.setHours(now.getHours() + 6);
-    
-    var millisLeft = startDate - now;
-    var totalHoursLeft = Math.floor(millisLeft / (1000 * 60 * 60));
-    var daysLeft = Math.floor(totalHoursLeft / 24);
-    var hoursLeft = totalHoursLeft % 24;
-    var minutesLeft = Math.floor((millisLeft % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (daysLeft >= 1) {
-        // Show days and hours
-        countdownElem.textContent = '⏰ Starts in NZ in ' + daysLeft + (daysLeft === 1 ? ' day' : ' days') + ' ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours');
-    } else if (hoursLeft > 0) {
-        // Show hours and minutes
-        countdownElem.textContent = '⏰ Starts in NZ in ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours') + ' ' + minutesLeft + (minutesLeft === 1 ? ' minute' : ' minutes');
-    } else if (minutesLeft > 0) {
-        countdownElem.textContent = '⏰ Starts in NZ in ' + minutesLeft + (minutesLeft === 1 ? ' minute' : ' minutes');
-    } else {
-        countdownElem.textContent = '⏰ Starts in NZ in less than a minute';
+    if (isActive) {
+        // Event is currently active - show "ENDS IN" countdown
+        var now = new Date();
+        var utc11Offset = -11;
+        var utc11Now = new Date(now.getTime() + (utc11Offset * 60 * 60 * 1000));
+        
+        // Parse end date
+        var endMatch = debut.event_date.match(/-\s*(\w+)\s+(\d+)(?:st|nd|rd|th)?\s+(\d{4})/);
+        if (endMatch) {
+            var monthMap = { January: 0, February: 1, March: 2, April: 3, May: 4, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 };
+            var endMonth = endMatch[1];
+            var endDay = parseInt(endMatch[2]);
+            var endYear = parseInt(endMatch[3]);
+            var endDate = new Date(endYear, monthMap[endMonth], endDay, 23, 59, 59);
+            
+            var millisLeft = endDate - utc11Now;
+            var daysLeft = Math.ceil(millisLeft / (1000 * 60 * 60 * 24));
+            var hoursLeft = Math.floor((millisLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            
+            if (daysLeft > 0) {
+                countdownElem.textContent = '⏰ Ends in ' + daysLeft + (daysLeft === 1 ? ' day' : ' days');
+            } else if (hoursLeft > 0) {
+                countdownElem.textContent = '⏰ Ends in ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours');
+            } else {
+                countdownElem.textContent = '⏰ Ends today!';
+            }
+            countdownElem.style.color = '#FFA500';
+        } else {
+            countdownElem.textContent = '⏰ Currently Active!';
+            countdownElem.style.color = '#4CAF50';
+        }
+    } else if (startDate) {
+        // Event is upcoming - show "STARTS IN" countdown
+        var now = new Date();
+        var utc11Offset = -11;
+        var utc11Now = new Date(now.getTime() + (utc11Offset * 60 * 60 * 1000));
+        
+        var millisLeft = startDate - utc11Now;
+        var daysLeft = Math.ceil(millisLeft / (1000 * 60 * 60 * 24));
+        var hoursLeft = Math.floor((millisLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        
+        if (daysLeft > 0) {
+            countdownElem.textContent = '⏰ Starts in ' + daysLeft + (daysLeft === 1 ? ' day' : ' days');
+        } else if (hoursLeft > 0) {
+            countdownElem.textContent = '⏰ Starts in ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours');
+        } else {
+            countdownElem.textContent = '⏰ Starts soon!';
+        }
+        countdownElem.style.color = '#4CAF50';
     }
     
     banner.style.display = 'block';
