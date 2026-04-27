@@ -1457,15 +1457,49 @@ function getEventImage(eventName) {
         'Terapagos': 1024, 'Pecharunt': 1025
     };
     
-    // Search for any Pokémon name in the event title
+    // Convert event name to lowercase once
+    var eventLower = eventName.toLowerCase();
+    
+    // Try to find exact match first (longest match wins)
+    var matchedPokemon = null;
+    var matchedId = null;
+    var matchLength = 0;
+    
     for (var pokemon in pokemonMap) {
-        if (eventName.toLowerCase().includes(pokemon.toLowerCase())) {
-            var id = pokemonMap[pokemon];
-            return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + id + '.png';
+        var pokemonLower = pokemon.toLowerCase();
+        if (eventLower.includes(pokemonLower)) {
+            // Prefer longer matches (e.g., "Tapu Koko" over "Koko")
+            if (pokemonLower.length > matchLength) {
+                matchLength = pokemonLower.length;
+                matchedPokemon = pokemon;
+                matchedId = pokemonMap[pokemon];
+            }
         }
     }
     
-    // No match - return the emoji fallback
+    // Also check for standalone words
+    var words = eventName.split(/[\s\-:]+/);
+    for (var i = 0; i < words.length; i++) {
+        var word = words[i];
+        if (word.length < 3) continue;
+        
+        for (var pokemon in pokemonMap) {
+            if (pokemon.toLowerCase() === word.toLowerCase()) {
+                matchedId = pokemonMap[pokemon];
+                break;
+            }
+        }
+        if (matchedId) break;
+    }
+    
+    if (matchedId) {
+        // Debug log to see what matched
+        console.log('Event:', eventName, '→ Matched Pokémon ID:', matchedId);
+        return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + matchedId + '.png';
+    }
+    
+    // No match - return emoji fallback
+    console.log('Event:', eventName, '→ No match, using 😎 fallback');
     return '😎';
 }
 
@@ -1540,6 +1574,8 @@ function displayUpcomingEvents(events) {
 
 // ========== INFOGRAPHICS FUNCTIONS ==========
 
+let allInfographicsList = [];
+
 async function loadAllInfographics() {
     showLoading('Loading infographics...');
     
@@ -1547,23 +1583,23 @@ async function loadAllInfographics() {
         const response = await fetch('https://api.github.com/repos/Skatecrete/infographics/contents/images');
         const data = await response.json();
         
-        const infographics = [];
+        allInfographicsList = [];
         for (var i = 0; i < data.length; i++) {
             var name = data[i].name;
             var downloadUrl = data[i].download_url;
             if (name !== 'placeholder.png' && (name.endsWith('.png') || name.endsWith('.webp'))) {
-                infographics.push({ name: name, url: downloadUrl });
+                allInfographicsList.push({ name: name, url: downloadUrl });
             }
         }
         
         hideLoading();
         
-        if (infographics.length === 0) {
+        if (allInfographicsList.length === 0) {
             showToast('No infographics found');
             return;
         }
         
-        showInfographicsGallery(infographics, 0);
+        showGalleryView();
         
     } catch (e) {
         hideLoading();
@@ -1571,85 +1607,94 @@ async function loadAllInfographics() {
     }
 }
 
-async function loadWeeklyView() {
-    showLoading('Loading Weekly View...');
-    await loadSpecificInfographic('weekly.png');
-}
-
-async function loadMonthlyView() {
-    showLoading('Loading Monthly View...');
-    await loadSpecificInfographic('monthly.png');
-}
-
-async function loadSpecificInfographic(filename) {
-    try {
-        const url = 'https://raw.githubusercontent.com/Skatecrete/infographics/main/images/' + filename;
-        
-        // Check if file exists
-        const response = await fetch(url, { method: 'HEAD' });
-        if (!response.ok) {
-            hideLoading();
-            showToast('No ' + filename.replace('.png', '').toUpperCase() + ' graphic uploaded yet');
-            return;
-        }
-        
-        hideLoading();
-        showInfographicsGallery([{ name: filename, url: url }], 0);
-        
-    } catch (e) {
-        hideLoading();
-        showToast('Failed to load graphic');
-    }
-}
-
-function showInfographicsGallery(images, startIndex) {
-    var modal = document.getElementById('infographicsModal');
+function showGalleryView() {
+    var modal = document.getElementById('galleryModal');
     if (!modal) {
-        // Create modal if it doesn't exist
         modal = document.createElement('div');
-        modal.id = 'infographicsModal';
-        modal.className = 'modal infographics-modal';
+        modal.id = 'galleryModal';
+        modal.className = 'modal gallery-modal';
         modal.innerHTML = `
-            <div class="modal-content infographics-modal-content">
+            <div class="modal-content">
                 <div class="modal-header">
-                    <h2 id="infographicsTitle">Infographics</h2>
+                    <h2>📸 All Infographics</h2>
                 </div>
-                <div class="infographics-viewer">
-                    <div class="infographics-image-container">
-                        <img id="infographicsImage" class="infographics-image" src="" alt="Infographic">
-                        <div class="infographics-nav">
-                            <button id="infographicsPrevBtn" class="infographics-nav-btn" onclick="navigateInfographics(-1)">◀</button>
-                            <span id="infographicsCounter" class="infographics-counter">1 / 1</span>
-                            <button id="infographicsNextBtn" class="infographics-nav-btn" onclick="navigateInfographics(1)">▶</button>
-                        </div>
-                    </div>
-                </div>
+                <div id="galleryGrid" class="gallery-grid"></div>
                 <div class="modal-footer">
-                    <button class="confirm-btn" onclick="closeInfographicsModal()">Close</button>
+                    <button class="back-btn" onclick="closeGalleryModal()">BACK</button>
                 </div>
             </div>
         `;
         document.body.appendChild(modal);
     }
     
-    window.infographicsData = images;
-    window.currentInfographicIndex = startIndex;
+    var grid = document.getElementById('galleryGrid');
+    var html = '';
+    for (var i = 0; i < allInfographicsList.length; i++) {
+        var item = allInfographicsList[i];
+        html += `
+            <div class="gallery-item" onclick="openImageViewer(${i})">
+                <img src="${item.url}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%237627C5\'/%3E%3Ctext x=\'50\' y=\'55\' text-anchor=\'middle\' fill=\'white\' font-size=\'14\'%3E📸%3C/text%3E%3C/svg%3E'">
+                <div class="gallery-item-name">${item.name}</div>
+            </div>
+        `;
+    }
+    grid.innerHTML = html;
     
-    updateInfographicDisplay();
     modal.style.display = 'flex';
 }
 
-function updateInfographicDisplay() {
-    var images = window.infographicsData;
-    var index = window.currentInfographicIndex;
+function closeGalleryModal() {
+    var modal = document.getElementById('galleryModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function openImageViewer(index) {
+    window.viewerImages = allInfographicsList;
+    window.currentViewerIndex = index;
+    
+    var modal = document.getElementById('viewerModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'viewerModal';
+        modal.className = 'modal viewer-modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="viewerTitle">Infographic</h2>
+                </div>
+                <div class="viewer-container">
+                    <img id="viewerImage" class="viewer-image" src="" alt="Infographic">
+                </div>
+                <div class="viewer-nav">
+                    <button id="viewerPrevBtn" class="viewer-nav-btn" onclick="navigateViewer(-1)">◀</button>
+                    <span id="viewerCounter" class="viewer-counter">1 / 1</span>
+                    <button id="viewerNextBtn" class="viewer-nav-btn" onclick="navigateViewer(1)">▶</button>
+                </div>
+                <div class="modal-footer">
+                    <button class="confirm-btn" onclick="closeViewerModal()">CLOSE</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    updateViewerDisplay();
+    modal.style.display = 'flex';
+}
+
+function updateViewerDisplay() {
+    var images = window.viewerImages;
+    var index = window.currentViewerIndex;
     
     if (!images || images.length === 0) return;
     
-    var imgElement = document.getElementById('infographicsImage');
-    var counterElement = document.getElementById('infographicsCounter');
-    var prevBtn = document.getElementById('infographicsPrevBtn');
-    var nextBtn = document.getElementById('infographicsNextBtn');
-    var titleElement = document.getElementById('infographicsTitle');
+    var imgElement = document.getElementById('viewerImage');
+    var counterElement = document.getElementById('viewerCounter');
+    var prevBtn = document.getElementById('viewerPrevBtn');
+    var nextBtn = document.getElementById('viewerNextBtn');
+    var titleElement = document.getElementById('viewerTitle');
     
     if (imgElement) {
         imgElement.src = images[index].url;
@@ -1661,33 +1706,92 @@ function updateInfographicDisplay() {
     }
     
     if (titleElement) {
-        titleElement.textContent = images[index].name === 'weekly.png' ? 'Weekly View' : 
-                                   (images[index].name === 'monthly.png' ? 'Monthly View' : 'Infographics');
+        titleElement.textContent = images[index].name;
     }
     
     if (prevBtn) {
-        prevBtn.style.opacity = index === 0 ? '0.3' : '1';
         prevBtn.disabled = index === 0;
     }
     
     if (nextBtn) {
-        nextBtn.style.opacity = index === images.length - 1 ? '0.3' : '1';
         nextBtn.disabled = index === images.length - 1;
     }
 }
 
-function navigateInfographics(direction) {
-    var images = window.infographicsData;
-    var newIndex = window.currentInfographicIndex + direction;
+function navigateViewer(direction) {
+    var images = window.viewerImages;
+    var newIndex = window.currentViewerIndex + direction;
     
     if (newIndex >= 0 && newIndex < images.length) {
-        window.currentInfographicIndex = newIndex;
-        updateInfographicDisplay();
+        window.currentViewerIndex = newIndex;
+        updateViewerDisplay();
     }
 }
 
-function closeInfographicsModal() {
-    var modal = document.getElementById('infographicsModal');
+function closeViewerModal() {
+    var modal = document.getElementById('viewerModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+async function loadWeeklyView() {
+    showLoading('Loading Weekly View...');
+    await loadSingleInfographic('weekly.png', 'Weekly View');
+}
+
+async function loadMonthlyView() {
+    showLoading('Loading Monthly View...');
+    await loadSingleInfographic('monthly.png', 'Monthly View');
+}
+
+async function loadSingleInfographic(filename, title) {
+    try {
+        const url = 'https://raw.githubusercontent.com/Skatecrete/infographics/main/images/' + filename;
+        
+        const response = await fetch(url, { method: 'HEAD' });
+        if (!response.ok) {
+            hideLoading();
+            showToast('No ' + title + ' graphic uploaded yet');
+            return;
+        }
+        
+        hideLoading();
+        
+        // Create single image viewer (no nav buttons)
+        var modal = document.getElementById('singleViewerModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'singleViewerModal';
+            modal.className = 'modal viewer-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 id="singleViewerTitle">Infographic</h2>
+                    </div>
+                    <div class="viewer-container">
+                        <img id="singleViewerImage" class="viewer-image" src="" alt="Infographic">
+                    </div>
+                    <div class="modal-footer">
+                        <button class="confirm-btn" onclick="closeSingleViewerModal()">CLOSE</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        document.getElementById('singleViewerTitle').textContent = title;
+        document.getElementById('singleViewerImage').src = url;
+        modal.style.display = 'flex';
+        
+    } catch (e) {
+        hideLoading();
+        showToast('Failed to load graphic');
+    }
+}
+
+function closeSingleViewerModal() {
+    var modal = document.getElementById('singleViewerModal');
     if (modal) {
         modal.style.display = 'none';
     }
