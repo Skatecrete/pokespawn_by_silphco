@@ -1872,6 +1872,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (monthlyBtn) monthlyBtn.onclick = loadMonthlyView;
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    setupTabListeners();
+    loadPricing();
+    loadCart();
+    loadSpawns();       // Load initial spawns
+    loadEvents();       // 👈 ADD THIS - load events for default tab
+    loadDebutData();
+
 // ========== DEBUT DATA (Only for Upcoming) ==========
 async function loadDebutData() {
     try {
