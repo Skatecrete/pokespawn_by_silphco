@@ -1881,15 +1881,18 @@ async function loadDebutData() {
         const data = await response.json();
         var debuts = data.debuts || [];
         
-        // Use UTC-11 (American Samoa) for consistent date handling
-        var now = new Date();
-        var utc11Offset = -11;
-        var utc11Now = new Date(now.getTime() + (utc11Offset * 60 * 60 * 1000));
-        var today = new Date(utc11Now.toISOString().split('T')[0]);
+        // Use NZ time
+        var nzTime = new Date().toLocaleString('en-US', { timeZone: 'Pacific/Auckland' });
+        var todayNz = new Date(nzTime);
+        todayNz.setHours(0, 0, 0, 0);
         
-        var upcomingDebut = null;
+        // Get tomorrow's date for "day before" check
+        var tomorrowNz = new Date(todayNz);
+        tomorrowNz.setDate(tomorrowNz.getDate() + 1);
+        
         var activeDebut = null;
-        var closestDate = null;
+        var isDayBefore = false;
+        var closestStartDate = null;
         
         for (var i = 0; i < debuts.length; i++) {
             var debut = debuts[i];
@@ -1899,73 +1902,45 @@ async function loadDebutData() {
                 var day = parseInt(dateMatch[2]);
                 var year = new Date().getFullYear();
                 var monthMap = { January: 0, February: 1, March: 2, April: 3, May: 4, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 };
-                
-                // Try to get year from end date if available
-                var endMatch = debut.event_date.match(/-\s*\w+\s+\d+(?:st|nd|rd|th)?\s+(\d{4})/);
-                if (endMatch) {
-                    year = parseInt(endMatch[1]);
-                }
-                
                 var startDate = new Date(year, monthMap[month], day);
-                var endDate = new Date(startDate);
-                endDate.setDate(endDate.getDate() + 7); // Assume events last 7 days if not specified
+                startDate.setHours(0, 0, 0, 0);
                 
-                // Parse end date if available
-                var endDateMatch = debut.event_date.match(/-\s*(\w+)\s+(\d+)(?:st|nd|rd|th)?\s+(\d{4})/);
-                if (endDateMatch) {
-                    var endMonth = endDateMatch[1];
-                    var endDay = parseInt(endDateMatch[2]);
-                    var endYear = parseInt(endDateMatch[3]);
+                // Get end date to check if event is ongoing
+                var endMatch = debut.event_date.match(/-\s*(\w+)\s+(\d+)(?:st|nd|rd|th)?\s+(\d{4})/);
+                var endDate = null;
+                if (endMatch) {
+                    var endMonth = endMatch[1];
+                    var endDay = parseInt(endMatch[2]);
+                    var endYear = parseInt(endMatch[3]);
                     endDate = new Date(endYear, monthMap[endMonth], endDay);
+                    endDate.setHours(23, 59, 59, 999);
                 }
                 
-                var startDateStr = startDate.toISOString().split('T')[0];
-                var endDateStr = endDate.toISOString().split('T')[0];
-                var todayStr = today.toISOString().split('T')[0];
-                
-                // Calculate days until start
-                var daysUntilStart = Math.ceil((startDate - new Date(now.getTime() + (utc11Offset * 60 * 60 * 1000))) / (1000 * 60 * 60 * 24));
-                
-                // Check if event is active (started and not ended)
-                if (todayStr >= startDateStr && todayStr <= endDateStr) {
-                    if (!activeDebut) {
-                        activeDebut = debut;
-                    }
-                    // Also add to upcoming if it started today (so it shows in both tabs for the first day)
-                    if (todayStr === startDateStr) {
-                        if (!upcomingDebut || startDate < closestDate) {
-                            upcomingDebut = debut;
-                            closestDate = startDate;
-                        }
-                    }
+                // Check if event is currently active (started AND not ended yet)
+                if (startDate <= todayNz && (!endDate || endDate >= todayNz)) {
+                    activeDebut = debut;
+                    isDayBefore = false;
+                    break;
                 }
-                // Check if event is upcoming (starts in 7 days or less, but not started yet)
-                else if (daysUntilStart > 0 && daysUntilStart <= 7) {
-                    if (!upcomingDebut || startDate < closestDate) {
-                        upcomingDebut = debut;
-                        closestDate = startDate;
-                    }
+                // Check if event starts tomorrow (day before)
+                else if (startDate.getTime() === tomorrowNz.getTime()) {
+                    activeDebut = debut;
+                    isDayBefore = true;
+                    closestStartDate = startDate;
+                    break;
                 }
             }
         }
         
-        // Determine which banner to show based on active tab
-        var activeTab = document.querySelector('.tab-content.active')?.id;
-        
-        if (activeTab === 'current' && activeDebut) {
-            displayDebutBanner(activeDebut, null, true);
-        } else if (activeTab === 'upcoming' && upcomingDebut) {
-            displayDebutBanner(upcomingDebut, closestDate, false);
-        } else {
-            document.getElementById('debutBanner').style.display = 'none';
+        if (activeDebut) {
+            displayDebutBanner(activeDebut, isDayBefore, closestStartDate);
         }
-        
     } catch (e) {
         console.error('Error loading debut data:', e);
     }
 }
 
-function displayDebutBanner(debut, startDate, isActive) {
+function displayDebutBanner(debut, isDayBefore, startDate) {
     var banner = document.getElementById('debutBanner');
     var eventNameElem = document.getElementById('debutEventName');
     var countdownElem = document.getElementById('debutCountdown');
@@ -1977,55 +1952,33 @@ function displayDebutBanner(debut, startDate, isActive) {
     viewEventBtn.onclick = function() { findAndOpenLeekDuckEvent(debut.event_name); };
     currentDebutData = debut;
     
-    if (isActive) {
-        // Event is currently active - show "ENDS IN" countdown
-        var now = new Date();
-        var utc11Offset = -11;
-        var utc11Now = new Date(now.getTime() + (utc11Offset * 60 * 60 * 1000));
-        
-        // Parse end date
-        var endMatch = debut.event_date.match(/-\s*(\w+)\s+(\d+)(?:st|nd|rd|th)?\s+(\d{4})/);
-        if (endMatch) {
-            var monthMap = { January: 0, February: 1, March: 2, April: 3, May: 4, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 };
-            var endMonth = endMatch[1];
-            var endDay = parseInt(endMatch[2]);
-            var endYear = parseInt(endMatch[3]);
-            var endDate = new Date(endYear, monthMap[endMonth], endDay, 23, 59, 59);
-            
-            var millisLeft = endDate - utc11Now;
-            var daysLeft = Math.ceil(millisLeft / (1000 * 60 * 60 * 24));
-            var hoursLeft = Math.floor((millisLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            
-            if (daysLeft > 0) {
-                countdownElem.textContent = '⏰ Ends in ' + daysLeft + (daysLeft === 1 ? ' day' : ' days');
-            } else if (hoursLeft > 0) {
-                countdownElem.textContent = '⏰ Ends in ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours');
-            } else {
-                countdownElem.textContent = '⏰ Ends today!';
-            }
-            countdownElem.style.color = '#FFA500';
-        } else {
-            countdownElem.textContent = '⏰ Currently Active!';
-            countdownElem.style.color = '#4CAF50';
-        }
-    } else if (startDate) {
-        // Event is upcoming - show "STARTS IN" countdown
-        var now = new Date();
-        var utc11Offset = -11;
-        var utc11Now = new Date(now.getTime() + (utc11Offset * 60 * 60 * 1000));
-        
-        var millisLeft = startDate - utc11Now;
-        var daysLeft = Math.ceil(millisLeft / (1000 * 60 * 60 * 24));
-        var hoursLeft = Math.floor((millisLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        
-        if (daysLeft > 0) {
-            countdownElem.textContent = '⏰ Starts in ' + daysLeft + (daysLeft === 1 ? ' day' : ' days');
-        } else if (hoursLeft > 0) {
-            countdownElem.textContent = '⏰ Starts in ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours');
-        } else {
-            countdownElem.textContent = '⏰ Starts soon!';
-        }
-        countdownElem.style.color = '#4CAF50';
+    // Show "Starting local soon" message for day-before events
+    if (isDayBefore) {
+        countdownElem.textContent = '⏰ Starting local soon!';
+        countdownElem.style.color = '#FFA500';
+        banner.style.display = 'block';
+        return;
+    }
+    
+    // Calculate time until event starts (original countdown logic - unchanged)
+    var now = new Date();
+    // Apply offset
+    now.setHours(now.getHours() + 6);
+    
+    var millisLeft = startDate - now;
+    var totalHoursLeft = Math.floor(millisLeft / (1000 * 60 * 60));
+    var daysLeft = Math.floor(totalHoursLeft / 24);
+    var hoursLeft = totalHoursLeft % 24;
+    var minutesLeft = Math.floor((millisLeft % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (daysLeft >= 1) {
+        countdownElem.textContent = '⏰ Starts in ' + daysLeft + (daysLeft === 1 ? ' day' : ' days') + ' ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours');
+    } else if (hoursLeft > 0) {
+        countdownElem.textContent = '⏰ Starts in ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours') + ' ' + minutesLeft + (minutesLeft === 1 ? ' minute' : ' minutes');
+    } else if (minutesLeft > 0) {
+        countdownElem.textContent = '⏰ Starts in ' + minutesLeft + (minutesLeft === 1 ? ' minute' : ' minutes');
+    } else {
+        countdownElem.textContent = '⏰ Starts in less than a minute';
     }
     
     banner.style.display = 'block';
