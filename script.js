@@ -1886,7 +1886,7 @@ async function loadDebutData() {
         var todayNz = new Date(nzTime);
         todayNz.setHours(0, 0, 0, 0);
         
-        // Get tomorrow's date for "day before" check
+        // Get tomorrow's date
         var tomorrowNz = new Date(todayNz);
         tomorrowNz.setDate(tomorrowNz.getDate() + 1);
         
@@ -1896,17 +1896,24 @@ async function loadDebutData() {
         
         for (var i = 0; i < debuts.length; i++) {
             var debut = debuts[i];
-            var dateMatch = debut.event_date.match(/(\w+)\s+(\d+)(?:st|nd|rd|th)?/);
-            if (dateMatch) {
-                var month = dateMatch[1];
-                var day = parseInt(dateMatch[2]);
-                var year = new Date().getFullYear();
+            
+            // Parse end date first to get the correct year
+            var endMatch = debut.event_date.match(/-\s*(\w+)\s+(\d+)(?:st|nd|rd|th)?\s+(\d{4})/);
+            var eventYear = new Date().getFullYear();
+            if (endMatch) {
+                eventYear = parseInt(endMatch[3]);
+            }
+            
+            // Parse start date using the year from end date
+            var startMatch = debut.event_date.match(/(\w+)\s+(\d+)(?:st|nd|rd|th)?/);
+            if (startMatch) {
+                var month = startMatch[1];
+                var day = parseInt(startMatch[2]);
                 var monthMap = { January: 0, February: 1, March: 2, April: 3, May: 4, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 };
-                var startDate = new Date(year, monthMap[month], day);
+                var startDate = new Date(eventYear, monthMap[month], day);
                 startDate.setHours(0, 0, 0, 0);
                 
-                // Get end date to check if event is ongoing
-                var endMatch = debut.event_date.match(/-\s*(\w+)\s+(\d+)(?:st|nd|rd|th)?\s+(\d{4})/);
+                // Parse end date for ongoing check
                 var endDate = null;
                 if (endMatch) {
                     var endMonth = endMatch[1];
@@ -1920,6 +1927,7 @@ async function loadDebutData() {
                 if (startDate <= todayNz && (!endDate || endDate >= todayNz)) {
                     activeDebut = debut;
                     isDayBefore = false;
+                    closestStartDate = startDate;
                     break;
                 }
                 // Check if event starts tomorrow (day before)
