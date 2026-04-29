@@ -1876,7 +1876,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ========== DEBUT DATA ==========
 async function loadDebutData() {
-    async function loadDebutData() {
     console.log('=== loadDebutData() CALLED ===');
     console.log('Current page URL:', window.location.href);
     console.log('Current page pathname:', window.location.pathname);
