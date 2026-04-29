@@ -62,7 +62,6 @@ function setupTabListeners() {
             if (tabId === 'raids') loadRaids();
             if (tabId === 'current' || tabId === 'upcoming') {
                 loadEvents();
-                // Load debut data for BOTH current and upcoming tabs
                 loadDebutData();
             }
         });
@@ -1872,7 +1871,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (viewAllBtn) viewAllBtn.onclick = loadAllInfographics;
     if (weeklyBtn) weeklyBtn.onclick = loadWeeklyView;
     if (monthlyBtn) monthlyBtn.onclick = loadMonthlyView;
-    loadDebutData();
+    
+    // Only load debut data if the debut banner exists on this page
+    var debutBanner = document.getElementById('debutBanner');
+    if (debutBanner) {
+        loadDebutData();
+    }
 });
 
 // ========== DEBUT DATA (Only for Upcoming) ==========
