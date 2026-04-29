@@ -1874,8 +1874,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// ========== DEBUT DATA (Only for Upcoming) ==========
-// ========== DEBUT DATA (Only for Upcoming) ==========
+// ========== DEBUT DATA ==========
 async function loadDebutData() {
     var banner = document.getElementById('debutBanner');
     if (!banner) {
@@ -1895,7 +1894,8 @@ async function loadDebutData() {
         
         var upcomingDebut = null;
         var activeDebut = null;
-        var closestStartDate = null;
+        var closestUpcomingDate = null;
+        var closestActiveDate = null;
         
         for (var i = 0; i < debuts.length; i++) {
             var debut = debuts[i];
@@ -1930,15 +1930,14 @@ async function loadDebutData() {
                 console.log('Event:', debut.event_name);
                 console.log('  startDateTime:', startDateTime);
                 console.log('  endDateTime:', endDateTime);
-                console.log('  startDateTime <= nowNz:', startDateTime <= nowNz);
-                console.log('  endDateTime >= nowNz:', endDateTime ? endDateTime >= nowNz : 'no end date');
                 
                 // Check if event is currently active (started AND not ended yet) - for Current tab
                 if (startDateTime <= nowNz && (!endDateTime || endDateTime >= nowNz)) {
                     console.log('  -> Categorized as ACTIVE');
-                    if (!activeDebut) {
+                    // Find the ACTIVE event with the EARLIEST start date (recently started)
+                    if (!activeDebut || startDateTime > closestActiveDate) {
                         activeDebut = debut;
-                        closestStartDate = startDateTime;
+                        closestActiveDate = startDateTime;
                     }
                 }
                 // Check if event is upcoming (starts in the future) - for Upcoming tab
@@ -1947,9 +1946,10 @@ async function loadDebutData() {
                     var daysUntil = (startDateTime - nowNz) / (1000 * 60 * 60 * 24);
                     // Show all upcoming events within 60 days
                     if (daysUntil <= 60) {
-                        if (!upcomingDebut || startDateTime < closestStartDate) {
+                        // Find the UPCOMING event with the EARLIEST start date (soonest)
+                        if (!upcomingDebut || startDateTime < closestUpcomingDate) {
                             upcomingDebut = debut;
-                            closestStartDate = startDateTime;
+                            closestUpcomingDate = startDateTime;
                         }
                     }
                 } else {
@@ -1958,14 +1958,13 @@ async function loadDebutData() {
             }
         }
         
-        // Determine which tab is active - check URL path
+        // Determine which tab is active
         var activeTab = 'upcoming'; // default
         if (window.location.pathname.includes('current.html')) {
             activeTab = 'current';
         } else if (window.location.pathname.includes('upcoming.html')) {
             activeTab = 'upcoming';
         } else {
-            // Check by visibility
             var currentContent = document.getElementById('current');
             var upcomingContent = document.getElementById('upcoming');
             if (currentContent && currentContent.classList.contains('active')) {
@@ -1981,10 +1980,10 @@ async function loadDebutData() {
         
         // Show appropriate banner
         if (activeTab === 'current' && activeDebut) {
-            displayDebutBanner(activeDebut, false, closestStartDate);
+            displayDebutBanner(activeDebut, false, closestActiveDate);
             banner.style.display = 'block';
         } else if (activeTab === 'upcoming' && upcomingDebut) {
-            displayDebutBanner(upcomingDebut, false, closestStartDate);
+            displayDebutBanner(upcomingDebut, false, closestUpcomingDate);
             banner.style.display = 'block';
         } else {
             banner.style.display = 'none';
