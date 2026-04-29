@@ -1960,6 +1960,9 @@ async function loadDebutData() {
                     console.log('  startDateTime <= nowNz:', startDateTime <= nowNz);
                     console.log('  endDateTime >= nowNz:', endDateTime >= nowNz);
                     console.log('  isActive:', startDateTime <= nowNz && (!endDateTime || endDateTime >= nowNz));
+                    console.log('window.location.pathname:', window.location.pathname);
+                    console.log('currentContent active:', currentContent ? currentContent.classList.contains('active') : 'no element');
+                    console.log('upcomingContent active:', upcomingContent ? upcomingContent.classList.contains('active') : 'no element');
                 }
             }
         }
