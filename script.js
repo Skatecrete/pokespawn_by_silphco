@@ -1881,17 +1881,16 @@ async function loadDebutData() {
         const data = await response.json();
         var debuts = data.debuts || [];
         
-        // Use NZ time
-        var nzTime = new Date().toLocaleString('en-US', { timeZone: 'Pacific/Auckland' });
-        var todayNz = new Date(nzTime);
-        todayNz.setHours(0, 0, 0, 0);
+        // Use NZ time with actual time (not just date)
+        var nzTimeStr = new Date().toLocaleString('en-US', { timeZone: 'Pacific/Auckland' });
+        var nowNz = new Date(nzTimeStr);
         
-        // Get tomorrow's date
-        var tomorrowNz = new Date(todayNz);
-        tomorrowNz.setDate(tomorrowNz.getDate() + 1);
+        // Get today's date at midnight for date comparisons
+        var todayMidnight = new Date(nowNz);
+        todayMidnight.setHours(0, 0, 0, 0);
         
+        var upcomingDebut = null;
         var activeDebut = null;
-        var isDayBefore = false;
         var closestStartDate = null;
         
         for (var i = 0; i < debuts.length; i++) {
@@ -1910,39 +1909,51 @@ async function loadDebutData() {
                 var month = startMatch[1];
                 var day = parseInt(startMatch[2]);
                 var monthMap = { January: 0, February: 1, March: 2, April: 3, May: 4, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 };
-                var startDate = new Date(eventYear, monthMap[month], day);
-                startDate.setHours(0, 0, 0, 0);
                 
-                // Parse end date for ongoing check
-                var endDate = null;
+                // Event starts at 10:00 AM local time
+                var startDateTime = new Date(eventYear, monthMap[month], day, 10, 0, 0);
+                
+                // Parse end date
+                var endDateTime = null;
                 if (endMatch) {
                     var endMonth = endMatch[1];
                     var endDay = parseInt(endMatch[2]);
                     var endYear = parseInt(endMatch[3]);
-                    endDate = new Date(endYear, monthMap[endMonth], endDay);
-                    endDate.setHours(23, 59, 59, 999);
+                    // Event ends at 8:00 PM local time
+                    endDateTime = new Date(endYear, monthMap[endMonth], endDay, 20, 0, 0);
                 }
                 
-                // Check if event is currently active (started AND not ended yet)
-                if (startDate <= todayNz && (!endDate || endDate >= todayNz)) {
-                    activeDebut = debut;
-                    isDayBefore = false;
-                    closestStartDate = startDate;
-                    break;
+                // Check if event is currently active (started AND not ended yet) - for Current tab
+                if (startDateTime <= nowNz && (!endDateTime || endDateTime >= nowNz)) {
+                    if (!activeDebut) {
+                        activeDebut = debut;
+                        closestStartDate = startDateTime;
+                    }
                 }
-                // Check if event starts tomorrow (day before)
-                else if (startDate.getTime() === tomorrowNz.getTime()) {
-                    activeDebut = debut;
-                    isDayBefore = true;
-                    closestStartDate = startDate;
-                    break;
+                // Check if event is upcoming (starts in the future) - for Upcoming tab
+                else if (startDateTime > nowNz) {
+                    var daysUntil = (startDateTime - nowNz) / (1000 * 60 * 60 * 24);
+                    if (daysUntil <= 7) {
+                        if (!upcomingDebut || startDateTime < closestStartDate) {
+                            upcomingDebut = debut;
+                            closestStartDate = startDateTime;
+                        }
+                    }
                 }
             }
         }
         
-        if (activeDebut) {
-            displayDebutBanner(activeDebut, isDayBefore, closestStartDate);
+        // Determine which banner to show based on active tab
+        var activeTab = document.querySelector('.tab-content.active')?.id;
+        
+        if (activeTab === 'current' && activeDebut) {
+            displayDebutBanner(activeDebut, false, closestStartDate);
+        } else if (activeTab === 'upcoming' && upcomingDebut) {
+            displayDebutBanner(upcomingDebut, false, closestStartDate);
+        } else {
+            document.getElementById('debutBanner').style.display = 'none';
         }
+        
     } catch (e) {
         console.error('Error loading debut data:', e);
     }
