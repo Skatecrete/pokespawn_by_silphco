@@ -1954,6 +1954,12 @@ async function loadDebutData() {
                     }
                 } else {
                     console.log('  -> Categorized as PAST/ENDED');
+                    console.log('Event:', debut.event_name);
+                    console.log('  startDateTime:', startDateTime);
+                    console.log('  nowNz:', nowNz);
+                    console.log('  startDateTime <= nowNz:', startDateTime <= nowNz);
+                    console.log('  endDateTime >= nowNz:', endDateTime >= nowNz);
+                    console.log('  isActive:', startDateTime <= nowNz && (!endDateTime || endDateTime >= nowNz));
                 }
             }
         }
