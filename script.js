@@ -1886,10 +1886,6 @@ async function loadDebutData() {
         var nzTimeStr = new Date().toLocaleString('en-US', { timeZone: 'Pacific/Auckland' });
         var nowNz = new Date(nzTimeStr);
         
-        // Get today's date at midnight for date comparisons
-        var todayMidnight = new Date(nowNz);
-        todayMidnight.setHours(0, 0, 0, 0);
-        
         var upcomingDebut = null;
         var activeDebut = null;
         var closestStartDate = null;
@@ -1944,22 +1940,41 @@ async function loadDebutData() {
             }
         }
         
-        // Determine which banner to show based on active tab
-        var activeTab = document.querySelector('.tab-content.active')?.id;
+        // Get the banner element
+        var banner = document.getElementById('debutBanner');
+        if (!banner) {
+            console.error('debutBanner element not found');
+            return;
+        }
         
+        // Determine which tab is active - check both methods
+        var activeTab = document.querySelector('.tab-content.active')?.id;
+        // Fallback: check which tab has active class
+        if (!activeTab) {
+            var currentTab = document.getElementById('current');
+            var upcomingTab = document.getElementById('upcoming');
+            if (currentTab && currentTab.classList.contains('active')) {
+                activeTab = 'current';
+            } else if (upcomingTab && upcomingTab.classList.contains('active')) {
+                activeTab = 'upcoming';
+            }
+        }
+        
+        console.log('activeDebut:', activeDebut);
+        console.log('upcomingDebut:', upcomingDebut);
+        console.log('activeTab:', activeTab);
+        
+        // Show appropriate banner
         if (activeTab === 'current' && activeDebut) {
             displayDebutBanner(activeDebut, false, closestStartDate);
         } else if (activeTab === 'upcoming' && upcomingDebut) {
             displayDebutBanner(upcomingDebut, false, closestStartDate);
         } else {
-            document.getElementById('debutBanner').style.display = 'none';
+            banner.style.display = 'none';
         }
         
     } catch (e) {
         console.error('Error loading debut data:', e);
-        console.log('activeDebut:', activeDebut);
-        console.log('upcomingDebut:', upcomingDebut);
-        console.log('activeTab:', activeTab);
     }
 }
 
