@@ -1872,6 +1872,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (viewAllBtn) viewAllBtn.onclick = loadAllInfographics;
     if (weeklyBtn) weeklyBtn.onclick = loadWeeklyView;
     if (monthlyBtn) monthlyBtn.onclick = loadMonthlyView;
+    loadDebutData();
 });
 
 // ========== DEBUT DATA (Only for Upcoming) ==========
@@ -1956,6 +1957,9 @@ async function loadDebutData() {
         
     } catch (e) {
         console.error('Error loading debut data:', e);
+        console.log('activeDebut:', activeDebut);
+        console.log('upcomingDebut:', upcomingDebut);
+        console.log('activeTab:', activeTab);
     }
 }
 
