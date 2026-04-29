@@ -1,4 +1,4 @@
-// ========== GLOBAL VARIABLES ==========
+    // ========== GLOBAL VARIABLES ==========
 let allPokemon = [];
 let cartItems = [];
 let customerName = '';
@@ -1951,18 +1951,30 @@ async function loadDebutData() {
         }
         
         // Determine which tab is active
-        var activeTab = document.querySelector('.tab-content.active')?.id;
+        var activeTab = null;
+        var currentContent = document.getElementById('current');
+        var upcomingContent = document.getElementById('upcoming');
+
+        if (currentContent && currentContent.classList.contains('active')) {
+            activeTab = 'current';
+        } else if (upcomingContent && upcomingContent.classList.contains('active')) {
+            activeTab = 'upcoming';
+        }
+
+        // Fallback: check URL path
         if (!activeTab) {
-            var currentTab = document.getElementById('current');
-            var upcomingTab = document.getElementById('upcoming');
-            if (currentTab && currentTab.classList.contains('active')) {
+            var path = window.location.pathname;
+            if (path.includes('current.html')) {
                 activeTab = 'current';
-            } else if (upcomingTab && upcomingTab.classList.contains('active')) {
+            } else if (path.includes('upcoming.html')) {
+                activeTab = 'upcoming';
+            } else {
+                // Default to upcoming if on other pages
                 activeTab = 'upcoming';
             }
         }
-        
-        console.log('activeDebut:', activeDebut);
+
+        console.log('activeTab:', activeTab);
         console.log('upcomingDebut:', upcomingDebut);
         console.log('activeTab:', activeTab);
         
