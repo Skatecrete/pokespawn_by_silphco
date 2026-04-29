@@ -1876,8 +1876,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ========== DEBUT DATA ==========
 async function loadDebutData() {
+    async function loadDebutData() {
+    console.log('=== loadDebutData() CALLED ===');
+    console.log('Current page URL:', window.location.href);
+    console.log('Current page pathname:', window.location.pathname);
+    
     var banner = document.getElementById('debutBanner');
+    console.log('debutBanner element found:', banner !== null);
+    
     if (!banner) {
+        console.log('No debut banner element found on this page - exiting');
         return;
     }
     
@@ -1954,17 +1962,6 @@ async function loadDebutData() {
                     }
                 } else {
                     console.log('  -> Categorized as PAST/ENDED');
-                    console.log('Event:', debut.event_name);
-                    console.log('  startDateTime:', startDateTime);
-                    console.log('  nowNz:', nowNz);
-                    console.log('  startDateTime <= nowNz:', startDateTime <= nowNz);
-                    console.log('  endDateTime >= nowNz:', endDateTime >= nowNz);
-                    console.log('  isActive:', startDateTime <= nowNz && (!endDateTime || endDateTime >= nowNz));
-                    console.log('window.location.pathname:', window.location.pathname);
-                    console.log('currentContent active:', currentContent ? currentContent.classList.contains('active') : 'no element');
-                    console.log('upcomingContent active:', upcomingContent ? upcomingContent.classList.contains('active') : 'no element');
-                    console.log('Showing banner for tab:', activeTab);
-                    console.log('Banner should show:', activeTab === 'current' ? activeDebut : upcomingDebut);
                 }
             }
         }
