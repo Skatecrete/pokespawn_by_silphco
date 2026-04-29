@@ -1951,30 +1951,38 @@ async function loadDebutData() {
         }
         
         // Determine which tab is active
+        // Determine which tab is active - simple version
         var activeTab = null;
         var currentContent = document.getElementById('current');
         var upcomingContent = document.getElementById('upcoming');
 
-        if (currentContent && currentContent.classList.contains('active')) {
+        if (currentContent && currentContent.style.display !== 'none' && currentContent.classList.contains('active')) {
             activeTab = 'current';
-        } else if (upcomingContent && upcomingContent.classList.contains('active')) {
+        } else if (upcomingContent && upcomingContent.style.display !== 'none' && upcomingContent.classList.contains('active')) {
             activeTab = 'upcoming';
         }
 
-        // Fallback: check URL path
+        // If still null, check by visibility
         if (!activeTab) {
-            var path = window.location.pathname;
-            if (path.includes('current.html')) {
-                activeTab = 'current';
-            } else if (path.includes('upcoming.html')) {
-                activeTab = 'upcoming';
-            } else {
-                // Default to upcoming if on other pages
+            if (currentContent && currentContent.offsetParent !== null) {
+        activeTab = 'current';
+            } else if (upcomingContent && upcomingContent.offsetParent !== null) {
                 activeTab = 'upcoming';
             }
         }
 
-        console.log('activeTab:', activeTab);
+// If still null, check URL
+        if (!activeTab) {
+            if (window.location.pathname.includes('current.html')) {
+                activeTab = 'current';
+            } else if (window.location.pathname.includes('upcoming.html')) {
+                activeTab = 'upcoming';
+            } else {
+                activeTab = 'upcoming'; // default
+            }
+        }
+
+        console.log('Detected activeTab:', activeTab);;
         console.log('upcomingDebut:', upcomingDebut);
         console.log('activeTab:', activeTab);
         
