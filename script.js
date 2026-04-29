@@ -1875,6 +1875,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ========== DEBUT DATA (Only for Upcoming) ==========
+// ========== DEBUT DATA (Only for Upcoming) ==========
 async function loadDebutData() {
     var banner = document.getElementById('debutBanner');
     if (!banner) {
@@ -1889,6 +1890,8 @@ async function loadDebutData() {
         // Use NZ time with actual time (not just date)
         var nzTimeStr = new Date().toLocaleString('en-US', { timeZone: 'Pacific/Auckland' });
         var nowNz = new Date(nzTimeStr);
+        
+        console.log('Current NZ time:', nowNz);
         
         var upcomingDebut = null;
         var activeDebut = null;
@@ -1924,8 +1927,15 @@ async function loadDebutData() {
                     endDateTime = new Date(endYear, monthMap[endMonth], endDay, 20, 0, 0);
                 }
                 
+                console.log('Event:', debut.event_name);
+                console.log('  startDateTime:', startDateTime);
+                console.log('  endDateTime:', endDateTime);
+                console.log('  startDateTime <= nowNz:', startDateTime <= nowNz);
+                console.log('  endDateTime >= nowNz:', endDateTime ? endDateTime >= nowNz : 'no end date');
+                
                 // Check if event is currently active (started AND not ended yet) - for Current tab
                 if (startDateTime <= nowNz && (!endDateTime || endDateTime >= nowNz)) {
+                    console.log('  -> Categorized as ACTIVE');
                     if (!activeDebut) {
                         activeDebut = debut;
                         closestStartDate = startDateTime;
@@ -1933,13 +1943,17 @@ async function loadDebutData() {
                 }
                 // Check if event is upcoming (starts in the future) - for Upcoming tab
                 else if (startDateTime > nowNz) {
+                    console.log('  -> Categorized as UPCOMING');
                     var daysUntil = (startDateTime - nowNz) / (1000 * 60 * 60 * 24);
-                    if (daysUntil <= 7) {
+                    // Show all upcoming events within 60 days
+                    if (daysUntil <= 60) {
                         if (!upcomingDebut || startDateTime < closestStartDate) {
                             upcomingDebut = debut;
                             closestStartDate = startDateTime;
                         }
                     }
+                } else {
+                    console.log('  -> Categorized as PAST/ENDED');
                 }
             }
         }
@@ -1962,8 +1976,8 @@ async function loadDebutData() {
         }
         
         console.log('activeTab:', activeTab);
-        console.log('activeDebut:', activeDebut);
-        console.log('upcomingDebut:', upcomingDebut);
+        console.log('activeDebut:', activeDebut ? activeDebut.event_name : null);
+        console.log('upcomingDebut:', upcomingDebut ? upcomingDebut.event_name : null);
         
         // Show appropriate banner
         if (activeTab === 'current' && activeDebut) {
@@ -2001,9 +2015,9 @@ function displayDebutBanner(debut, isDayBefore, startDate) {
         return;
     }
     
-    // Calculate time until event starts (original countdown logic - unchanged)
+    // Calculate time until event starts
     var now = new Date();
-    // Apply offset
+    // Apply offset (6 hours added)
     now.setHours(now.getHours() + 6);
     
     var millisLeft = startDate - now;
@@ -2011,6 +2025,11 @@ function displayDebutBanner(debut, isDayBefore, startDate) {
     var daysLeft = Math.floor(totalHoursLeft / 24);
     var hoursLeft = totalHoursLeft % 24;
     var minutesLeft = Math.floor((millisLeft % (1000 * 60 * 60)) / (1000 * 60));
+    
+    console.log('Countdown - startDate:', startDate);
+    console.log('Countdown - now (with offset):', now);
+    console.log('Countdown - millisLeft:', millisLeft);
+    console.log('Countdown - daysLeft:', daysLeft, 'hoursLeft:', hoursLeft);
     
     if (daysLeft >= 1) {
         countdownElem.textContent = '⏰ Starts in ' + daysLeft + (daysLeft === 1 ? ' day' : ' days') + ' ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours');
