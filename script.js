@@ -1881,6 +1881,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ========== DEBUT DATA (Only for Upcoming) ==========
 async function loadDebutData() {
+    // Safety check - exit if debut banner doesn't exist on this page
+    var banner = document.getElementById('debutBanner');
+    if (!banner) {
+        return;
+    }
+    
     try {
         const response = await fetch('https://raw.githubusercontent.com/Skatecrete/pogo-raid-data/main/debuts.json');
         const data = await response.json();
@@ -1944,16 +1950,8 @@ async function loadDebutData() {
             }
         }
         
-        // Get the banner element
-        var banner = document.getElementById('debutBanner');
-        if (!banner) {
-            console.error('debutBanner element not found');
-            return;
-        }
-        
-        // Determine which tab is active - check both methods
+        // Determine which tab is active
         var activeTab = document.querySelector('.tab-content.active')?.id;
-        // Fallback: check which tab has active class
         if (!activeTab) {
             var currentTab = document.getElementById('current');
             var upcomingTab = document.getElementById('upcoming');
