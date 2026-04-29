@@ -1317,7 +1317,7 @@ async function loadEvents() {
         displayUpcomingEvents(upcomingEvents);
         
         var activeTab = document.querySelector('.tab-content.active')?.id;
-        if (activeTab === 'upcoming') {
+        if (activeTab === 'upcoming' || activeTab === 'current') {
             loadDebutData();
         }
     } catch (e) {
