@@ -1881,7 +1881,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ========== DEBUT DATA (Only for Upcoming) ==========
 async function loadDebutData() {
-    // Safety check - exit if debut banner doesn't exist on this page
     var banner = document.getElementById('debutBanner');
     if (!banner) {
         return;
@@ -1950,47 +1949,34 @@ async function loadDebutData() {
             }
         }
         
-        // Determine which tab is active
-        // Determine which tab is active - simple version
-        var activeTab = null;
-        var currentContent = document.getElementById('current');
-        var upcomingContent = document.getElementById('upcoming');
-
-        if (currentContent && currentContent.style.display !== 'none' && currentContent.classList.contains('active')) {
+        // Determine which tab is active - check URL path
+        var activeTab = 'upcoming'; // default
+        if (window.location.pathname.includes('current.html')) {
             activeTab = 'current';
-        } else if (upcomingContent && upcomingContent.style.display !== 'none' && upcomingContent.classList.contains('active')) {
+        } else if (window.location.pathname.includes('upcoming.html')) {
             activeTab = 'upcoming';
-        }
-
-        // If still null, check by visibility
-        if (!activeTab) {
-            if (currentContent && currentContent.offsetParent !== null) {
-        activeTab = 'current';
-            } else if (upcomingContent && upcomingContent.offsetParent !== null) {
-                activeTab = 'upcoming';
-            }
-        }
-
-// If still null, check URL
-        if (!activeTab) {
-            if (window.location.pathname.includes('current.html')) {
+        } else {
+            // Check by visibility
+            var currentContent = document.getElementById('current');
+            var upcomingContent = document.getElementById('upcoming');
+            if (currentContent && currentContent.classList.contains('active')) {
                 activeTab = 'current';
-            } else if (window.location.pathname.includes('upcoming.html')) {
+            } else if (upcomingContent && upcomingContent.classList.contains('active')) {
                 activeTab = 'upcoming';
-            } else {
-                activeTab = 'upcoming'; // default
             }
         }
-
-        console.log('Detected activeTab:', activeTab);;
-        console.log('upcomingDebut:', upcomingDebut);
+        
         console.log('activeTab:', activeTab);
+        console.log('activeDebut:', activeDebut);
+        console.log('upcomingDebut:', upcomingDebut);
         
         // Show appropriate banner
         if (activeTab === 'current' && activeDebut) {
             displayDebutBanner(activeDebut, false, closestStartDate);
+            banner.style.display = 'block';
         } else if (activeTab === 'upcoming' && upcomingDebut) {
             displayDebutBanner(upcomingDebut, false, closestStartDate);
+            banner.style.display = 'block';
         } else {
             banner.style.display = 'none';
         }
