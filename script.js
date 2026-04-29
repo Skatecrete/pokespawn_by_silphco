@@ -1963,6 +1963,8 @@ async function loadDebutData() {
                     console.log('window.location.pathname:', window.location.pathname);
                     console.log('currentContent active:', currentContent ? currentContent.classList.contains('active') : 'no element');
                     console.log('upcomingContent active:', upcomingContent ? upcomingContent.classList.contains('active') : 'no element');
+                    console.log('Showing banner for tab:', activeTab);
+                    console.log('Banner should show:', activeTab === 'current' ? activeDebut : upcomingDebut);
                 }
             }
         }
