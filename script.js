@@ -1306,7 +1306,6 @@ async function loadEvents() {
             }
             else if (startDate > now) {
                 var daysUntil = (startDate - now) / (1000 * 60 * 60 * 24);
-                // Show if within 45 days OR contains "Go Fest"
                 if (daysUntil <= 45 || event.name.toLowerCase().includes('go fest')) {
                     upcomingEvents.push(event);
                 }
@@ -1316,10 +1315,6 @@ async function loadEvents() {
         displayCurrentEvents(currentEvents);
         displayUpcomingEvents(upcomingEvents);
         
-        var activeTab = document.querySelector('.tab-content.active')?.id;
-        if (activeTab === 'upcoming' || activeTab === 'current') {
-            loadDebutData();
-        }
     } catch (e) {
         console.error('Error loading events:', e);
     }
