@@ -1867,10 +1867,24 @@ document.addEventListener('DOMContentLoaded', function() {
     if (weeklyBtn) weeklyBtn.onclick = loadWeeklyView;
     if (monthlyBtn) monthlyBtn.onclick = loadMonthlyView;
     
-    // Only load debut data if the debut banner exists on this page
-    var debutBanner = document.getElementById('debutBanner');
-    if (debutBanner) {
-        loadDebutData();
+    // DO NOT load debut data here - it will be loaded by tab switching
+    // Instead, detect which tab is active and load accordingly
+    var currentContent = document.getElementById('current');
+    var upcomingContent = document.getElementById('upcoming');
+    
+    if (currentContent && currentContent.classList.contains('active')) {
+        // Current tab is active
+        loadEvents();
+        loadDebutData();  // This will load for current tab
+    } else if (upcomingContent && upcomingContent.classList.contains('active')) {
+        // Upcoming tab is active
+        loadEvents();
+        loadDebutData();  // This will load for upcoming tab
+    } else {
+        // Neither active (spawns/raids/orders)
+        loadSpawns();
+        loadRaids();
+        loadPricing();
     }
 });
 
