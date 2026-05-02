@@ -292,10 +292,10 @@ function displaySpawns() {
     }
     
     if (filters.shundo) {
-        filtered = filtered.filter(function(p) { return p.spawnRate >= 0.65 && p.isShiny; });
+        filtered = filtered.filter(function(p) { return p.spawnRate >= 0.45 && p.isShiny; });
     }
     if (filters.shiny164) {
-        filtered = filtered.filter(function(p) { return p.isShiny && p.spawnRate >= 0.65; });
+        filtered = filtered.filter(function(p) { return p.isShiny && p.spawnRate >= 0.45; });
     }
     if (filters.regional) {
         filtered = filtered.filter(function(p) { return p.isRegional; });
@@ -402,6 +402,12 @@ function showSpawnOrderDialog(pokemon) {
     var shinyPrice = pokemon.isRegional ? (pricingCache['Spawn_Shiny_Regional'] || 5) : (pricingCache['Spawn_Shiny'] || 2);
     var normalRegionalPrice = pricingCache['Spawn_Normal_Regional'] || 3;
     
+    // Check if disclaimer should show (spawn rate between 0.45% and 0.65%)
+    var showShundoDisclaimer = pokemon.spawnRate >= 0.45 && pokemon.spawnRate < 0.65 && pokemon.isShiny;
+    
+    // Check if Shundo should be available (0.45% or higher, with shiny)
+    var shundoAvailable = pokemon.spawnRate >= 0.45 && pokemon.isShiny;
+    
     document.getElementById('modalTitle').textContent = 'Order ' + pokemon.name;
     document.getElementById('modalBody').innerHTML = `
         <div class="order-stats">
@@ -409,7 +415,14 @@ function showSpawnOrderDialog(pokemon) {
             <div>Shiny: ${pokemon.shinyRate}</div>
         </div>
         
-        ${pokemon.spawnRate >= 0.65 && pokemon.isShiny ? `
+        ${showShundoDisclaimer ? `
+        <div class="order-section" style="background:#33FFA500; margin-bottom:16px;">
+            <div class="section-title" style="color:#FFA500;">⚠️ Disclaimer</div>
+            <div style="font-size:12px; color:#FFA500; text-align:center;">Shundos between 0.45% - 0.65% may take up to 2 days to complete</div>
+        </div>
+        ` : ''}
+        
+        ${shundoAvailable ? `
         <div class="order-section">
             <div class="section-title">✨ SHUNDO (100% IV + SHINY) - $${shundoPrice} EACH</div>
             <div class="quantity-selector">
