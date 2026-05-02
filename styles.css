@@ -368,14 +368,16 @@ body {
     left: 0;
     right: 0;
     z-index: 10;
-    background: rgba(0,0,0,0.7);
-    padding: 12px 20px;
+    background: linear-gradient(135deg, #1a1a2e, #0d0d1a);
+    padding: 16px 20px;
+    border-bottom: 2px solid #FF9800;
 }
 
 .viewer-modal .modal-header h2 {
-    color: white;
+    color: #FF9800;
     font-size: 16px;
     margin: 0;
+    font-weight: bold;
 }
 
 .viewer-modal .modal-footer {
@@ -384,9 +386,10 @@ body {
     left: 0;
     right: 0;
     z-index: 10;
-    background: rgba(0,0,0,0.7);
+    background: linear-gradient(135deg, #1a1a2e, #0d0d1a);
     padding: 16px;
     justify-content: center;
+    border-top: 1px solid #333;
 }
 
 .viewer-container {
@@ -412,8 +415,11 @@ body {
     justify-content: center;
     align-items: center;
     gap: 30px;
-    padding: 10px;
-    background: rgba(0,0,0,0.5);
+    padding: 15px;
+    background: rgba(0,0,0,0.7);
+    border-radius: 50px;
+    margin: 0 auto;
+    width: fit-content;
     z-index: 10;
 }
 
@@ -422,27 +428,35 @@ body {
     border: none;
     color: white;
     font-size: 24px;
-    padding: 10px 20px;
-    border-radius: 30px;
+    padding: 12px 24px;
+    border-radius: 40px;
     cursor: pointer;
     transition: all 0.2s;
-    min-width: 60px;
+    min-width: 70px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .viewer-nav-btn:hover:not(:disabled) {
     background: #FF9800;
+    transform: scale(1.05);
 }
 
 .viewer-nav-btn:disabled {
     opacity: 0.3;
     cursor: not-allowed;
+    transform: none;
 }
 
 .viewer-counter {
-    color: white;
-    font-size: 14px;
+    color: #FF9800;
+    font-size: 16px;
+    font-weight: bold;
     min-width: 80px;
     text-align: center;
+    background: rgba(0,0,0,0.5);
+    padding: 8px 16px;
+    border-radius: 30px;
 }
 
 .back-btn {
