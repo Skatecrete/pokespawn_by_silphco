@@ -1690,12 +1690,9 @@ function showGalleryView() {
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>📸 All Infographics</h2>
-                    <button class="modal-close" onclick="closeGalleryModal()" style="position:absolute; right:16px; top:12px; background:none; border:none; color:#FF9800; font-size:24px; cursor:pointer;">✕</button>
+                    <button class="modal-close" onclick="closeGalleryModal()">✕</button>
                 </div>
                 <div id="galleryGrid" class="gallery-grid"></div>
-                <div class="modal-footer">
-                    <button class="confirm-btn" onclick="closeGalleryModal()" style="background:#FF9800;">BACK TO APP</button>
-                </div>
             </div>
         `;
         document.body.appendChild(modal);
@@ -1735,16 +1732,16 @@ function openImageViewer(index) {
         modal.innerHTML = `
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 id="viewerTitle">📸 Infographic</h2>
-                    <button class="modal-close" onclick="closeViewerModal()" style="position:absolute; right:16px; top:12px; background:none; border:none; color:#FF9800; font-size:24px; cursor:pointer;">✕</button>
+                    <h2>📸 Infographic</h2>
+                    <button class="modal-close" onclick="closeViewerModal()">✕</button>
                 </div>
                 <div class="viewer-container">
                     <img id="viewerImage" class="viewer-image" src="" alt="Infographic">
                 </div>
                 <div class="viewer-nav">
-                    <button id="viewerPrevBtn" class="viewer-nav-btn" onclick="navigateViewer(-1)">◀ PREV</button>
+                    <button id="viewerPrevBtn" class="viewer-nav-btn" onclick="navigateViewer(-1)">◀</button>
                     <span id="viewerCounter" class="viewer-counter">1 / 1</span>
-                    <button id="viewerNextBtn" class="viewer-nav-btn" onclick="navigateViewer(1)">NEXT ▶</button>
+                    <button id="viewerNextBtn" class="viewer-nav-btn" onclick="navigateViewer(1)">▶</button>
                 </div>
             </div>
         `;
@@ -1817,6 +1814,8 @@ async function loadMonthlyView() {
 }
 
 async function loadSingleInfographic(filename, title) {
+    showLoading('Loading ' + title + '...');
+    
     try {
         const url = 'https://raw.githubusercontent.com/Skatecrete/infographics/main/images/' + filename;
         
@@ -1829,7 +1828,7 @@ async function loadSingleInfographic(filename, title) {
         
         hideLoading();
         
-        // Create single image viewer (no nav buttons)
+        // Create single image viewer with X button only
         var modal = document.getElementById('singleViewerModal');
         if (!modal) {
             modal = document.createElement('div');
@@ -1839,12 +1838,10 @@ async function loadSingleInfographic(filename, title) {
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 id="singleViewerTitle">Infographic</h2>
+                        <button class="modal-close" onclick="closeSingleViewerModal()">✕</button>
                     </div>
                     <div class="viewer-container">
                         <img id="singleViewerImage" class="viewer-image" src="" alt="Infographic">
-                    </div>
-                    <div class="modal-footer">
-                        <button class="confirm-btn" onclick="closeSingleViewerModal()">CLOSE</button>
                     </div>
                 </div>
             `;
