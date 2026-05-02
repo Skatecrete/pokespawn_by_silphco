@@ -1899,27 +1899,18 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========== DEBUT DATA ==========
 async function loadDebutData() {
     console.log('=== loadDebutData() CALLED ===');
-    console.log('Current page URL:', window.location.href);
-    console.log('Current page pathname:', window.location.pathname);
     
     var banner = document.getElementById('debutBanner');
-    console.log('debutBanner element found:', banner !== null);
-    
-    if (!banner) {
-        console.log('No debut banner element found on this page - exiting');
-        return;
-    }
+    if (!banner) return;
     
     try {
         const response = await fetch('https://raw.githubusercontent.com/Skatecrete/pogo-raid-data/main/debuts.json');
         const data = await response.json();
         var debuts = data.debuts || [];
         
-        // Get current NZ date and time - use this for all comparisons
-        var currentDate = new Date();
-        var currentDateNz = new Date(currentDate.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }));
-        
-        console.log('Current NZ time:', currentDateNz);
+        // Get current UTC time (no timezone conversion)
+        var nowUtc = new Date();
+        console.log('Current UTC time:', nowUtc);
         
         var upcomingDebut = null;
         var activeDebut = null;
@@ -1938,64 +1929,53 @@ async function loadDebutData() {
             
             // Parse end date to get the year
             var endMatch = eventDateStr.match(/-\s*(\w+)\s+(\d+)(?:st|nd|rd|th)?\s+(\d{4})/);
-            var eventYear = currentDateNz.getFullYear();
+            var eventYear = nowUtc.getFullYear();
             if (endMatch) {
                 eventYear = parseInt(endMatch[3]);
             }
             
-            // Parse start date: e.g., "April 28th"
+            // Parse start date
             var startMatch = eventDateStr.match(/^(\w+)\s+(\d+)(?:st|nd|rd|th)?/);
             if (!startMatch) continue;
             
             var startMonth = startMatch[1];
             var startDay = parseInt(startMatch[2]);
             
-            // Create start date in NZ timezone by building a string and parsing with NZ locale
-            var startMonthNum = monthMap[startMonth] + 1;
-            var startDateString = `${eventYear}-${startMonthNum.toString().padStart(2, '0')}-${startDay.toString().padStart(2, '0')} 10:00:00`;
+            // Create UTC date for start of event (10:00 AM NZT = 22:00 UTC previous day? Let's calculate correctly)
+            // NZ time is UTC+12 or UTC+13. For May, likely UTC+12 (NZST)
+            // 10:00 AM NZT = 22:00 UTC previous day (since NZ is ahead)
+            var startDateUtc = new Date(Date.UTC(eventYear, monthMap[startMonth], startDay - 1, 22, 0, 0));
             
-            // Parse the date string in NZ timezone
-            var startDateTime = new Date(startDateString + ' GMT+1300');  // Use a generic offset that will be interpreted correctly
-            
-            // More reliable: Create date parts and let the browser handle it with the correct offset
-            // by using the toLocaleString method
-            var startDateTimeFormatted = new Date(eventYear, monthMap[startMonth], startDay, 10, 0, 0);
-            // Convert to NZ timezone string then back to Date for accurate comparison
-            var startDateTimeNz = new Date(startDateTimeFormatted.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }));
-            
-            // Parse end date if available
-            var endDateTimeNz = null;
+            // Parse end date
+            var endDateUtc = null;
             if (endMatch) {
                 var endMonth = endMatch[1];
                 var endDay = parseInt(endMatch[2]);
                 var endYear = parseInt(endMatch[3]);
-                var endDateTimeFormatted = new Date(endYear, monthMap[endMonth], endDay, 20, 0, 0);
-                endDateTimeNz = new Date(endDateTimeFormatted.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }));
+                // Event ends at 8:00 PM NZT = 08:00 UTC (same day)
+                endDateUtc = new Date(Date.UTC(endYear, monthMap[endMonth], endDay, 8, 0, 0));
             }
             
             console.log('Event:', debut.event_name);
-            console.log('  startDateTimeNz:', startDateTimeNz);
-            console.log('  endDateTimeNz:', endDateTimeNz);
-            console.log('  currentDateNz:', currentDateNz);
+            console.log('  startDateUtc:', startDateUtc);
+            console.log('  endDateUtc:', endDateUtc);
             
             // Check if event is currently active
-            var isActive = startDateTimeNz <= currentDateNz && (!endDateTimeNz || endDateTimeNz >= currentDateNz);
+            var isActive = startDateUtc <= nowUtc && (!endDateUtc || endDateUtc >= nowUtc);
             
             if (isActive) {
                 console.log('  -> Categorized as ACTIVE');
-                if (!activeDebut || startDateTimeNz > closestActiveDate) {
+                if (!activeDebut || startDateUtc > closestActiveDate) {
                     activeDebut = debut;
-                    closestActiveDate = startDateTimeNz;
+                    closestActiveDate = startDateUtc;
                 }
-            }
-            // Check if event is upcoming (starts in the future)
-            else if (startDateTimeNz > currentDateNz) {
+            } else if (startDateUtc > nowUtc) {
                 console.log('  -> Categorized as UPCOMING');
-                var daysUntil = (startDateTimeNz - currentDateNz) / (1000 * 60 * 60 * 24);
+                var daysUntil = (startDateUtc - nowUtc) / (1000 * 60 * 60 * 24);
                 if (daysUntil <= 60) {
-                    if (!upcomingDebut || startDateTimeNz < closestUpcomingDate) {
+                    if (!upcomingDebut || startDateUtc < closestUpcomingDate) {
                         upcomingDebut = debut;
-                        closestUpcomingDate = startDateTimeNz;
+                        closestUpcomingDate = startDateUtc;
                     }
                 }
             } else {
@@ -2023,7 +2003,6 @@ async function loadDebutData() {
         console.log('activeDebut:', activeDebut ? activeDebut.event_name : null);
         console.log('upcomingDebut:', upcomingDebut ? upcomingDebut.event_name : null);
         
-        // Show appropriate banner
         if (activeTab === 'current' && activeDebut) {
             displayDebutBanner(activeDebut, false, closestActiveDate);
             banner.style.display = 'block';
@@ -2037,6 +2016,57 @@ async function loadDebutData() {
     } catch (e) {
         console.error('Error loading debut data:', e);
     }
+}
+
+function displayDebutBanner(debut, isDayBefore, startDateUtc) {
+    var banner = document.getElementById('debutBanner');
+    var eventNameElem = document.getElementById('debutEventName');
+    var countdownElem = document.getElementById('debutCountdown');
+    var viewEventBtn = document.getElementById('debutViewEventBtn');
+    
+    if (!banner) return;
+    
+    eventNameElem.textContent = debut.event_name;
+    viewEventBtn.onclick = function() { findAndOpenLeekDuckEvent(debut.event_name); };
+    currentDebutData = debut;
+    
+    if (isDayBefore) {
+        countdownElem.textContent = '⏰ Starting local soon!';
+        countdownElem.style.color = '#FFA500';
+        banner.style.display = 'block';
+        return;
+    }
+    
+    // Get current UTC time
+    var nowUtc = new Date();
+    
+    var millisLeft = startDateUtc - nowUtc;
+    var totalHoursLeft = Math.floor(millisLeft / (1000 * 60 * 60));
+    var daysLeft = Math.floor(totalHoursLeft / 24);
+    var hoursLeft = totalHoursLeft % 24;
+    
+    console.log('Countdown Debug (UTC):');
+    console.log('  startDateUtc:', startDateUtc);
+    console.log('  nowUtc:', nowUtc);
+    console.log('  millisLeft:', millisLeft);
+    console.log('  totalHoursLeft:', totalHoursLeft);
+    console.log('  daysLeft:', daysLeft);
+    console.log('  hoursLeft:', hoursLeft);
+    
+    if (daysLeft >= 1) {
+        countdownElem.textContent = '⏰ Starts in ' + daysLeft + (daysLeft === 1 ? ' day' : ' days') + ' ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours');
+    } else if (totalHoursLeft > 0) {
+        countdownElem.textContent = '⏰ Starts in ' + totalHoursLeft + (totalHoursLeft === 1 ? ' hour' : ' hours');
+    } else {
+        var minutesLeft = Math.floor(millisLeft / (1000 * 60));
+        if (minutesLeft > 0) {
+            countdownElem.textContent = '⏰ Starts in ' + minutesLeft + (minutesLeft === 1 ? ' minute' : ' minutes');
+        } else {
+            countdownElem.textContent = '⏰ Starts in less than a minute';
+        }
+    }
+    
+    banner.style.display = 'block';
 }
 
 function displayDebutBanner(debut, isDayBefore, startDate) {
