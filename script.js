@@ -1915,80 +1915,87 @@ async function loadDebutData() {
         const data = await response.json();
         var debuts = data.debuts || [];
         
-        // Use NZ time with actual time (not just date)
-        var nzTimeStr = new Date().toLocaleString('en-US', { timeZone: 'Pacific/Auckland' });
-        var nowNz = new Date(nzTimeStr);
-        
-        console.log('Current NZ time:', nowNz);
+        // Get current NZ time
+        var nowNz = new Date().toLocaleString('en-US', { timeZone: 'Pacific/Auckland' });
+        var currentDate = new Date(nowNz);
+        console.log('Current NZ time:', currentDate);
         
         var upcomingDebut = null;
         var activeDebut = null;
         var closestUpcomingDate = null;
         var closestActiveDate = null;
         
+        var monthMap = { 
+            'January': 0, 'February': 1, 'March': 2, 'April': 3, 
+            'May': 4, 'June': 5, 'July': 6, 'August': 7, 
+            'September': 8, 'October': 9, 'November': 10, 'December': 11 
+        };
+        
         for (var i = 0; i < debuts.length; i++) {
             var debut = debuts[i];
+            var eventDateStr = debut.event_date;
             
-            // Parse end date first to get the correct year
-            var endMatch = debut.event_date.match(/-\s*(\w+)\s+(\d+)(?:st|nd|rd|th)?\s+(\d{4})/);
-            var eventYear = new Date().getFullYear();
+            // Parse end date to get the year
+            var endMatch = eventDateStr.match(/-\s*(\w+)\s+(\d+)(?:st|nd|rd|th)?\s+(\d{4})/);
+            var eventYear = currentDate.getFullYear();
             if (endMatch) {
                 eventYear = parseInt(endMatch[3]);
             }
             
-            // Parse start date using the year from end date
-            var startMatch = debut.event_date.match(/(\w+)\s+(\d+)(?:st|nd|rd|th)?/);
-            if (startMatch) {
-                var month = startMatch[1];
-                var day = parseInt(startMatch[2]);
-                var monthMap = { January: 0, February: 1, March: 2, April: 3, May: 4, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 };
-                
-                // Event starts at 10:00 AM local time
-                var startDateTime = new Date(eventYear, monthMap[month], day, 10, 0, 0);
-                
-                // Parse end date
-                var endDateTime = null;
-                if (endMatch) {
-                    var endMonth = endMatch[1];
-                    var endDay = parseInt(endMatch[2]);
-                    var endYear = parseInt(endMatch[3]);
-                    // Event ends at 8:00 PM local time
-                    endDateTime = new Date(endYear, monthMap[endMonth], endDay, 20, 0, 0);
+            // Parse start date: e.g., "April 28th"
+            var startMatch = eventDateStr.match(/^(\w+)\s+(\d+)(?:st|nd|rd|th)?/);
+            if (!startMatch) continue;
+            
+            var startMonth = startMatch[1];
+            var startDay = parseInt(startMatch[2]);
+            
+            // Create start date in NZ timezone - events start at 10:00 AM NZ time
+            var startDateStr = `${eventYear}-${(monthMap[startMonth] + 1).toString().padStart(2, '0')}-${startDay.toString().padStart(2, '0')}T10:00:00`;
+            var startDateTime = new Date(startDateStr + '+13:00'); // UTC+13 for NZDT (summer) or +12 for NZST
+            
+            // Parse end date if available
+            var endDateTime = null;
+            if (endMatch) {
+                var endMonth = endMatch[1];
+                var endDay = parseInt(endMatch[2]);
+                var endYear = parseInt(endMatch[3]);
+                var endDateStr = `${endYear}-${(monthMap[endMonth] + 1).toString().padStart(2, '0')}-${endDay.toString().padStart(2, '0')}T20:00:00`;
+                endDateTime = new Date(endDateStr + '+13:00');
+            }
+            
+            console.log('Event:', debut.event_name);
+            console.log('  event_date:', eventDateStr);
+            console.log('  startDateTime:', startDateTime);
+            console.log('  endDateTime:', endDateTime);
+            console.log('  currentDate:', currentDate);
+            
+            // Check if event is currently active (started AND not ended)
+            var isActive = startDateTime <= currentDate && (!endDateTime || endDateTime >= currentDate);
+            
+            if (isActive) {
+                console.log('  -> Categorized as ACTIVE');
+                if (!activeDebut || startDateTime > closestActiveDate) {
+                    activeDebut = debut;
+                    closestActiveDate = startDateTime;
                 }
-                
-                console.log('Event:', debut.event_name);
-                console.log('  startDateTime:', startDateTime);
-                console.log('  endDateTime:', endDateTime);
-                
-                // Check if event is currently active (started AND not ended yet) - for Current tab
-                if (startDateTime <= nowNz && (!endDateTime || endDateTime >= nowNz)) {
-                    console.log('  -> Categorized as ACTIVE');
-                    // Find the ACTIVE event with the EARLIEST start date (recently started)
-                    if (!activeDebut || startDateTime > closestActiveDate) {
-                        activeDebut = debut;
-                        closestActiveDate = startDateTime;
+            }
+            // Check if event is upcoming (starts in the future)
+            else if (startDateTime > currentDate) {
+                console.log('  -> Categorized as UPCOMING');
+                var daysUntil = (startDateTime - currentDate) / (1000 * 60 * 60 * 24);
+                if (daysUntil <= 60) {
+                    if (!upcomingDebut || startDateTime < closestUpcomingDate) {
+                        upcomingDebut = debut;
+                        closestUpcomingDate = startDateTime;
                     }
                 }
-                // Check if event is upcoming (starts in the future) - for Upcoming tab
-                else if (startDateTime > nowNz) {
-                    console.log('  -> Categorized as UPCOMING');
-                    var daysUntil = (startDateTime - nowNz) / (1000 * 60 * 60 * 24);
-                    // Show all upcoming events within 60 days
-                    if (daysUntil <= 60) {
-                        // Find the UPCOMING event with the EARLIEST start date (soonest)
-                        if (!upcomingDebut || startDateTime < closestUpcomingDate) {
-                            upcomingDebut = debut;
-                            closestUpcomingDate = startDateTime;
-                        }
-                    }
-                } else {
-                    console.log('  -> Categorized as PAST/ENDED');
-                }
+            } else {
+                console.log('  -> Categorized as PAST/ENDED');
             }
         }
         
         // Determine which tab is active
-        var activeTab = 'upcoming'; // default
+        var activeTab = 'upcoming';
         if (window.location.pathname.includes('current.html')) {
             activeTab = 'current';
         } else if (window.location.pathname.includes('upcoming.html')) {
@@ -2043,19 +2050,19 @@ function displayDebutBanner(debut, isDayBefore, startDate) {
         return;
     }
     
-    // Calculate time until event starts
+    // Get current NZ time (no manual offset)
     var now = new Date();
-    // Apply offset (6 hours added)
-    now.setHours(now.getHours() + 6);
+    var nzTimeStr = now.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' });
+    var nowNz = new Date(nzTimeStr);
     
-    var millisLeft = startDate - now;
+    var millisLeft = startDate - nowNz;
     var totalHoursLeft = Math.floor(millisLeft / (1000 * 60 * 60));
     var daysLeft = Math.floor(totalHoursLeft / 24);
     var hoursLeft = totalHoursLeft % 24;
     var minutesLeft = Math.floor((millisLeft % (1000 * 60 * 60)) / (1000 * 60));
     
     console.log('Countdown - startDate:', startDate);
-    console.log('Countdown - now (with offset):', now);
+    console.log('Countdown - now (NZ):', nowNz);
     console.log('Countdown - millisLeft:', millisLeft);
     console.log('Countdown - daysLeft:', daysLeft, 'hoursLeft:', hoursLeft);
     
