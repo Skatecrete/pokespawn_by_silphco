@@ -1690,15 +1690,31 @@ function showGalleryView() {
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>📸 All Infographics</h2>
+                    <button class="modal-close" onclick="closeGalleryModal()" style="position:absolute; right:16px; top:12px; background:none; border:none; color:#FF9800; font-size:24px; cursor:pointer;">✕</button>
                 </div>
                 <div id="galleryGrid" class="gallery-grid"></div>
                 <div class="modal-footer">
-                    <button class="back-btn" onclick="closeGalleryModal()">BACK</button>
+                    <button class="confirm-btn" onclick="closeGalleryModal()" style="background:#FF9800;">BACK TO APP</button>
                 </div>
             </div>
         `;
         document.body.appendChild(modal);
     }
+    
+    var grid = document.getElementById('galleryGrid');
+    var html = '';
+    for (var i = 0; i < allInfographicsList.length; i++) {
+        var item = allInfographicsList[i];
+        html += `
+            <div class="gallery-item" onclick="openImageViewer(${i})">
+                <img src="${item.url}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%237627C5\'/%3E%3Ctext x=\'50\' y=\'55\' text-anchor=\'middle\' fill=\'white\' font-size=\'14\'%3E📸%3C/text%3E%3C/svg%3E'">
+            </div>
+        `;
+    }
+    grid.innerHTML = html;
+    
+    modal.style.display = 'flex';
+}
     
     var grid = document.getElementById('galleryGrid');
     var html = '';
@@ -1734,18 +1750,16 @@ function openImageViewer(index) {
         modal.innerHTML = `
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 id="viewerTitle">Infographic</h2>
+                    <h2 id="viewerTitle">📸 Infographic</h2>
+                    <button class="modal-close" onclick="closeViewerModal()" style="position:absolute; right:16px; top:12px; background:none; border:none; color:#FF9800; font-size:24px; cursor:pointer;">✕</button>
                 </div>
                 <div class="viewer-container">
                     <img id="viewerImage" class="viewer-image" src="" alt="Infographic">
                 </div>
                 <div class="viewer-nav">
-                    <button id="viewerPrevBtn" class="viewer-nav-btn" onclick="navigateViewer(-1)">◀</button>
+                    <button id="viewerPrevBtn" class="viewer-nav-btn" onclick="navigateViewer(-1)">◀ PREV</button>
                     <span id="viewerCounter" class="viewer-counter">1 / 1</span>
-                    <button id="viewerNextBtn" class="viewer-nav-btn" onclick="navigateViewer(1)">▶</button>
-                </div>
-                <div class="modal-footer">
-                    <button class="confirm-btn" onclick="closeViewerModal()">CLOSE</button>
+                    <button id="viewerNextBtn" class="viewer-nav-btn" onclick="navigateViewer(1)">NEXT ▶</button>
                 </div>
             </div>
         `;
