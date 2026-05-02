@@ -1915,10 +1915,11 @@ async function loadDebutData() {
         const data = await response.json();
         var debuts = data.debuts || [];
         
-        // Get current NZ time
-        var nowNz = new Date().toLocaleString('en-US', { timeZone: 'Pacific/Auckland' });
-        var currentDate = new Date(nowNz);
-        console.log('Current NZ time:', currentDate);
+        // Get current NZ date and time - use this for all comparisons
+        var currentDate = new Date();
+        var currentDateNz = new Date(currentDate.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }));
+        
+        console.log('Current NZ time:', currentDateNz);
         
         var upcomingDebut = null;
         var activeDebut = null;
@@ -1937,7 +1938,7 @@ async function loadDebutData() {
             
             // Parse end date to get the year
             var endMatch = eventDateStr.match(/-\s*(\w+)\s+(\d+)(?:st|nd|rd|th)?\s+(\d{4})/);
-            var eventYear = currentDate.getFullYear();
+            var eventYear = currentDateNz.getFullYear();
             if (endMatch) {
                 eventYear = parseInt(endMatch[3]);
             }
@@ -1949,44 +1950,52 @@ async function loadDebutData() {
             var startMonth = startMatch[1];
             var startDay = parseInt(startMatch[2]);
             
-            // Create start date in NZ timezone - events start at 10:00 AM NZ time
-            var startDateStr = `${eventYear}-${(monthMap[startMonth] + 1).toString().padStart(2, '0')}-${startDay.toString().padStart(2, '0')}T10:00:00`;
-            var startDateTime = new Date(startDateStr + '+13:00'); // UTC+13 for NZDT (summer) or +12 for NZST
+            // Create start date in NZ timezone by building a string and parsing with NZ locale
+            var startMonthNum = monthMap[startMonth] + 1;
+            var startDateString = `${eventYear}-${startMonthNum.toString().padStart(2, '0')}-${startDay.toString().padStart(2, '0')} 10:00:00`;
+            
+            // Parse the date string in NZ timezone
+            var startDateTime = new Date(startDateString + ' GMT+1300');  // Use a generic offset that will be interpreted correctly
+            
+            // More reliable: Create date parts and let the browser handle it with the correct offset
+            // by using the toLocaleString method
+            var startDateTimeFormatted = new Date(eventYear, monthMap[startMonth], startDay, 10, 0, 0);
+            // Convert to NZ timezone string then back to Date for accurate comparison
+            var startDateTimeNz = new Date(startDateTimeFormatted.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }));
             
             // Parse end date if available
-            var endDateTime = null;
+            var endDateTimeNz = null;
             if (endMatch) {
                 var endMonth = endMatch[1];
                 var endDay = parseInt(endMatch[2]);
                 var endYear = parseInt(endMatch[3]);
-                var endDateStr = `${endYear}-${(monthMap[endMonth] + 1).toString().padStart(2, '0')}-${endDay.toString().padStart(2, '0')}T20:00:00`;
-                endDateTime = new Date(endDateStr + '+13:00');
+                var endDateTimeFormatted = new Date(endYear, monthMap[endMonth], endDay, 20, 0, 0);
+                endDateTimeNz = new Date(endDateTimeFormatted.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }));
             }
             
             console.log('Event:', debut.event_name);
-            console.log('  event_date:', eventDateStr);
-            console.log('  startDateTime:', startDateTime);
-            console.log('  endDateTime:', endDateTime);
-            console.log('  currentDate:', currentDate);
+            console.log('  startDateTimeNz:', startDateTimeNz);
+            console.log('  endDateTimeNz:', endDateTimeNz);
+            console.log('  currentDateNz:', currentDateNz);
             
-            // Check if event is currently active (started AND not ended)
-            var isActive = startDateTime <= currentDate && (!endDateTime || endDateTime >= currentDate);
+            // Check if event is currently active
+            var isActive = startDateTimeNz <= currentDateNz && (!endDateTimeNz || endDateTimeNz >= currentDateNz);
             
             if (isActive) {
                 console.log('  -> Categorized as ACTIVE');
-                if (!activeDebut || startDateTime > closestActiveDate) {
+                if (!activeDebut || startDateTimeNz > closestActiveDate) {
                     activeDebut = debut;
-                    closestActiveDate = startDateTime;
+                    closestActiveDate = startDateTimeNz;
                 }
             }
             // Check if event is upcoming (starts in the future)
-            else if (startDateTime > currentDate) {
+            else if (startDateTimeNz > currentDateNz) {
                 console.log('  -> Categorized as UPCOMING');
-                var daysUntil = (startDateTime - currentDate) / (1000 * 60 * 60 * 24);
+                var daysUntil = (startDateTimeNz - currentDateNz) / (1000 * 60 * 60 * 24);
                 if (daysUntil <= 60) {
-                    if (!upcomingDebut || startDateTime < closestUpcomingDate) {
+                    if (!upcomingDebut || startDateTimeNz < closestUpcomingDate) {
                         upcomingDebut = debut;
-                        closestUpcomingDate = startDateTime;
+                        closestUpcomingDate = startDateTimeNz;
                     }
                 }
             } else {
@@ -2050,21 +2059,26 @@ function displayDebutBanner(debut, isDayBefore, startDate) {
         return;
     }
     
-    // Get current NZ time (no manual offset)
-    var now = new Date();
-    var nzTimeStr = now.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' });
-    var nowNz = new Date(nzTimeStr);
+    // Get current NZ time - same method as in loadDebutData for consistency
+    var currentDate = new Date();
+    var currentDateNz = new Date(currentDate.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }));
     
-    var millisLeft = startDate - nowNz;
+    // startDate should already be in NZ timezone from loadDebutData
+    var startDateNz = startDate;
+    
+    var millisLeft = startDateNz - currentDateNz;
     var totalHoursLeft = Math.floor(millisLeft / (1000 * 60 * 60));
     var daysLeft = Math.floor(totalHoursLeft / 24);
     var hoursLeft = totalHoursLeft % 24;
     var minutesLeft = Math.floor((millisLeft % (1000 * 60 * 60)) / (1000 * 60));
     
-    console.log('Countdown - startDate:', startDate);
-    console.log('Countdown - now (NZ):', nowNz);
-    console.log('Countdown - millisLeft:', millisLeft);
-    console.log('Countdown - daysLeft:', daysLeft, 'hoursLeft:', hoursLeft);
+    console.log('Countdown Debug:');
+    console.log('  startDateNz:', startDateNz);
+    console.log('  currentDateNz:', currentDateNz);
+    console.log('  millisLeft:', millisLeft);
+    console.log('  hoursLeft:', totalHoursLeft);
+    console.log('  daysLeft:', daysLeft);
+    console.log('  hoursLeftRemainder:', hoursLeft);
     
     if (daysLeft >= 1) {
         countdownElem.textContent = '⏰ Starts in ' + daysLeft + (daysLeft === 1 ? ' day' : ' days') + ' ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours');
