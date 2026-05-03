@@ -1910,7 +1910,7 @@ async function loadDebutData() {
         const data = await response.json();
         var debuts = data.debuts || [];
         
-        // Get current UTC time (no timezone conversion)
+        // Get current UTC time
         var nowUtc = new Date();
         console.log('Current UTC time:', nowUtc);
         
@@ -1943,9 +1943,7 @@ async function loadDebutData() {
             var startMonth = startMatch[1];
             var startDay = parseInt(startMatch[2]);
             
-            // Create UTC date for start of event (10:00 AM NZT = 22:00 UTC previous day? Let's calculate correctly)
-            // NZ time is UTC+12 or UTC+13. For May, likely UTC+12 (NZST)
-            // 10:00 AM NZT = 22:00 UTC previous day (since NZ is ahead)
+            // Create UTC date for start of event (10:00 AM NZT = 22:00 UTC previous day)
             var startDateUtc = new Date(Date.UTC(eventYear, monthMap[startMonth], startDay - 1, 22, 0, 0));
             
             // Parse end date
@@ -1954,7 +1952,7 @@ async function loadDebutData() {
                 var endMonth = endMatch[1];
                 var endDay = parseInt(endMatch[2]);
                 var endYear = parseInt(endMatch[3]);
-                // Event ends at 8:00 PM NZT = 08:00 UTC (same day)
+                // Event ends at 8:00 PM NZT = 08:00 UTC same day
                 endDateUtc = new Date(Date.UTC(endYear, monthMap[endMonth], endDay, 8, 0, 0));
             }
             
@@ -2020,7 +2018,7 @@ async function loadDebutData() {
     }
 }
 
-function displayDebutBanner(debut, isDayBefore, startDate) {
+function displayDebutBanner(debut, isDayBefore, startDateUtc) {
     var banner = document.getElementById('debutBanner');
     var eventNameElem = document.getElementById('debutEventName');
     var countdownElem = document.getElementById('debutCountdown');
@@ -2032,7 +2030,6 @@ function displayDebutBanner(debut, isDayBefore, startDate) {
     viewEventBtn.onclick = function() { findAndOpenLeekDuckEvent(debut.event_name); };
     currentDebutData = debut;
     
-    // Show "Starting local soon" message for day-before events
     if (isDayBefore) {
         countdownElem.textContent = '⏰ Starting local soon!';
         countdownElem.style.color = '#FFA500';
@@ -2040,35 +2037,36 @@ function displayDebutBanner(debut, isDayBefore, startDate) {
         return;
     }
     
-    // Get current NZ time - same method as in loadDebutData for consistency
-    var currentDate = new Date();
-    var currentDateNz = new Date(currentDate.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }));
+    // Get current UTC time
+    var nowUtc = new Date();
     
-    // startDate should already be in NZ timezone from loadDebutData
-    var startDateNz = startDate;
+    // Apply offset (in milliseconds)
+    var offsetMs = DEBUT_COUNTDOWN_OFFSET_HOURS * 60 * 60 * 1000;
+    var adjustedNow = new Date(nowUtc.getTime() + offsetMs);
     
-    var millisLeft = startDateNz - currentDateNz;
+    var millisLeft = startDateUtc - adjustedNow;
     var totalHoursLeft = Math.floor(millisLeft / (1000 * 60 * 60));
     var daysLeft = Math.floor(totalHoursLeft / 24);
     var hoursLeft = totalHoursLeft % 24;
-    var minutesLeft = Math.floor((millisLeft % (1000 * 60 * 60)) / (1000 * 60));
     
-    console.log('Countdown Debug:');
-    console.log('  startDateNz:', startDateNz);
-    console.log('  currentDateNz:', currentDateNz);
+    console.log('Countdown Debug (with offset):');
+    console.log('  startDateUtc:', startDateUtc);
+    console.log('  adjustedNow (offset ' + DEBUT_COUNTDOWN_OFFSET_HOURS + 'h):', adjustedNow);
     console.log('  millisLeft:', millisLeft);
-    console.log('  hoursLeft:', totalHoursLeft);
     console.log('  daysLeft:', daysLeft);
-    console.log('  hoursLeftRemainder:', hoursLeft);
+    console.log('  hoursLeft:', hoursLeft);
     
     if (daysLeft >= 1) {
         countdownElem.textContent = '⏰ Starts in ' + daysLeft + (daysLeft === 1 ? ' day' : ' days') + ' ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours');
-    } else if (hoursLeft > 0) {
-        countdownElem.textContent = '⏰ Starts in ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours') + ' ' + minutesLeft + (minutesLeft === 1 ? ' minute' : ' minutes');
-    } else if (minutesLeft > 0) {
-        countdownElem.textContent = '⏰ Starts in ' + minutesLeft + (minutesLeft === 1 ? ' minute' : ' minutes');
+    } else if (totalHoursLeft > 0) {
+        countdownElem.textContent = '⏰ Starts in ' + totalHoursLeft + (totalHoursLeft === 1 ? ' hour' : ' hours');
     } else {
-        countdownElem.textContent = '⏰ Starts in less than a minute';
+        var minutesLeft = Math.floor(millisLeft / (1000 * 60));
+        if (minutesLeft > 0) {
+            countdownElem.textContent = '⏰ Starts in ' + minutesLeft + (minutesLeft === 1 ? ' minute' : ' minutes');
+        } else {
+            countdownElem.textContent = '⏰ Starts in less than a minute';
+        }
     }
     
     banner.style.display = 'block';
