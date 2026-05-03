@@ -8,7 +8,7 @@ let filters = { shundo: false, shiny164: false, regional: false, greatLeague: fa
 let currentSearch = '';
 let currentDebutData = null;
 
-let DEBUT_COUNTDOWN_OFFSET_HOURS = -16;
+let DEBUT_COUNTDOWN_OFFSET_HOURS = 0;
 
 // ========== PRICING CACHE (Default values, updated by loadPricing) ==========
 let pricingCache = {
