@@ -8,6 +8,8 @@ let filters = { shundo: false, shiny164: false, regional: false, greatLeague: fa
 let currentSearch = '';
 let currentDebutData = null;
 
+let DEBUT_COUNTDOWN_OFFSET_HOURS = -16;
+
 // ========== PRICING CACHE (Default values, updated by loadPricing) ==========
 let pricingCache = {
     'Spawn_Shundo': 5,
@@ -2040,16 +2042,19 @@ function displayDebutBanner(debut, isDayBefore, startDateUtc) {
     // Get current UTC time
     var nowUtc = new Date();
     
-    var millisLeft = startDateUtc - nowUtc;
+    // Apply offset (in milliseconds)
+    var offsetMs = DEBUT_COUNTDOWN_OFFSET_HOURS * 60 * 60 * 1000;
+    var adjustedNow = new Date(nowUtc.getTime() + offsetMs);
+    
+    var millisLeft = startDateUtc - adjustedNow;
     var totalHoursLeft = Math.floor(millisLeft / (1000 * 60 * 60));
     var daysLeft = Math.floor(totalHoursLeft / 24);
     var hoursLeft = totalHoursLeft % 24;
     
-    console.log('Countdown Debug (UTC):');
+    console.log('Countdown Debug (with offset):');
     console.log('  startDateUtc:', startDateUtc);
-    console.log('  nowUtc:', nowUtc);
+    console.log('  adjustedNow (offset ' + DEBUT_COUNTDOWN_OFFSET_HOURS + 'h):', adjustedNow);
     console.log('  millisLeft:', millisLeft);
-    console.log('  totalHoursLeft:', totalHoursLeft);
     console.log('  daysLeft:', daysLeft);
     console.log('  hoursLeft:', hoursLeft);
     
