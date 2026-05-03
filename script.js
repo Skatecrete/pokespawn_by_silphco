@@ -2020,60 +2020,6 @@ async function loadDebutData() {
     }
 }
 
-function displayDebutBanner(debut, isDayBefore, startDateUtc) {
-    var banner = document.getElementById('debutBanner');
-    var eventNameElem = document.getElementById('debutEventName');
-    var countdownElem = document.getElementById('debutCountdown');
-    var viewEventBtn = document.getElementById('debutViewEventBtn');
-    
-    if (!banner) return;
-    
-    eventNameElem.textContent = debut.event_name;
-    viewEventBtn.onclick = function() { findAndOpenLeekDuckEvent(debut.event_name); };
-    currentDebutData = debut;
-    
-    if (isDayBefore) {
-        countdownElem.textContent = '⏰ Starting local soon!';
-        countdownElem.style.color = '#FFA500';
-        banner.style.display = 'block';
-        return;
-    }
-    
-    // Get current UTC time
-    var nowUtc = new Date();
-    
-    // Apply offset (in milliseconds)
-    var offsetMs = DEBUT_COUNTDOWN_OFFSET_HOURS * 60 * 60 * 1000;
-    var adjustedNow = new Date(nowUtc.getTime() + offsetMs);
-    
-    var millisLeft = startDateUtc - adjustedNow;
-    var totalHoursLeft = Math.floor(millisLeft / (1000 * 60 * 60));
-    var daysLeft = Math.floor(totalHoursLeft / 24);
-    var hoursLeft = totalHoursLeft % 24;
-    
-    console.log('Countdown Debug (with offset):');
-    console.log('  startDateUtc:', startDateUtc);
-    console.log('  adjustedNow (offset ' + DEBUT_COUNTDOWN_OFFSET_HOURS + 'h):', adjustedNow);
-    console.log('  millisLeft:', millisLeft);
-    console.log('  daysLeft:', daysLeft);
-    console.log('  hoursLeft:', hoursLeft);
-    
-    if (daysLeft >= 1) {
-        countdownElem.textContent = '⏰ Starts in ' + daysLeft + (daysLeft === 1 ? ' day' : ' days') + ' ' + hoursLeft + (hoursLeft === 1 ? ' hour' : ' hours');
-    } else if (totalHoursLeft > 0) {
-        countdownElem.textContent = '⏰ Starts in ' + totalHoursLeft + (totalHoursLeft === 1 ? ' hour' : ' hours');
-    } else {
-        var minutesLeft = Math.floor(millisLeft / (1000 * 60));
-        if (minutesLeft > 0) {
-            countdownElem.textContent = '⏰ Starts in ' + minutesLeft + (minutesLeft === 1 ? ' minute' : ' minutes');
-        } else {
-            countdownElem.textContent = '⏰ Starts in less than a minute';
-        }
-    }
-    
-    banner.style.display = 'block';
-}
-
 function displayDebutBanner(debut, isDayBefore, startDate) {
     var banner = document.getElementById('debutBanner');
     var eventNameElem = document.getElementById('debutEventName');
