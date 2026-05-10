@@ -2393,21 +2393,27 @@ document.addEventListener('DOMContentLoaded', function() {
     if (weeklyBtn) weeklyBtn.onclick = loadWeeklyView;
     if (monthlyBtn) monthlyBtn.onclick = loadMonthlyView;
     
-    // DO NOT load debut data here - it will be loaded by tab switching
-    // Instead, detect which tab is active and load accordingly
     var currentContent = document.getElementById('current');
     var upcomingContent = document.getElementById('upcoming');
+    var ordersContent = document.getElementById('orders');
+    var servicesGrid = document.getElementById('servicesGrid');
     
     if (currentContent && currentContent.classList.contains('active')) {
         // Current tab is active
         loadEvents();
-        loadDebutData();  // This will load for current tab
+        loadDebutData();
     } else if (upcomingContent && upcomingContent.classList.contains('active')) {
         // Upcoming tab is active
         loadEvents();
-        loadDebutData();  // This will load for upcoming tab
+        loadDebutData();
+    } else if (servicesGrid) {
+        // Orders page (has services grid)
+        loadSpawns();
+        loadRaids();
+        loadPricing();
+        loadAdditionalServices();  // Load additional services for orders page
     } else {
-        // Neither active (spawns/raids/orders)
+        // Spawns/Raids pages
         loadSpawns();
         loadRaids();
         loadPricing();
