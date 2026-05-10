@@ -1175,6 +1175,7 @@ body {
 .service-detail-description {
     font-size: 14px;
     color: #FFA500;
+    font-weight: bold;
     line-height: 1.5;
     margin-bottom: 20px;
     text-align: center;
