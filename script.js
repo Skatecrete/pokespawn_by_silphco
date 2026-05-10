@@ -1177,14 +1177,16 @@ function displayRaids(regularRaids, dynamaxRaids) {
                 html += '<div class="raid-card" onclick=\'showRaidOrderDialog(' + JSON.stringify(raid).replace(/'/g, "&#39;") + ')\'>';
                 html += '<div class="raid-image-container">';
                 
+                // Underlays (behind image)
                 if (isShadow) html += '<div class="shadow-underlay"></div>';
+                if (!isGigantamax && isDynamax) html += '<div class="dynamax-underlay"></div>';
                 
-                if (!isGigantamax && isDynamax) {
-                    html += '<div class="dynamax-underlay"></div>';
-                    html += '<div class="dynamax-red-tint"></div>';
-                }
-                
+                // Pokémon image
                 html += '<img src="' + raid.image + '" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png\'">';
+                
+                // Red tint overlay (on top of image, Dynamax only)
+                if (!isGigantamax && isDynamax) html += '<div class="dynamax-red-tint"></div>';
+                
                 html += '</div>';
                 html += '<span>' + raid.name + (raid.isShiny ? ' ✨' : '') + '</span>';
                 html += '</div>';
@@ -1212,12 +1214,19 @@ function displayRaids(regularRaids, dynamaxRaids) {
                 html += '<div class="raid-card" onclick=\'showDynamaxOrderDialog(' + JSON.stringify(raid).replace(/'/g, "&#39;") + ')\'>';
                 html += '<div class="raid-image-container">';
                 
+                // Underlays (behind image) - Gigantamax gets nothing
                 if (!isGigantamax && isDynamax) {
                     html += '<div class="dynamax-underlay"></div>';
+                }
+                
+                // Pokémon image
+                html += '<img src="' + raid.image + '" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png\'">';
+                
+                // Red tint overlay (on top of image, Dynamax only, NOT Gigantamax)
+                if (!isGigantamax && isDynamax) {
                     html += '<div class="dynamax-red-tint"></div>';
                 }
                 
-                html += '<img src="' + raid.image + '" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png\'">';
                 html += '</div>';
                 html += '<span>' + raid.name + '</span>';
                 html += '</div>';
