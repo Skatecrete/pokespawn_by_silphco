@@ -785,8 +785,15 @@ function displaySpawns() {
             html += '<div class="pokemon-card" onclick=\'showSpawnOrderDialog(' + JSON.stringify(p).replace(/'/g, "&#39;") + ')\'>';
         }
         
+        // Build image URLs with ultimategallery priority
+        var ultimateUrl = getUltimateGalleryUrl(p.name, false, false, false);
         var customImageUrl = 'https://raw.githubusercontent.com/Skatecrete/pogo-raid-data/main/images/' + p.id + '_' + getFormSlug(p.name) + '.webp';
-        html += '<img src="' + customImageUrl + '" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + p.id + '.png\'">';
+        var pokeApiFallback = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + p.id + '.png';
+        
+        // Start with ultimategallery, fallback to custom images, then PokeAPI
+        var imageSrc = ultimateUrl || customImageUrl;
+        
+        html += '<img src="' + imageSrc + '" onerror="this.src=\'' + pokeApiFallback + '\'">';
         html += '<div class="pokemon-info">';
         
         // Pokemon name with NOPE badge or spawn badge
@@ -992,12 +999,26 @@ async function loadRaids() {
             var tier = raid.tier;
             var name = raid.name;
             var id = await getPokemonIdFromName(name);
+            
+            // Build image URL with ultimategallery first
+            var isShadow = name.toLowerCase().includes('shadow') || tier.toLowerCase().includes('shadow');
+            var isMega = tier.toLowerCase().includes('mega') || name.toLowerCase().includes('mega');
+            
+            var imageUrl;
+            if (isMega) {
+                var ultimateUrl = getUltimateGalleryUrl(name, raid.canBeShiny, true, false);
+                imageUrl = ultimateUrl || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + id + '.png';
+            } else {
+                var ultimateUrl = getUltimateGalleryUrl(name, raid.canBeShiny, false, false);
+                imageUrl = ultimateUrl || (raid.image || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + id + '.png');
+            }
+            
             var raidObj = { 
                 name: name, 
                 tier: tier, 
                 id: id, 
                 isShiny: raid.canBeShiny, 
-                image: raid.image || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + id + '.png' 
+                image: imageUrl
             };
             
             var tierLower = tier.toLowerCase();
@@ -1026,13 +1047,15 @@ async function loadRaids() {
                 var raidName = dynaRaids['tier1'][j];
                 if (raidName && raidName.length > 2 && !invalidNames.includes(raidName)) {
                     var raidId = await getPokemonIdFromName(raidName);
+                    var ultimateUrl = getUltimateGalleryUrl(raidName, true, false, false);
+                    var imageUrl = ultimateUrl || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png';
                     if (!regularRaids.tier1) regularRaids.tier1 = [];
                     regularRaids.tier1.push({ 
                         name: raidName, 
                         tier: '1-Star', 
                         id: raidId, 
                         isShiny: true, 
-                        image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png' 
+                        image: imageUrl
                     });
                 }
             }
@@ -1044,13 +1067,15 @@ async function loadRaids() {
                 var raidName = dynaRaids['tier3'][j];
                 if (raidName && raidName.length > 2 && !invalidNames.includes(raidName)) {
                     var raidId = await getPokemonIdFromName(raidName);
+                    var ultimateUrl = getUltimateGalleryUrl(raidName, true, false, false);
+                    var imageUrl = ultimateUrl || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png';
                     if (!regularRaids.tier3) regularRaids.tier3 = [];
                     regularRaids.tier3.push({ 
                         name: raidName, 
                         tier: '3-Star', 
                         id: raidId, 
                         isShiny: true, 
-                        image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png' 
+                        image: imageUrl
                     });
                 }
             }
@@ -1062,13 +1087,15 @@ async function loadRaids() {
                 var raidName = dynaRaids['mega'][j];
                 if (raidName && raidName.length > 2 && !invalidNames.includes(raidName)) {
                     var raidId = await getPokemonIdFromName(raidName);
+                    var ultimateUrl = getUltimateGalleryUrl(raidName, true, true, false);
+                    var imageUrl = ultimateUrl || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png';
                     if (!regularRaids.mega) regularRaids.mega = [];
                     regularRaids.mega.push({ 
                         name: raidName, 
                         tier: 'Mega', 
                         id: raidId, 
                         isShiny: true, 
-                        image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png' 
+                        image: imageUrl
                     });
                 }
             }
@@ -1076,46 +1103,55 @@ async function loadRaids() {
         
         // Dynamax and Gigantamax
         var dynamaxRaids = [];
-var tierMapping = {
-    'gigantamax': '💥 GIGANTAMAX',
-    'dynamax_tier5': '⚡⚡⚡⚡⚡ DYNAMAX TIER 5',
-    'dynamax_tier4': '⚡⚡⚡⚡ DYNAMAX TIER 4',
-    'dynamax_tier3': '⚡⚡⚡ DYNAMAX TIER 3',
-    'dynamax_tier2': '⚡⚡ DYNAMAX TIER 2',
-    'dynamax_tier1': '⚡ DYNAMAX TIER 1'
-};
-
-var invalidNames = ['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'flying', 'ghost', 'grass', 'ground', 'ice', 'normal', 'poison', 'psychic', 'rock', 'steel', 'water', 'Search...'];
-
-for (var key in tierMapping) {
-    if (dynaRaids[key] && dynaRaids[key].length) {
-        for (var j = 0; j < dynaRaids[key].length; j++) {
-            var raidName = dynaRaids[key][j];
-            if (!raidName || raidName.length < 2 || invalidNames.includes(raidName) || invalidNames.includes(raidName.toLowerCase())) continue;
-            var raidId = await getPokemonIdFromName(raidName);
-            
-            // Build image URL - special handling for Gigantamax
-            var imageUrl;
-            if (key === 'gigantamax') {
-                var slug = raidName.toLowerCase();
-                // Special cases for shared images
-                if (slug === 'toxtricity') slug = 'toxtricity';
-                if (slug === 'flapple' || slug === 'appletun') slug = 'appletun';
-                imageUrl = 'https://raw.githubusercontent.com/Skatecrete/infographics/main/gigantamax/gigantamax_' + slug + '.png';
-            } else {
-                imageUrl = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png';
+        var tierMapping = {
+            'gigantamax': '💥 GIGANTAMAX',
+            'dynamax_tier5': '⚡⚡⚡⚡⚡ DYNAMAX TIER 5',
+            'dynamax_tier4': '⚡⚡⚡⚡ DYNAMAX TIER 4',
+            'dynamax_tier3': '⚡⚡⚡ DYNAMAX TIER 3',
+            'dynamax_tier2': '⚡⚡ DYNAMAX TIER 2',
+            'dynamax_tier1': '⚡ DYNAMAX TIER 1'
+        };
+        
+        for (var key in tierMapping) {
+            if (dynaRaids[key] && dynaRaids[key].length) {
+                for (var j = 0; j < dynaRaids[key].length; j++) {
+                    var raidName = dynaRaids[key][j];
+                    if (!raidName || raidName.length < 2 || invalidNames.includes(raidName) || invalidNames.includes(raidName.toLowerCase())) continue;
+                    var raidId = await getPokemonIdFromName(raidName);
+                    
+                    // Build image URL
+                    var isGigantamax = (key === 'gigantamax');
+                    var isDynamax = !isGigantamax;
+                    
+                    var ultimateUrl;
+                    if (isGigantamax) {
+                        ultimateUrl = getUltimateGalleryUrl(raidName, true, false, true);
+                    } else {
+                        ultimateUrl = getUltimateGalleryUrl(raidName, true, false, false);
+                    }
+                    
+                    var imageUrl;
+                    if (isGigantamax) {
+                        // Fallback for Gigantamax
+                        var slug = raidName.toLowerCase();
+                        if (slug === 'toxtricity') slug = 'toxtricity';
+                        if (slug === 'flapple' || slug === 'appletun') slug = 'appletun';
+                        imageUrl = ultimateUrl || 'https://raw.githubusercontent.com/Skatecrete/infographics/main/gigantamax/gigantamax_' + slug + '.png';
+                    } else {
+                        // Fallback for Dynamax
+                        imageUrl = ultimateUrl || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png';
+                    }
+                    
+                    dynamaxRaids.push({ 
+                        name: raidName, 
+                        tier: tierMapping[key], 
+                        id: raidId, 
+                        isShiny: true, 
+                        image: imageUrl
+                    });
+                }
             }
-            
-            dynamaxRaids.push({ 
-                name: raidName, 
-                tier: tierMapping[key], 
-                id: raidId, 
-                isShiny: true, 
-                image: imageUrl
-            });
         }
-    }
-}
         
         displayRaids(regularRaids, dynamaxRaids);
     } catch (e) {
@@ -2003,47 +2039,55 @@ function getEventImage(eventName) {
     };
 
     var eventLower = eventName.toLowerCase();
-    var matchedId = null;
+    var matchedPokemon = null;
     var matchLength = 0;
 
+    // Find best matching Pokemon name from the event name
     for (var pokemon in pokemonMap) {
         var pokemonLower = pokemon.toLowerCase();
         if (eventLower.includes(pokemonLower)) {
             if (pokemonLower.length > matchLength) {
                 matchLength = pokemonLower.length;
-                matchedId = pokemonMap[pokemon];
+                matchedPokemon = pokemon;
             }
         }
     }
 
     // Partial matches for common event patterns
-    if (!matchedId) {
+    if (!matchedPokemon) {
         var partialMatches = {
-            'nihilego': 793, 'buzzwole': 794, 'pheromosa': 795, 'xurkitree': 796,
-            'celesteela': 797, 'kartana': 798, 'guzzlord': 799, 'poipole': 803,
-            'naganadel': 804, 'stakataka': 805, 'blacephalon': 806, 'lechonk': 915,
-            'oinkologne': 916, 'tinkatink': 957, 'tinkatuff': 958, 'tinkaton': 959,
-            'clodsire': 980, 'farigiraf': 981, 'dudunsparce': 982, 'kingambit': 983,
-            'gimmighoul': 999, 'gholdengo': 1000, 'ogerpon': 1017, 'terapagos': 1024,
-            'pecharunt': 1025, 'walking wake': 1009, 'iron leaves': 1010, 'iron bundle': 991,
-            'iron hands': 992, 'iron jugulis': 993, 'iron moth': 994, 'iron thorns': 995,
-            'iron treads': 990, 'iron valiant': 1006, 'roaring moon': 1005, 'sandy shocks': 989,
-            'slither wing': 988, 'flutter mane': 987, 'brute bonnet': 986, 'scream tail': 985,
-            'great tusk': 984, 'gouging fire': 1020, 'raging bolt': 1021, 'iron boulder': 1022,
-            'iron crown': 1023, 'archaludon': 1018, 'hydrapple': 1019, 'sinistcha': 1013,
-            'poltchageist': 1012, 'dipplin': 1011, 'okidogi': 1014, 'munkidori': 1015,
-            'fezandipiti': 1016, 'basculegion': 902, 'sneasler': 903, 'overqwil': 904,
-            'enamorus': 905, 'ursaluna': 901, 'wyrdeer': 899, 'kleavor': 900
+            'nihilego': 'Nihilego', 'buzzwole': 'Buzzwole', 'pheromosa': 'Pheromosa', 'xurkitree': 'Xurkitree',
+            'celesteela': 'Celesteela', 'kartana': 'Kartana', 'guzzlord': 'Guzzlord', 'poipole': 'Poipole',
+            'naganadel': 'Naganadel', 'stakataka': 'Stakataka', 'blacephalon': 'Blacephalon', 'lechonk': 'Lechonk',
+            'oinkologne': 'Oinkologne', 'tinkatink': 'Tinkatink', 'tinkatuff': 'Tinkatuff', 'tinkaton': 'Tinkaton',
+            'clodsire': 'Clodsire', 'farigiraf': 'Farigiraf', 'dudunsparce': 'Dudunsparce', 'kingambit': 'Kingambit',
+            'gimmighoul': 'Gimmighoul', 'gholdengo': 'Gholdengo', 'ogerpon': 'Ogerpon', 'terapagos': 'Terapagos',
+            'pecharunt': 'Pecharunt', 'walking wake': 'Walking Wake', 'iron leaves': 'Iron Leaves', 'iron bundle': 'Iron Bundle',
+            'iron hands': 'Iron Hands', 'iron jugulis': 'Iron Jugulis', 'iron moth': 'Iron Moth', 'iron thorns': 'Iron Thorns',
+            'iron treads': 'Iron Treads', 'iron valiant': 'Iron Valiant', 'roaring moon': 'Roaring Moon', 'sandy shocks': 'Sandy Shocks',
+            'slither wing': 'Slither Wing', 'flutter mane': 'Flutter Mane', 'brute bonnet': 'Brute Bonnet', 'scream tail': 'Scream Tail',
+            'great tusk': 'Great Tusk', 'gouging fire': 'Gouging Fire', 'raging bolt': 'Raging Bolt', 'iron boulder': 'Iron Boulder',
+            'iron crown': 'Iron Crown', 'archaludon': 'Archaludon', 'hydrapple': 'Hydrapple', 'sinistcha': 'Sinistcha',
+            'poltchageist': 'Poltchageist', 'dipplin': 'Dipplin', 'okidogi': 'Okidogi', 'munkidori': 'Munkidori',
+            'fezandipiti': 'Fezandipiti', 'basculegion': 'Basculegion', 'sneasler': 'Sneasler', 'overqwil': 'Overqwil',
+            'enamorus': 'Enamorus', 'ursaluna': 'Ursaluna', 'wyrdeer': 'Wyrdeer', 'kleavor': 'Kleavor'
         };
         for (var partial in partialMatches) {
             if (eventLower.includes(partial)) {
-                matchedId = partialMatches[partial];
+                matchedPokemon = partialMatches[partial];
                 break;
             }
         }
     }
 
-    if (matchedId) {
+    if (matchedPokemon) {
+        // Try ultimategallery first
+        var ultimateUrl = getUltimateGalleryUrl(matchedPokemon, false, false, false);
+        if (ultimateUrl) {
+            return ultimateUrl;
+        }
+        // Fallback to PokeAPI
+        var matchedId = pokemonMap[matchedPokemon];
         return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + matchedId + '.png';
     }
 
