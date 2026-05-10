@@ -58,6 +58,14 @@
                 </div>
             </div>
 
+            <!-- Additional Services Section -->
+            <div class="additional-services-section">
+                <div class="section-title">🎉 ADDITIONAL SERVICES</div>
+                <div id="servicesGrid" class="services-grid">
+                    <div class="loading-small">Loading services...</div>
+                </div>
+            </div>
+
             <div class="other-requests-section">
                 <div class="section-title">📝 Other Requests (Optional)</div>
                 <textarea id="notesInput" rows="3" placeholder="Any other service ideas or questions please ask here! For example, if you want the 31k Coin order split between 2 accounts or want details on upcoming Go Fests, etc..."></textarea>
@@ -79,9 +87,21 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modalTitle">Order</h2>
+                <button class="modal-close" onclick="closeModal()">✕</button>
             </div>
             <div class="modal-body" id="modalBody"></div>
             <div class="modal-footer" id="modalFooter"></div>
+        </div>
+    </div>
+
+    <div id="serviceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="serviceModalTitle">Service Details</h2>
+                <button class="modal-close" onclick="closeServiceModal()">✕</button>
+            </div>
+            <div class="modal-body" id="serviceModalBody"></div>
+            <div class="modal-footer" id="serviceModalFooter"></div>
         </div>
     </div>
 
@@ -96,6 +116,7 @@
     <script>
         loadCart();
         loadPricing();
+        loadAdditionalServices();
         updateCartDisplay();
     
         window.addCoinToCart = addCoinToCart;
@@ -107,7 +128,9 @@
         window.submitOrder = submitOrder;
         window.copyToClipboard = copyToClipboard;
         window.closeModal = closeModal;
+        window.closeServiceModal = closeServiceModal;
         window.showKingiMessage = showKingiMessage;
+        window.addServiceToCart = addServiceToCart;
     </script>
 </body>
 </html>
