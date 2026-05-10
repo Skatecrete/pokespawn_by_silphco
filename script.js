@@ -1484,7 +1484,16 @@ function addToCart(item) {
     }
     
     if (existingIndex >= 0) {
-        cartItems[existingIndex].quantity += item.quantity;
+        // For services, calculate unit price to maintain correct pricing
+        if (item.type === 'service') {
+            var existingItem = cartItems[existingIndex];
+            var unitPrice = existingItem.price / existingItem.quantity;
+            var newQuantity = existingItem.quantity + item.quantity;
+            cartItems[existingIndex].quantity = newQuantity;
+            cartItems[existingIndex].price = unitPrice * newQuantity;
+        } else {
+            cartItems[existingIndex].quantity += item.quantity;
+        }
     } else {
         cartItems.push(item);
     }
@@ -1500,6 +1509,7 @@ function calculateItemPrice(item) {
     if (item.type === 'hundo') return item.quantity * (pricingCache['Spawn_Hundo'] || 3);
     if (item.type === 'shiny') return item.quantity * (pricingCache['Spawn_Shiny'] || 2);
     if (item.type === 'coins') return item.price;
+    if (item.type === 'service') return item.price;
     if (item.type === 'dynamax') {
         var quantity = item.quantity;
         var dynamaxPricePer4 = pricingCache['Raid_Dynamax_4'] || 10;
@@ -1571,7 +1581,14 @@ function updateCartQuantity(index, newQuantity) {
     if (newQuantity <= 0) {
         cartItems.splice(index, 1);
     } else {
-        cartItems[index].quantity = newQuantity;
+        var item = cartItems[index];
+        if (item.type === 'service') {
+            var unitPrice = item.price / item.quantity;
+            item.quantity = newQuantity;
+            item.price = unitPrice * newQuantity;
+        } else {
+            item.quantity = newQuantity;
+        }
     }
     recalculateAllRaidPrices();
     saveCart();
@@ -2933,6 +2950,8 @@ function showOrderDetail(order) {
 
 // ========== ADDITIONAL SERVICES ==========
 let additionalServices = [];
+let currentServiceIndex = null;
+let currentServiceQuantity = 1;
 
 async function loadAdditionalServices() {
     var container = document.getElementById('servicesGrid');
@@ -3008,38 +3027,65 @@ function showServiceDetails(index) {
     var service = additionalServices[index];
     if (!service) return;
     
+    currentServiceIndex = index;
+    currentServiceQuantity = 1;
+    
     document.getElementById('serviceModalTitle').textContent = service.serviceName;
     document.getElementById('serviceModalBody').innerHTML = `
         <div class="service-detail-name">${service.serviceName}</div>
-        <div class="service-detail-price">$${service.price.toFixed(2)}</div>
+        <div id="serviceDetailPrice" class="service-detail-price">$${service.price.toFixed(2)}</div>
         <div class="service-detail-divider"></div>
         <div class="service-detail-description">${service.details || 'Contact admin for more information about this service.'}</div>
+        <div class="quantity-selector" style="justify-content: center; margin-top: 16px;">
+            <button class="qty-btn" onclick="updateServiceQuantity(-1)">-</button>
+            <span id="serviceQty" class="qty-num" style="min-width: 40px;">1</span>
+            <button class="qty-btn" onclick="updateServiceQuantity(1)">+</button>
+        </div>
     `;
     document.getElementById('serviceModalFooter').innerHTML = `
         <button class="cancel-btn" onclick="closeServiceModal()">Cancel</button>
-        <button class="confirm-btn" onclick="addServiceToCart(${index})">Add to Cart</button>
+        <button class="confirm-btn" onclick="addServiceToCart()">Add to Cart</button>
     `;
     document.getElementById('serviceModal').style.display = 'flex';
 }
 
-function closeServiceModal() {
-    document.getElementById('serviceModal').style.display = 'none';
+function updateServiceQuantity(delta) {
+    var service = additionalServices[currentServiceIndex];
+    if (!service) return;
+    
+    var newQty = currentServiceQuantity + delta;
+    if (newQty < 1) return;
+    
+    currentServiceQuantity = newQty;
+    
+    document.getElementById('serviceQty').textContent = currentServiceQuantity;
+    var totalPrice = service.price * currentServiceQuantity;
+    document.getElementById('serviceDetailPrice').textContent = '$' + totalPrice.toFixed(2);
 }
 
-function addServiceToCart(index) {
-    var service = additionalServices[index];
+function closeServiceModal() {
+    document.getElementById('serviceModal').style.display = 'none';
+    currentServiceIndex = null;
+    currentServiceQuantity = 1;
+}
+
+function addServiceToCart() {
+    var service = additionalServices[currentServiceIndex];
     if (!service) return;
+    
+    var totalPrice = service.price * currentServiceQuantity;
     
     addToCart({ 
         type: 'service', 
         pokemonName: service.serviceName, 
-        quantity: 1, 
-        price: service.price,
-        serviceName: service.serviceName
+        quantity: currentServiceQuantity, 
+        price: totalPrice,
+        serviceName: service.serviceName,
+        unitPrice: service.price
     });
     
     closeServiceModal();
-    showToast('Added ' + service.serviceName + ' to cart');
+    showToast('Added ' + currentServiceQuantity + 'x ' + service.serviceName + ' to cart');
 }
 
 // ========== UTILITIES ==========
