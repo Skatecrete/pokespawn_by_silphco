@@ -10,6 +10,59 @@ let currentDebutData = null;
 
 let DEBUT_COUNTDOWN_OFFSET_HOURS = 0;
 
+// ========== ULTIMATE GALLERY URL BUILDER ==========
+function getUltimateGalleryUrl(pokemonName, isShiny = false, isMega = false, isGigantamax = false) {
+    if (!pokemonName) return null;
+    
+    let baseName = pokemonName.toLowerCase().trim();
+    
+    // Remove prefixes
+    const prefixes = ['mega ', 'gigantamax ', 'shadow ', 'd-max '];
+    for (const prefix of prefixes) {
+        if (baseName.startsWith(prefix)) {
+            baseName = baseName.substring(prefix.length);
+            break;
+        }
+    }
+    
+    // Remove parentheses content
+    baseName = baseName.replace(/\s*\([^)]*\)/, '');
+    
+    // Region form handling (Alolan Vulpix → vulpix-alola)
+    const regionMap = {
+        'alolan': 'alola',
+        'alola': 'alola',
+        'galarian': 'galarian',
+        'hisuian': 'hisuian',
+        'paldean': 'paldea',
+        'paldea': 'paldea'
+    };
+    
+    for (const [regionKeyword, regionSuffix] of Object.entries(regionMap)) {
+        if (baseName.startsWith(regionKeyword + ' ')) {
+            const pokemon = baseName.substring(regionKeyword.length + 1);
+            baseName = pokemon + '-' + regionSuffix;
+            break;
+        } else if (baseName.endsWith(' ' + regionKeyword)) {
+            const pokemon = baseName.substring(0, baseName.length - regionKeyword.length - 1);
+            baseName = pokemon + '-' + regionSuffix;
+            break;
+        }
+    }
+    
+    // Replace spaces with hyphens
+    const slug = baseName.replace(/ /g, '-').replace(/[^a-z0-9-]/g, '');
+    
+    // Build suffix
+    let suffix = '';
+    if (isMega) suffix = '-mega';
+    else if (isGigantamax) suffix = '-gigantamax';
+    
+    const shinySuffix = isShiny ? '-shiny' : '';
+    
+    return `https://raw.githubusercontent.com/Skatecrete/infographics/main/ultimategallery/${slug}${suffix}${shinySuffix}.png`;
+}
+
 // ========== ALL POKEMON MASTER LIST (1-1025) ==========
 const ALL_POKEMON_NAMES = {
     1: "Bulbasaur", 2: "Ivysaur", 3: "Venusaur",
