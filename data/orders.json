@@ -28,20 +28,5 @@
     "otherRequests": "",
     "status": "Paid",
     "assignedAdmin": "Dan"
-  },
-  {
-    "orderId": "SilphCoOrder#003",
-    "date": "2026-03-23T04:00:00.000Z",
-    "customer": "m (M)",
-    "huntType": "Coins",
-    "raidType": "",
-    "pokemon": "15500 Coins",
-    "quantity": "1",
-    "coins": "15500",
-    "itemPrice": 45,
-    "paymentMethod": "Venmo",
-    "otherRequests": "",
-    "status": "Paid",
-    "assignedAdmin": "Dan"
   }
 ]
