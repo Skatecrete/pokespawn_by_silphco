@@ -2925,6 +2925,117 @@ function showOrderDetail(order) {
     document.getElementById('orderModal').style.display = 'flex';
 }
 
+// ========== ADDITIONAL SERVICES ==========
+let additionalServices = [];
+
+async function loadAdditionalServices() {
+    var container = document.getElementById('servicesGrid');
+    if (!container) return;
+    
+    container.innerHTML = '<div class="loading-small">Loading services...</div>';
+    
+    try {
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'getAdditionalServices' })
+        });
+        const data = await response.json();
+        
+        if (data.status === 'success' && data.services && data.services.length > 0) {
+            additionalServices = data.services;
+            displayAdditionalServices();
+        } else {
+            container.innerHTML = '<div class="loading-small">No additional services available</div>';
+        }
+    } catch (e) {
+        console.error('Error loading services:', e);
+        container.innerHTML = '<div class="loading-small">Failed to load services</div>';
+    }
+}
+
+function displayAdditionalServices() {
+    var container = document.getElementById('servicesGrid');
+    if (!container) return;
+    
+    if (additionalServices.length === 0) {
+        container.innerHTML = '<div class="loading-small">No additional services available</div>';
+        return;
+    }
+    
+    var html = '';
+    for (var i = 0; i < additionalServices.length; i++) {
+        var service = additionalServices[i];
+        var slug = getServiceImageSlug(service.serviceName);
+        var imageUrl = 'https://raw.githubusercontent.com/Skatecrete/infographics/main/services_pics/' + slug + '.png';
+        
+        html += '<div class="service-card" onclick="showServiceDetails(' + i + ')">';
+        html += '<img src="' + imageUrl + '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=\\\'http://www.w3.org/2000/svg\\\' viewBox=\\\'0 0 100 100\\\'%3E%3Crect width=\\\'100\\\' height=\\\'100\\\' fill=\\\'%237627C5\\\'/%3E%3Ctext x=\\\'50\\\' y=\\\'55\\\' text-anchor=\\\'middle\\\' fill=\\\'white\\\' font-size=\\\'14\\\'%3E😎%3C/text%3E%3C/svg%3E\'">';
+        html += '<div class="service-name">' + service.serviceName + '</div>';
+        html += '<div class="service-price">$' + service.price.toFixed(2) + '</div>';
+        html += '</div>';
+    }
+    container.innerHTML = html;
+}
+
+function getServiceImageSlug(serviceName) {
+    var mapping = {
+        'Go Fest': 'go_fest',
+        'Go Fest Global': 'go_fest',
+        'Go Tour': 'go_tour',
+        'City-Specific Ticketed Event': 'ticketed_events',
+        'Spotlight Hour': 'spotlight_hour',
+        'Community Day': 'community_day',
+        'Rocket Task': 'rocket',
+        'Limited Time Mon': 'limited_time',
+        'Half-Priced Store Purchase': 'store_purchase',
+        'Stardust': 'stardust',
+        'Egg Hatching per km': 'egg_hatching',
+        'Candy': 'candy'
+    };
+    
+    if (mapping[serviceName]) return mapping[serviceName];
+    return serviceName.toLowerCase().replace(/ /g, '-').replace(/[^a-z0-9-]/g, '');
+}
+
+function showServiceDetails(index) {
+    var service = additionalServices[index];
+    if (!service) return;
+    
+    document.getElementById('serviceModalTitle').textContent = service.serviceName;
+    document.getElementById('serviceModalBody').innerHTML = `
+        <div class="service-detail-name">${service.serviceName}</div>
+        <div class="service-detail-price">$${service.price.toFixed(2)}</div>
+        <div class="service-detail-divider"></div>
+        <div class="service-detail-description">${service.details || 'Contact admin for more information about this service.'}</div>
+    `;
+    document.getElementById('serviceModalFooter').innerHTML = `
+        <button class="cancel-btn" onclick="closeServiceModal()">Cancel</button>
+        <button class="confirm-btn" onclick="addServiceToCart(${index})">Add to Cart</button>
+    `;
+    document.getElementById('serviceModal').style.display = 'flex';
+}
+
+function closeServiceModal() {
+    document.getElementById('serviceModal').style.display = 'none';
+}
+
+function addServiceToCart(index) {
+    var service = additionalServices[index];
+    if (!service) return;
+    
+    addToCart({ 
+        type: 'service', 
+        pokemonName: service.serviceName, 
+        quantity: 1, 
+        price: service.price,
+        serviceName: service.serviceName
+    });
+    
+    closeServiceModal();
+    showToast('Added ' + service.serviceName + ' to cart');
+}
+
 // ========== UTILITIES ==========
 function showLoading(message) {
     var modal = document.getElementById('loadingModal');
