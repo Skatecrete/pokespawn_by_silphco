@@ -36,19 +36,6 @@
         </div>
 
         <div class="content">
-            <div class="cart-section">
-                <div class="cart-header">
-                    <span>🛒 YOUR CART</span>
-                    <span id="cartCount">0 items</span>
-                </div>
-                <div id="cartItems"></div>
-                <div id="emptyCartMsg" class="empty-cart">Your Pokecart is empty</div>
-                <div class="cart-total">
-                    Total: $<span id="cartTotal">0.00</span>
-                </div>
-                <button class="checkout-btn" onclick="showCustomerDialog()">PROCEED TO CHECKOUT</button>
-            </div>
-
             <div class="coins-section">
                 <div class="section-title">💰 ADD COINS TO ORDER</div>
                 <div class="coin-buttons">
@@ -69,6 +56,19 @@
             <div class="other-requests-section">
                 <div class="section-title">📝 Other Requests (Optional)</div>
                 <textarea id="notesInput" rows="3" placeholder="Any other service ideas or questions please ask here! For example, if you want the 31k Coin order split between 2 accounts or want details on upcoming Go Fests, etc..."></textarea>
+            </div>
+
+            <div class="cart-section">
+                <div class="cart-header">
+                    <span>🛒 YOUR CART</span>
+                    <span id="cartCount">0 items</span>
+                </div>
+                <div id="cartItems"></div>
+                <div id="emptyCartMsg" class="empty-cart">Your Pokecart is empty</div>
+                <div class="cart-total">
+                    Total: $<span id="cartTotal">0.00</span>
+                </div>
+                <button class="checkout-btn" onclick="showCustomerDialog()">PROCEED TO CHECKOUT</button>
             </div>
 
             <div class="contact-section">
