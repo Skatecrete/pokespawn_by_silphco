@@ -28,5 +28,20 @@
     "otherRequests": "",
     "status": "Paid",
     "assignedAdmin": "Dan"
+  },
+  {
+    "orderId": "SilphCoOrder#004",
+    "date": "2026-05-12T10:46:00.000Z",
+    "customer": "Mike (Death187Knight)",
+    "huntType": "Coins",
+    "raidType": "",
+    "pokemon": "15500 Coins",
+    "quantity": "1",
+    "coins": "15500",
+    "itemPrice": 45,
+    "paymentMethod": "PayPal",
+    "otherRequests": "",
+    "status": "Pending",
+    "assignedAdmin": "Dan"
   }
 ]
