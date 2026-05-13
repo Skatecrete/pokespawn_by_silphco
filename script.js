@@ -11,13 +11,13 @@ let currentDebutData = null;
 let DEBUT_COUNTDOWN_OFFSET_HOURS = 0;
 
 // ========== ULTIMATE GALLERY URL BUILDER ==========
-function getUltimateGalleryUrl(pokemonName, isShiny = false, isMega = false, isGigantamax = false) {
+function getUltimateGalleryUrl(pokemonName, isShiny = false, isMega = false, isGigantamax = false, isUltraBeast = false) {
     if (!pokemonName) return null;
     
     let baseName = pokemonName.toLowerCase().trim();
     
     // Remove prefixes
-    const prefixes = ['mega ', 'gigantamax ', 'shadow ', 'd-max '];
+    const prefixes = ['mega ', 'gigantamax ', 'shadow ', 'd-max ', 'ultra beast '];
     for (const prefix of prefixes) {
         if (baseName.startsWith(prefix)) {
             baseName = baseName.substring(prefix.length);
@@ -57,10 +57,30 @@ function getUltimateGalleryUrl(pokemonName, isShiny = false, isMega = false, isG
     let suffix = '';
     if (isMega) suffix = '-mega';
     else if (isGigantamax) suffix = '-gigantamax';
+    else if (isUltraBeast) suffix = '-ultra-beast';
     
     const shinySuffix = isShiny ? '-shiny' : '';
     
     return `https://raw.githubusercontent.com/Skatecrete/infographics/main/ultimategallery/${slug}${suffix}${shinySuffix}.png`;
+}
+
+// ========== ULTRA BEAST IDS ==========
+const ULTRA_BEAST_IDS = new Set([
+    793,  // Nihilego
+    794,  // Buzzwole
+    795,  // Pheromosa
+    796,  // Xurkitree
+    797,  // Celesteela
+    798,  // Kartana
+    799,  // Guzzlord
+    803,  // Poipole
+    804,  // Naganadel
+    805,  // Stakataka
+    806   // Blacephalon
+]);
+
+function isUltraBeast(id) {
+    return ULTRA_BEAST_IDS.has(id);
 }
 
 // ========== ALL POKEMON MASTER LIST (1-1025) ==========
