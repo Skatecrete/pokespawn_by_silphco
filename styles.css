@@ -860,6 +860,32 @@ body {
     border-radius: 50%;
 }
 
+/* Ultra Beast Header Styling */
+.raid-header.ultra-beast {
+    border-left-color: #00BCD4;
+}
+
+.raid-header.ultra-beast h4 {
+    color: #00BCD4;
+}
+
+/* Ultra Beast Portal Underlay */
+.ultrabeast-underlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background-image: url('https://raw.githubusercontent.com/Skatecrete/infographics/main/effects/ultrabeastportal.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: 50%;
+}
+
 /* Cart Section */
 .cart-section, .coins-section, .other-requests-section {
     background: #0d0d1a;
