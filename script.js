@@ -1276,7 +1276,7 @@ function displayRaids(regularRaids, dynamaxRaids) {
     var container = document.getElementById('raidsList');
     if (!container) return;
     
-    // Updated category order - added tier5 and mega
+    // Updated category order - Ultra Beasts at the top
     var categoryOrder = [
         { key: 'ultraBeasts', title: '🌀 ULTRA BEASTS' },
         { key: 'tier6', title: '⭐⭐⭐⭐⭐⭐ 6-STAR RAIDS' }, 
@@ -1306,12 +1306,15 @@ function displayRaids(regularRaids, dynamaxRaids) {
     for (var c = 0; c < categoryOrder.length; c++) {
         var cat = categoryOrder[c];
         if (regularRaids[cat.key] && regularRaids[cat.key].length) {
-            html += '<div class="raid-header"><h4>' + cat.title + '</h4></div><div class="raids-grid">';
+            // Add ultra-beast class for header styling
+            var headerClass = (cat.key === 'ultraBeasts') ? 'raid-header ultra-beast' : 'raid-header';
+            html += '<div class="' + headerClass + '"><h4>' + cat.title + '</h4></div><div class="raids-grid">';
             for (var r = 0; r < regularRaids[cat.key].length; r++) {
                 var raid = regularRaids[cat.key][r];
                 var isGigantamax = raid.tier === 'Gigantamax' || raid.tier === '💥 GIGANTAMAX';
                 var isDynamax = raid.tier.includes('Dynamax');
                 var isShadow = raid.name.includes('Shadow') || raid.tier.includes('Shadow');
+                var isUltraBeast = (cat.key === 'ultraBeasts');
                 
                 html += '<div class="raid-card" onclick=\'showRaidOrderDialog(' + JSON.stringify(raid).replace(/'/g, "&#39;") + ')\'>';
                 html += '<div class="raid-image-container">';
@@ -1319,6 +1322,7 @@ function displayRaids(regularRaids, dynamaxRaids) {
                 // Underlays (behind image)
                 if (isShadow) html += '<div class="shadow-underlay"></div>';
                 if (!isGigantamax && isDynamax) html += '<div class="dynamax-underlay"></div>';
+                if (isUltraBeast) html += '<div class="ultrabeast-underlay"></div>';
                 
                 // Pokémon image
                 html += '<img src="' + raid.image + '" onerror="this.src=\'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png\'">';
