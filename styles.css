@@ -872,17 +872,16 @@ body {
 /* Ultra Beast Portal Underlay */
 .ultrabeast-underlay {
     position: absolute;
-    top: -5px;
-    right: -5px;
-    width: 40px;
-    height: 40px;
+    top: 2px;
+    right: 2px;
+    width: 30px;
+    height: 30px;
     background-image: url('https://raw.githubusercontent.com/Skatecrete/infographics/main/effects/ultrabeastportal.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     pointer-events: none;
     z-index: 1;
-    border-radius: 0;
 }
 
 /* Cart Section */
