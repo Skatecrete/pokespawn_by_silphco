@@ -1010,8 +1010,15 @@ async function loadRaids() {
         
         // Initialize regular raids object
         var regularRaids = { 
-            tier5: [], shadow5: [], shadow3: [], shadow1: []
+            tier5: [], shadow5: [], shadow3: [], shadow1: [], ultraBeasts: []  // ADDED ultraBeasts
         };
+        
+        // ========== ULTRA BEAST IDS ==========
+        const ultraBeastIds = [793, 794, 795, 796, 797, 798, 799, 803, 804, 805, 806];
+        
+        function isUltraBeast(id) {
+            return ultraBeastIds.includes(id);
+        }
         
         // Process ScrapedDuck raids (5-Star and Shadow only)
         for (var i = 0; i < scrapedRaids.length; i++) {
@@ -1044,7 +1051,10 @@ async function loadRaids() {
             var tierLower = tier.toLowerCase();
             var nameLower = name.toLowerCase();
             
-            if (nameLower.includes('shadow') || tierLower.includes('shadow')) {
+            // CHECK FOR ULTRA BEAST FIRST (before shadow or 5-star)
+            if (isUltraBeast(id)) {
+                regularRaids.ultraBeasts.push(raidObj);
+            } else if (nameLower.includes('shadow') || tierLower.includes('shadow')) {
                 if (tierLower.includes('5-star') || tierLower.includes('legendary')) {
                     regularRaids.shadow5.push(raidObj);
                 } else if (tierLower.includes('3-star')) {
@@ -1113,6 +1123,25 @@ async function loadRaids() {
                     regularRaids.mega.push({ 
                         name: raidName, 
                         tier: 'Mega', 
+                        id: raidId, 
+                        isShiny: true, 
+                        image: imageUrl
+                    });
+                }
+            }
+        }
+        
+        // Ultra Beasts from SnackNap (NEW)
+        if (dynaRaids['ultra_beasts']) {
+            for (var j = 0; j < dynaRaids['ultra_beasts'].length; j++) {
+                var raidName = dynaRaids['ultra_beasts'][j];
+                if (raidName && raidName.length > 2 && !invalidNames.includes(raidName)) {
+                    var raidId = await getPokemonIdFromName(raidName);
+                    var ultimateUrl = getUltimateGalleryUrl(raidName, true, false, false);
+                    var imageUrl = ultimateUrl || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/' + raidId + '.png';
+                    regularRaids.ultraBeasts.push({ 
+                        name: raidName, 
+                        tier: 'Ultra Beast', 
                         id: raidId, 
                         isShiny: true, 
                         image: imageUrl
@@ -1249,6 +1278,7 @@ function displayRaids(regularRaids, dynamaxRaids) {
     
     // Updated category order - added tier5 and mega
     var categoryOrder = [
+        { key: 'ultraBeasts', title: '🌀 ULTRA BEASTS' },
         { key: 'tier6', title: '⭐⭐⭐⭐⭐⭐ 6-STAR RAIDS' }, 
         { key: 'tier5', title: '⭐⭐⭐⭐⭐ 5-STAR RAIDS' },
         { key: 'tier4', title: '⭐⭐⭐⭐ 4-STAR RAIDS' }, 
