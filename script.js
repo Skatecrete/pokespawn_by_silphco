@@ -2692,18 +2692,27 @@ function showDebutDetails() {
         var pokemon = item.name;
         var isShinyPokemon = item.isShiny;
         
+        // Primary: ultimategallery with slug (hyphens, .png)
+        var slug = pokemon.toLowerCase()
+            .replace(/[\(\)]/g, '')
+            .replace(/'/g, '')
+            .trim()
+            .replace(/\s+/g, '-');
+        
+        // Fallback: debuts folder with cleanName (no hyphens, .webp)
         var cleanName = pokemon.toLowerCase()
             .replace(/ /g, '')
             .replace(/[\(\)]/g, '')
             .replace(/-/g, '')
             .replace(/'/g, '');
-        var filename = cleanName + (isShinyPokemon ? 'shiny' : '') + '.webp';
-        var imageUrl = 'https://raw.githubusercontent.com/Skatecrete/infographics/main/debuts/' + filename;
+        
+        var primaryUrl = 'https://raw.githubusercontent.com/Skatecrete/infographics/main/ultimategallery/' + slug + '.png';
+        var fallbackUrl = 'https://raw.githubusercontent.com/Skatecrete/infographics/main/debuts/' + cleanName + (isShinyPokemon ? 'shiny' : '') + '.webp';
         
         html += '<div class="order-section" style="text-align:center;">';
         html += '<div class="section-title">' + (isShinyPokemon ? '✨ SHINY ' + pokemon.toUpperCase() + ' ✨' : '🌟 ' + pokemon.toUpperCase() + ' 🌟') + '</div>';
         html += '<div style="display:flex; justify-content:center; margin-top:12px;">';
-        html += '<img src="' + imageUrl + '" onerror="this.style.display=\'none\'" style="width:120px; height:120px; object-fit:contain;">';
+        html += '<img src="' + primaryUrl + '" onerror="this.src=\'' + fallbackUrl + '\'" style="width:120px; height:120px; object-fit:contain;">';
         html += '</div>';
         html += '</div>';
     }
