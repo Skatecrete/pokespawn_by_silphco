@@ -2686,7 +2686,9 @@ function showDebutDetails() {
         return;
     }
     
+    var comingSoonUrl = 'https://raw.githubusercontent.com/Skatecrete/infographics/main/debuts/comingsoon.png';
     var html = '<div class="order-stats"><div>🌟 DEBUTS 🌟</div></div>';
+    
     for (var i = 0; i < allItems.length; i++) {
         var item = allItems[i];
         var pokemon = item.name;
@@ -2712,7 +2714,7 @@ function showDebutDetails() {
         html += '<div class="order-section" style="text-align:center;">';
         html += '<div class="section-title">' + (isShinyPokemon ? '✨ SHINY ' + pokemon.toUpperCase() + ' ✨' : '🌟 ' + pokemon.toUpperCase() + ' 🌟') + '</div>';
         html += '<div style="display:flex; justify-content:center; margin-top:12px;">';
-        html += '<img src="' + primaryUrl + '" onerror="this.src=\'' + fallbackUrl + '\'" style="width:120px; height:120px; object-fit:contain;">';
+        html += '<img src="' + primaryUrl + '" onerror="this.src=\'' + fallbackUrl + '\'; this.onerror=this.src=\'' + comingSoonUrl + '\';" style="width:120px; height:120px; object-fit:contain;">';
         html += '</div>';
         html += '</div>';
     }
