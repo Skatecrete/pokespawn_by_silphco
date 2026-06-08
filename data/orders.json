@@ -176,7 +176,22 @@
     "itemPrice": 5,
     "paymentMethod": "Venmo",
     "otherRequests": "",
-    "status": "Pending",
+    "status": "Paid",
+    "assignedAdmin": "Dan"
+  },
+  {
+    "orderId": "SilphCoOrder#014",
+    "date": "2026-06-08T19:01:00.000Z",
+    "customer": "other (other)",
+    "huntType": "Go Fest",
+    "raidType": "",
+    "pokemon": "Go Fest",
+    "quantity": "4",
+    "coins": "",
+    "itemPrice": 140,
+    "paymentMethod": "Other",
+    "otherRequests": "",
+    "status": "Paid",
     "assignedAdmin": "Dan"
   }
 ]
