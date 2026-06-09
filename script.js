@@ -13,10 +13,9 @@ let DEBUT_COUNTDOWN_OFFSET_HOURS = 0;
 // ========== ULTIMATE GALLERY URL BUILDER ==========
 function getUltimateGalleryUrl(pokemonName, isShiny = false, isMega = false, isGigantamax = false, isUltraBeast = false) {
     if (!pokemonName) return null;
-    
+
     let baseName = pokemonName.toLowerCase().trim();
-    
-    // Remove prefixes
+
     const prefixes = ['mega ', 'gigantamax ', 'shadow ', 'd-max ', 'ultra beast '];
     for (const prefix of prefixes) {
         if (baseName.startsWith(prefix)) {
@@ -24,11 +23,10 @@ function getUltimateGalleryUrl(pokemonName, isShiny = false, isMega = false, isG
             break;
         }
     }
-    
-    // Remove parentheses content
-    baseName = baseName.replace(/\s*\([^)]*\)/, '');
-    
-    // Region form handling (Alolan Vulpix → vulpix-alola)
+
+    baseName = baseName.replace(/[()]/g, '');
+    baseName = baseName.replace(/'/g, '');
+
     const regionMap = {
         'alolan': 'alola',
         'alola': 'alola',
@@ -37,7 +35,7 @@ function getUltimateGalleryUrl(pokemonName, isShiny = false, isMega = false, isG
         'paldean': 'paldea',
         'paldea': 'paldea'
     };
-    
+
     for (const [regionKeyword, regionSuffix] of Object.entries(regionMap)) {
         if (baseName.startsWith(regionKeyword + ' ')) {
             const pokemon = baseName.substring(regionKeyword.length + 1);
@@ -49,18 +47,16 @@ function getUltimateGalleryUrl(pokemonName, isShiny = false, isMega = false, isG
             break;
         }
     }
-    
-    // Replace spaces with hyphens
-    const slug = baseName.replace(/ /g, '-').replace(/[^a-z0-9-]/g, '');
-    
-    // Build suffix
+
+    const slug = baseName.trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
     let suffix = '';
     if (isMega) suffix = '-mega';
     else if (isGigantamax) suffix = '-gigantamax';
     else if (isUltraBeast) suffix = '-ultra-beast';
-    
+
     const shinySuffix = isShiny ? '-shiny' : '';
-    
+
     return `https://raw.githubusercontent.com/Skatecrete/infographics/main/ultimategallery/${slug}${suffix}${shinySuffix}.png`;
 }
 
