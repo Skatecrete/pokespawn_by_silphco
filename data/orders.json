@@ -268,5 +268,20 @@
     "otherRequests": "",
     "status": "Paid",
     "assignedAdmin": "Dan"
+  },
+  {
+    "orderId": "SilphCoOrder#020",
+    "date": "2026-06-16T15:47:00.000Z",
+    "customer": "Meagan (Sharkie1231)",
+    "huntType": "Coins",
+    "raidType": "",
+    "pokemon": "31000 Coins",
+    "quantity": "1",
+    "coins": "31000",
+    "itemPrice": 85,
+    "paymentMethod": "Web Order",
+    "otherRequests": "",
+    "status": "Pending",
+    "assignedAdmin": "Dan"
   }
 ]
