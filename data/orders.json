@@ -298,5 +298,35 @@
     "otherRequests": "split between me and tj please",
     "status": "Paid",
     "assignedAdmin": "Dan"
+  },
+  {
+    "orderId": "SilphCoOrder#022",
+    "date": "2026-06-21T03:11:00.000Z",
+    "customer": "Aaron (Aaron13524)",
+    "huntType": "Hundo",
+    "raidType": "",
+    "pokemon": "Frigibax",
+    "quantity": "1",
+    "coins": "",
+    "itemPrice": 3,
+    "paymentMethod": "PayPal",
+    "otherRequests": "",
+    "status": "Paid",
+    "assignedAdmin": "Dan"
+  },
+  {
+    "orderId": "SilphCoOrder#022",
+    "date": "2026-06-21T03:11:00.000Z",
+    "customer": "Aaron (Aaron13524)",
+    "huntType": "Shundo",
+    "raidType": "",
+    "pokemon": "Frigibax",
+    "quantity": "1",
+    "coins": "",
+    "itemPrice": 5,
+    "paymentMethod": "PayPal",
+    "otherRequests": "",
+    "status": "Paid",
+    "assignedAdmin": "Dan"
   }
 ]
