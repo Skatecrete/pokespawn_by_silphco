@@ -433,5 +433,50 @@
     "otherRequests": "",
     "status": "Paid",
     "assignedAdmin": "Dan"
+  },
+  {
+    "orderId": "SilphCoOrder#033",
+    "date": "2026-07-07T13:35:00.000Z",
+    "customer": "skate (Skatecrete)",
+    "huntType": "Coins",
+    "raidType": "",
+    "pokemon": "31000 Coins",
+    "quantity": "3",
+    "coins": "31000",
+    "itemPrice": 255,
+    "paymentMethod": "PayPal",
+    "otherRequests": "",
+    "status": "Paid",
+    "assignedAdmin": "Dan"
+  },
+  {
+    "orderId": "SilphCoOrder#034",
+    "date": "2026-07-07T13:35:00.000Z",
+    "customer": "skate (Skatecrete)",
+    "huntType": "Coins",
+    "raidType": "",
+    "pokemon": "5600 Coins",
+    "quantity": "1",
+    "coins": "5600",
+    "itemPrice": 24,
+    "paymentMethod": "PayPal",
+    "otherRequests": "",
+    "status": "Paid",
+    "assignedAdmin": "Dan"
+  },
+  {
+    "orderId": "SilphCoOrder#035",
+    "date": "2026-07-07T13:36:00.000Z",
+    "customer": "skate (Skatecrete)",
+    "huntType": "Coins",
+    "raidType": "",
+    "pokemon": "15500 Coins",
+    "quantity": "1",
+    "coins": "15500",
+    "itemPrice": 45,
+    "paymentMethod": "PayPal",
+    "otherRequests": "",
+    "status": "Paid",
+    "assignedAdmin": "Dan"
   }
 ]
