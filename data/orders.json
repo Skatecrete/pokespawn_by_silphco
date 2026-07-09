@@ -508,5 +508,20 @@
     "otherRequests": "",
     "status": "Paid",
     "assignedAdmin": "Dan"
+  },
+  {
+    "orderId": "SilphCoOrder#038",
+    "date": "2026-07-09T15:54:00.000Z",
+    "customer": "skate (Skatecrete)",
+    "huntType": "Coins",
+    "raidType": "",
+    "pokemon": "15500 Coins",
+    "quantity": "1",
+    "coins": "15500",
+    "itemPrice": 45,
+    "paymentMethod": "PayPal",
+    "otherRequests": "",
+    "status": "Paid",
+    "assignedAdmin": "Dan"
   }
 ]
