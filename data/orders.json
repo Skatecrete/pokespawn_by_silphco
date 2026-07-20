@@ -551,7 +551,7 @@
     "itemPrice": 5,
     "paymentMethod": "Web Order",
     "otherRequests": "",
-    "status": "Pending",
+    "status": "Paid",
     "assignedAdmin": "Dan"
   },
   {
@@ -566,7 +566,7 @@
     "itemPrice": 6,
     "paymentMethod": "Web Order",
     "otherRequests": "",
-    "status": "Pending",
+    "status": "Paid",
     "assignedAdmin": "Dan"
   },
   {
@@ -581,7 +581,7 @@
     "itemPrice": 9,
     "paymentMethod": "Web Order",
     "otherRequests": "",
-    "status": "Pending",
+    "status": "Paid",
     "assignedAdmin": "Dan"
   },
   {
@@ -596,7 +596,7 @@
     "itemPrice": 12,
     "paymentMethod": "Web Order",
     "otherRequests": "",
-    "status": "Pending",
+    "status": "Paid",
     "assignedAdmin": "Dan"
   },
   {
@@ -611,7 +611,7 @@
     "itemPrice": 12,
     "paymentMethod": "Web Order",
     "otherRequests": "",
-    "status": "Pending",
+    "status": "Paid",
     "assignedAdmin": "Dan"
   },
   {
@@ -626,7 +626,7 @@
     "itemPrice": 7,
     "paymentMethod": "Web Order",
     "otherRequests": "",
-    "status": "Pending",
+    "status": "Paid",
     "assignedAdmin": "Dan"
   }
 ]
