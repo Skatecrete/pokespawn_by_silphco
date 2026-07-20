@@ -628,5 +628,20 @@
     "otherRequests": "",
     "status": "Paid",
     "assignedAdmin": "Dan"
+  },
+  {
+    "orderId": "SilphCoOrder#046",
+    "date": "2026-07-20T20:29:00.000Z",
+    "customer": "Mike (Death187Knight)",
+    "huntType": "Coins",
+    "raidType": "",
+    "pokemon": "31000 Coins",
+    "quantity": "1",
+    "coins": "31000",
+    "itemPrice": 85,
+    "paymentMethod": "PayPal",
+    "otherRequests": "tj and me split it please",
+    "status": "Pending",
+    "assignedAdmin": "Dan"
   }
 ]
