@@ -658,5 +658,20 @@
     "otherRequests": "",
     "status": "Paid",
     "assignedAdmin": "Dan"
+  },
+  {
+    "orderId": "SilphCoOrder#048",
+    "date": "2026-08-20T17:34:00.000Z",
+    "customer": "skate (Skatecrete)",
+    "huntType": "Shundo",
+    "raidType": "",
+    "pokemon": "Magikarp",
+    "quantity": "1",
+    "coins": "",
+    "itemPrice": 5,
+    "paymentMethod": "PayPal",
+    "otherRequests": "",
+    "status": "Pending",
+    "assignedAdmin": "Dan"
   }
 ]
