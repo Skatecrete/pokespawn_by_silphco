@@ -671,7 +671,7 @@
     "itemPrice": 5,
     "paymentMethod": "PayPal",
     "otherRequests": "",
-    "status": "Pending",
+    "status": "Paid",
     "assignedAdmin": "Dan"
   }
 ]
