@@ -688,5 +688,20 @@
     "otherRequests": "split between my account and tjs",
     "status": "Paid",
     "assignedAdmin": "Dan"
+  },
+  {
+    "orderId": "SilphCoOrder#079",
+    "date": "2026-09-10T21:10:00.000Z",
+    "customer": "skate (Skatecrete)",
+    "huntType": "Coins",
+    "raidType": "",
+    "pokemon": "31000 Coins",
+    "quantity": "1",
+    "coins": "31000",
+    "itemPrice": 85,
+    "paymentMethod": "PayPal",
+    "otherRequests": "",
+    "status": "Pending",
+    "assignedAdmin": "Dan"
   }
 ]
